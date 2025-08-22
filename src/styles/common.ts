@@ -1,0 +1,64 @@
+import {StyleSheet} from 'react-native';
+
+export const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    backgroundColor: '#FAF9F6',
+  },
+  welcomeContainer: {
+    position: 'relative',
+    flex: 1,
+    flexDirection: 'column',
+    gap: 20,
+    display: 'flex',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    padding: 10,
+    paddingTop: 80,
+  },
+  videoContainer: {
+    width: '90%',
+    minHeight: 300, // ~10rem equivalent
+    backgroundColor: '#D9D9D9',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 8,
+  },
+  h1Text: {
+    fontFamily: 'CormorantGaramond-SemiBold',
+    fontWeight: '700',
+    fontStyle: 'normal',
+    fontSize: 25,
+    lineHeight: 25,
+    letterSpacing: 0,
+    textAlign: 'center',
+    marginVertical: 8,
+    maxWidth: '80%',
+  },
+  subText: {
+    fontFamily: 'DMSans-Regular',
+    fontWeight: '400',
+    fontStyle: 'normal',
+    fontSize: 16,
+    lineHeight: 16,
+    letterSpacing: 0,
+    textAlign: 'center',
+    color: '#2C2C2C80',
+    maxWidth: '80%',
+  },
+  button: {
+    backgroundColor: '#C1A36A',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    alignItems: 'center',
+    width: '90%',
+    position: 'absolute',
+    bottom: 30,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+});
