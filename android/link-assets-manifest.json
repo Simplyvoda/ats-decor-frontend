@@ -2,12 +2,12 @@
   "migIndex": 1,
   "data": [
     {
-      "path": "assets/fonts/CormorantGaramond-SemiBold.ttf",
-      "sha1": "b83023477a9aa4da95d87b248825ab064bcaba27"
+      "path": "assets/fonts/CormorantGaramond-Medium.ttf",
+      "sha1": "2757a4a3e557b1954f4c15ec7e596451fb31128a"
     },
     {
-      "path": "assets/fonts/DMSans-Regular.ttf",
-      "sha1": "ea29eece15a0fa96acdd1b19a232a08b696c7bb0"
+      "path": "assets/fonts/DMSans-Medium.ttf",
+      "sha1": "98848b759c488bac3d85c864b793c1e29e9c1944"
     }
   ]
 }

@@ -37,7 +37,7 @@
 	<string>BootSplash</string>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
-		<string>armv7</string>
+		<string>arm64</string>
 	</array>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
@@ -49,8 +49,8 @@
 	<false/>
 	<key>UIAppFonts</key>
 	<array>
-		<string>CormorantGaramond-SemiBold.ttf</string>
-		<string>DMSans-Regular.ttf</string>
+		<string>CormorantGaramond-Medium.ttf</string>
+		<string>DMSans-Medium.ttf</string>
 	</array>
 </dict>
 </plist>

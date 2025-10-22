@@ -1,15 +1,27 @@
+// HomeScreen.tsx
 import React from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
   SafeAreaView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
+import {startRoomScan} from '../native/roomplan';
 
-export default function PromptLogin() {
+export default function ScanScreen() {
+  const handleScan = async () => {
+    try {
+      const res = await startRoomScan();
+      console.log('Scan result:', res);
+      // you can now do something with the USDZ file
+    } catch (e) {
+      console.error('Scan failed:', e);
+    }
+  };
+
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       {/* Content */}
       <View style={styles.content}>
         <Text style={styles.title}>Ready to Design Your Dream Home?</Text>
@@ -20,14 +32,11 @@ export default function PromptLogin() {
 
       {/* Buttons */}
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.signUpButton}>
-          <Text style={styles.signUpText}>Sign Up</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.loginButton}>
-          <Text style={styles.loginText}>Log In</Text>
+        <TouchableOpacity style={styles.signUpButton} onPress={handleScan}>
+          <Text style={styles.signUpText}>Start Room Scan</Text>
         </TouchableOpacity>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 

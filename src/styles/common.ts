@@ -18,7 +18,7 @@ export const styles = StyleSheet.create({
   },
   videoContainer: {
     width: '90%',
-    minHeight: 300, // ~10rem equivalent
+    minHeight: 300,
     backgroundColor: '#D9D9D9',
     justifyContent: 'center',
     alignItems: 'center',
