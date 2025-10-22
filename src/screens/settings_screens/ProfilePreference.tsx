@@ -35,7 +35,6 @@ const ProfilePreference = () => {
   ];
 
   return (
-    // <SafeAreaView className='flex-1  bg-offWhite'>
     <ScrollView
       className="flex-1 bg-offWhite px-5 pt-[70px]"
       contentContainerStyle={{paddingBottom: 40}}
@@ -47,7 +46,7 @@ const ProfilePreference = () => {
           size={24}
           onPress={() => goBack(navigation)}
         />
-        <Text className="text-[20px] font-semibold text-[#1A1A1A] font-cormorant">
+        <Text className="text-[20px] ml-5 font-semibold text-[#1A1A1A] font-cormorant">
           Profile & Preferences
         </Text>
       </View>
@@ -214,7 +213,6 @@ const ProfilePreference = () => {
         </Text>
       </TouchableOpacity>
     </ScrollView>
-    // </SafeAreaView>
   );
 };
 
