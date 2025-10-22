@@ -1,4 +1,10 @@
-import {View, Text, TextInput, ScrollView, TouchableOpacity} from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  ScrollView,
+  TouchableOpacity,
+} from 'react-native';
 import React from 'react';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {goBack, navigateTo} from '../../utils/navigation';
@@ -109,7 +115,7 @@ const InitialScreen = () => {
             <TouchableOpacity
               key={i}
               onPress={() => navigateTo(navigation, section.screen)}
-              className="w-full border-[1px] border-[#2C2C2C33] rounded-[16px] flex flex-row h-[196px] p-6">
+              className="w-full border-[1px] border-[#2C2C2C33] rounded-[16px] flex flex-row min-h-[196px] p-6">
               <View className="bg-[#C1A36A26] w-[42px] h-[39px] rounded-md flex items-center justify-center">
                 <Icon color="#C1A36A" size={18} />
               </View>

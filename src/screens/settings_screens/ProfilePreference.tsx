@@ -20,6 +20,8 @@ import {
 } from 'react-native';
 import {goBack} from '../../utils/navigation';
 import {Dropdown} from 'react-native-element-dropdown';
+import PrimaryButton from '../../components/molecules/PrimaryButton';
+import AppSwitch from '../../components/molecules/AppSwitch';
 
 const ProfilePreference = () => {
   const navigation = useNavigation();
@@ -52,7 +54,7 @@ const ProfilePreference = () => {
       </View>
 
       {/* PROFILE INFO */}
-      <View className="bg-white  border-[1px] border-[#2C2C2C33]  rounded-2xl p-4 mb-5">
+      <View className="bg-transparent  border-[1px] border-[#2C2C2C33]  rounded-2xl p-4 mb-5">
         <View className="flex-row items-center gap-2 mb-3">
           <User size={18} color="#C4A663" />
           <Text className="text-[20px] font-semibold text-[#1A1A1A] font-cormorant">
@@ -110,7 +112,7 @@ const ProfilePreference = () => {
       </View>
 
       {/* LANGUAGE & REGION */}
-      <View className="bg-white border-[1px] border-[#2C2C2C33]  rounded-2xl p-4 mb-5">
+      <View className="bg-transparent border-[1px] border-[#2C2C2C33]  rounded-2xl p-4 mb-5">
         <View className="flex-row items-center gap-2 mb-3">
           <Globe size={18} color="#C4A663" />
           <Text className="text-[20px] font-semibold font-cormorant text-[#1A1A1A]">
@@ -147,7 +149,7 @@ const ProfilePreference = () => {
       </View>
 
       {/* NOTIFICATIONS */}
-      <View className="bg-white border-[1px] border-[#2C2C2C33] rounded-2xl p-4 mb-5">
+      <View className="bg-transparent border-[1px] border-[#2C2C2C33] rounded-2xl p-4 mb-5">
         <View className="flex-row items-center gap-2 mb-3">
           <Bell size={18} color="#C4A663" />
           <Text className="text-[20px] font-semibold font-cormorant text-[#1A1A1A]">
@@ -159,19 +161,19 @@ const ProfilePreference = () => {
           <Text className="text-[14px] text-[#333] font-dm-sans">
             Push Notifications
           </Text>
-          <Switch value={pushNotif} onValueChange={setPushNotif} />
+          <AppSwitch value={pushNotif} onValueChange={setPushNotif} />
         </View>
 
         <View className="flex-row justify-between items-center">
           <Text className="text-[14px] text-[#333] font-dm-sans">
             Email Notifications
           </Text>
-          <Switch value={emailNotif} onValueChange={setEmailNotif} />
+          <AppSwitch value={emailNotif} onValueChange={setEmailNotif} />
         </View>
       </View>
 
       {/* APPEARANCE */}
-      <View className="bg-white border-[1px] border-[#2C2C2C33]  rounded-2xl p-4 mb-5">
+      <View className="bg-transparent border-[1px] border-[#2C2C2C33]  rounded-2xl p-4 mb-5">
         <View className="flex-row items-center gap-2 mb-3">
           <Sun size={18} color="#C4A663" />
           <Text className="text-[20px] font-semibold font-cormorant text-[#1A1A1A]">
@@ -183,12 +185,12 @@ const ProfilePreference = () => {
           <Text className="text-[14px] text-[#333] font-dm-sans">
             Dark Mode
           </Text>
-          <Switch value={darkMode} onValueChange={setDarkMode} />
+          <AppSwitch value={darkMode} onValueChange={setDarkMode} />
         </View>
       </View>
 
       {/* DESIGN STYLE */}
-      <View className="bg-white border-[1px] border-[#2C2C2C33] rounded-2xl p-4 mb-5">
+      <View className="bg-transparent border-[1px] border-[#2C2C2C33] rounded-2xl p-4 mb-5">
         <View className="flex-row items-center gap-2 mb-3">
           <Palette size={18} color="#C4A663" />
           <Text className="text-[20px] font-semibold font-cormorant text-[#1A1A1A]">
@@ -207,11 +209,7 @@ const ProfilePreference = () => {
       </View>
 
       {/* SAVE BUTTON */}
-      <TouchableOpacity className="bg-[#C4A663] rounded-xl py-4 items-center mt-2">
-        <Text className="text-white font-semibold text-[16px]">
-          Save Changes
-        </Text>
-      </TouchableOpacity>
+      <PrimaryButton title="Save Changes" onPress={() => {}} />
     </ScrollView>
   );
 };
