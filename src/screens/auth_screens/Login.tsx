@@ -4,7 +4,7 @@ import {Controller, useForm} from 'react-hook-form';
 import {Pressable, ScrollView, Text, TextInput, View} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import PrimaryButton from '../../components/molecules/PrimaryButton';
-import {goBack} from '../../utils/navigation';
+import {goBack, navigateTo} from '../../utils/navigation';
 import {useNavigation} from '@react-navigation/native';
 
 type FormData = {
@@ -121,7 +121,7 @@ const Login = () => {
 
           <Text className="w-full text-center self-end">
             Don't have an account?
-            <Pressable onPress={() => navigation.navigate('SignUp')}>
+            <Pressable onPress={() => navigateTo(navigation, 'SignUp')}>
               <Text className="text-brand">Sign Up</Text>
             </Pressable>
           </Text>

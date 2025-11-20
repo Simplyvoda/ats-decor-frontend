@@ -52,5 +52,9 @@
 		<string>CormorantGaramond-Medium.ttf</string>
 		<string>DMSans-Medium.ttf</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>Camera access is required to scan the room.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Required to save or share room scans.</string>
 </dict>
 </plist>

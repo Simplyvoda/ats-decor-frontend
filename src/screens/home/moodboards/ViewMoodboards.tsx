@@ -8,7 +8,7 @@ import {
   StyleSheet,
   SafeAreaView,
 } from 'react-native';
-import Layout from '../../../layout/HomeLayout';
+// import Layout from '../../../layout/HomeLayout';
 import {Plus, ChevronLeft} from 'lucide-react-native';
 
 
@@ -23,7 +23,7 @@ const ViewMoodboards = () => {
 
 
   return (
-    <Layout activeTab="Home" showHeader={false}>
+    // <Layout activeTab="Home" showHeader={false}>
       <SafeAreaView style={styles.container}>
         <ScrollView
           style={styles.scrollView}
@@ -69,7 +69,7 @@ const ViewMoodboards = () => {
           </View>
         </ScrollView>
       </SafeAreaView>
-    </Layout>
+    // </Layout>
   );
 };
 

@@ -1,96 +1,69 @@
-// HomeScreen.tsx
-import React from 'react';
+import React, {useRef} from 'react';
 import {
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
   View,
+  Button,
+  UIManager,
+  findNodeHandle,
+  NativeSyntheticEvent,
 } from 'react-native';
-import {startRoomScan} from '../native/roomplan';
+import RoomPlanView from '../components/RoomScanner/RoomPlanView.native';
 
-export default function ScanScreen() {
-  const handleScan = async () => {
-    try {
-      const res = await startRoomScan();
-      console.log('Scan result:', res);
-      // you can now do something with the USDZ file
-    } catch (e) {
-      console.error('Scan failed:', e);
-    }
+export default function ScannerScreen() {
+  const ref = useRef(null);
+
+  // Called when scanning finishes (JSON string of CapturedRoom)
+  const onScanFinished = (e: NativeSyntheticEvent<{roomJson: string}>) => {
+    const roomJson = e.nativeEvent.roomJson;
+    console.log('Scan JSON:', roomJson);
+    // Parse or save JSON as needed
+  };
+  
+  // Called when export is done (JSON + USDZ base64)
+  const onExportComplete = (e: NativeSyntheticEvent<{json: string; usdzBase64: string}>) => {
+    const {json, usdzBase64} = e.nativeEvent;
+    console.log('Export JSON:', json);
+    console.log('USDZ (base64) length:', usdzBase64.length);
+    // You can save or decode the USDZ for viewing
+  };
+
+  const startScan = () => {
+    // Dispatch the native command to start scanning on the view ref
+    UIManager.dispatchViewManagerCommand(
+      findNodeHandle(ref.current),
+      UIManager.getViewManagerConfig('RoomplanView').Commands.startScanning,
+      [],
+    );
+  };
+
+  const finishScan = () => {
+    UIManager.dispatchViewManagerCommand(
+      findNodeHandle(ref.current),
+      UIManager.getViewManagerConfig('RoomplanView').Commands.stopScanning,
+      [],
+    );
+  };
+
+  const exportScan = () => {
+    UIManager.dispatchViewManagerCommand(
+      findNodeHandle(ref.current),
+      UIManager.getViewManagerConfig('RoomplanView').Commands.exportScanResults,
+      [],
+    );
   };
 
   return (
-    <View style={styles.container}>
-      {/* Content */}
-      <View style={styles.content}>
-        <Text style={styles.title}>Ready to Design Your Dream Home?</Text>
-        <Text style={styles.subtitle}>
-          Join us to save your styles and get personalized design inspiration.
-        </Text>
-      </View>
-
-      {/* Buttons */}
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.signUpButton} onPress={handleScan}>
-          <Text style={styles.signUpText}>Start Room Scan</Text>
-        </TouchableOpacity>
-      </View>
+    <View style={{flex: 1}}>
+      {/* A full-screen scanning view */}
+      <RoomPlanView
+        ref={ref}
+        style={{flex: 1}}
+        onScanFinished={onScanFinished}
+        onExportComplete={onExportComplete}
+      />
+      {/* Example buttons to control scan */}
+      <Button title="Start Scan" onPress={startScan} />
+      <Button title="Stop & Finish" onPress={finishScan} />
+      <Button title="Export Results" onPress={exportScan} />
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FAF9F6', // close to off-white in your image
-    justifyContent: 'space-between',
-    paddingHorizontal: 24,
-    paddingVertical: 40,
-  },
-  content: {
-    marginTop: 80,
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: '600',
-    textAlign: 'center',
-    color: '#000',
-    marginBottom: 10,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: '#7A7A7A',
-    textAlign: 'center',
-    maxWidth: 300,
-    lineHeight: 20,
-  },
-  buttonContainer: {
-    width: '100%',
-    gap: 16,
-  },
-  signUpButton: {
-    backgroundColor: '#C9A56A',
-    borderRadius: 8,
-    paddingVertical: 14,
-    alignItems: 'center',
-  },
-  signUpText: {
-    color: '#fff',
-    fontWeight: '600',
-    fontSize: 16,
-  },
-  loginButton: {
-    borderWidth: 1,
-    borderColor: '#C9A56A',
-    borderRadius: 8,
-    paddingVertical: 14,
-    alignItems: 'center',
-  },
-  loginText: {
-    color: '#000',
-    fontWeight: '600',
-    fontSize: 16,
-  },
-});

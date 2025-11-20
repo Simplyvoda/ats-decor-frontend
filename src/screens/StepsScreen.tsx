@@ -1,16 +1,15 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, {useState} from 'react';
+import { useNavigation } from '@react-navigation/native';
+import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  Button,
-  StyleSheet,
-  SafeAreaView,
-  TouchableOpacity,
   Image,
+  SafeAreaView,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
-import {styles} from '../styles/common';
-import {useNavigation} from '@react-navigation/native';
+import PrimaryButton from '../components/molecules/PrimaryButton';
+import { navigateTo } from '../utils/navigation';
 
 const stepsData = [
   {
@@ -43,14 +42,14 @@ export default function StepsScreen() {
     if (step < stepsData.length - 1) {
       setStep(step + 1);
     } else {
-      navigation.navigate('GetReady' as never); // Final action
+      navigateTo(navigation, 'Auth', { screen: 'GetReady' });
     }
   };
 
   const {image, title, subtitle, buttonText} = stepsData[step];
 
   return (
-    <View className="flex-1 bg-[#FAF9F6]">
+    <SafeAreaView className="flex-1 bg-[#FAF9F6]">
       <View className="relative flex-1 flex-col justify-start items-center px-3 pt-20 space-y-5">
         {/* Image container */}
         <View className="w-[90%] min-h-[300px] justify-center items-center rounded-lg overflow-hidden bg-[#D9D9D9]">
@@ -62,24 +61,21 @@ export default function StepsScreen() {
         </View>
 
         {/* Title */}
-        <Text className="text-center text-[25px] leading-[25px] font-bold font-[CormorantGaramond-SemiBold] max-w-[80%] my-2">
+        <Text className="text-center text-[25px] leading-[25px] font-bold font-cormorant max-w-[80%] my-2">
           {title}
         </Text>
 
         {/* Subtitle */}
-        <Text className="text-center text-[16px] leading-[16px] font-normal font-[DMSans-Regular] text-[#2C2C2C80] max-w-[80%]">
+        <Text className="text-center text-[16px] leading-[16px] font-normal font-dm-sans text-[#2C2C2C80] max-w-[80%]">
           {subtitle}
         </Text>
 
-        {/* Button */}
-        <TouchableOpacity
-          className="absolute bottom-8 w-[90%] bg-[#C1A36A] py-3 px-5 rounded-lg items-center"
-          onPress={nextStep}>
-          <Text className="text-white text-[16px] font-semibold">
-            {buttonText}
-          </Text>
-        </TouchableOpacity>
+
+
+        <View className="absolute bottom-4 w-[90%]">
+          <PrimaryButton title={buttonText} onPress={nextStep} />
+        </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }

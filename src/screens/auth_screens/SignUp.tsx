@@ -13,8 +13,6 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import PrimaryButton from '../../components/molecules/PrimaryButton';
 import {useNavigation} from '@react-navigation/native';
 import {goBack} from '../../utils/navigation';
-// import { images } from '../../../assets/constants/images';
-// import FacebookIcon from '../../../assets/icons/fb_icon.svg';
 import {images} from '../../../assets/constants/images';
 
 type FormData = {

@@ -1,0 +1,826 @@
+
+Showing Recent Errors Only
+
+Build target fe of project fe with configuration Debug
+warning: Skipping duplicate build file in Copy Bundle Resources build phase: /Users/vodinaefem/ats-decor-app/fe/ios/fe/LaunchScreen.storyboard (in target 'fe' from project 'fe')
+warning: Skipping duplicate build file in Copy Bundle Resources build phase: /Users/vodinaefem/ats-decor-app/fe/ios/fe/PrivacyInfo.xcprivacy (in target 'fe' from project 'fe')
+warning: Run script build phase 'Bundle React Native code and images' will be run during every build because it does not specify any outputs. To address this warning, either add output dependencies to the script phase, or configure it to run in every build by unchecking "Based on dependency analysis" in the script phase. (in target 'fe' from project 'fe')
+warning: Skipping duplicate build file in Copy Bundle Resources build phase: /Users/vodinaefem/ats-decor-app/fe/ios/fe/BootSplash.storyboard (in target 'fe' from project 'fe')
+warning: Skipping duplicate build file in Compile Sources build phase: /Users/vodinaefem/ats-decor-app/fe/ios/fe/Images.xcassets (in target 'fe' from project 'fe')
+warning: Skipping duplicate build file in Compile Sources build phase: /Users/vodinaefem/ats-decor-app/fe/ios/fe/Colors.xcassets (in target 'fe' from project 'fe')
+warning: Skipping duplicate build file in Compile Sources build phase: /Users/vodinaefem/ats-decor-app/fe/ios/fe/AppDelegate.swift (in target 'fe' from project 'fe')
+
+
+Ld /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/fe.app/fe normal (in target 'fe' from project 'fe')
+    cd /Users/vodinaefem/ats-decor-app/fe/ios
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++ -Xlinker -reproducible -target arm64-apple-ios16.1 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS17.0.sdk -O0 -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphoneos -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos -L/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS17.0.sdk/usr/lib/swift -L/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/DoubleConversion -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/RCT-Folly -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/RCTDeprecation -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/RCTTypeSafety -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/RNBootSplash -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/RNReanimated -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/RNSVG -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/RNScreens -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-Core -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-CoreModules -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-Fabric -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-FabricComponents -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-FabricImage -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-ImageManager -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-Mapbuffer -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-NativeModulesApple -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-RCTAnimation -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-RCTAppDelegate -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-RCTBlob -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-RCTFBReactNativeSpec -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-RCTFabric -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-RCTImage -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-RCTLinking -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-RCTNetwork -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-RCTRuntime -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-RCTSettings -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-RCTText -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-RCTVibration -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-RuntimeApple -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-RuntimeCore -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-RuntimeHermes -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-cxxreact -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-debug -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-defaultsnativemodule -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-domnativemodule -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-featureflags -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-featureflagsnativemodule -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-graphics -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-hermes -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-idlecallbacksnativemodule -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-jserrorhandler -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-jsi -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-jsiexecutor -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-jsinspector -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-jsinspectortracing -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-jsitooling -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-logger -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-microtasksnativemodule -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-oscompat -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-perflogger -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-performancetimeline -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-rendererconsistency -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-renderercss -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-rendererdebug -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-runtimescheduler -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-utils -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/ReactAppDependencyProvider -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/ReactCodegen -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/ReactCommon -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/Yoga -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/fmt -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/glog -L/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/react-native-safe-area-context -F/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphoneos -F/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos -F/Users/vodinaefem/ats-decor-app/fe/ios/Pods/hermes-engine/destroot/Library/Frameworks/universal -F/Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/XCFrameworkIntermediates/hermes-engine/Pre-built -F/Users/vodinaefem/ats-decor-app/fe/ios/Pods/hermes-engine/destroot/Library/Frameworks/macosx -filelist /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/fe.LinkFileList -Xlinker -rpath -Xlinker /usr/lib/swift -Xlinker -rpath -Xlinker @executable_path/Frameworks -Xlinker -rpath -Xlinker @loader_path/Frameworks -dead_strip -Xlinker -object_path_lto -Xlinker /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/fe_lto.o -Xlinker -export_dynamic -Xlinker -no_deduplicate -stdlib\=libc++ -fobjc-arc -fobjc-link-runtime -L/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos -L/usr/lib/swift -Xlinker -add_ast_path -Xlinker /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/fe.swiftmodule -ObjC -lDoubleConversion -lRCT-Folly -lRCTDeprecation -lRCTTypeSafety -lRNBootSplash -lRNReanimated -lRNSVG -lRNScreens -lReact-Core -lReact-CoreModules -lReact-Fabric -lReact-FabricComponents -lReact-FabricImage -lReact-ImageManager -lReact-Mapbuffer -lReact-NativeModulesApple -lReact-RCTAnimation -lReact-RCTAppDelegate -lReact-RCTBlob -lReact-RCTFBReactNativeSpec -lReact-RCTFabric -lReact-RCTImage -lReact-RCTLinking -lReact-RCTNetwork -lReact-RCTRuntime -lReact-RCTSettings -lReact-RCTText -lReact-RCTVibration -lReact-RuntimeApple -lReact-RuntimeCore -lReact-RuntimeHermes -lReact-cxxreact -lReact-debug -lReact-defaultsnativemodule -lReact-domnativemodule -lReact-featureflags -lReact-featureflagsnativemodule -lReact-graphics -lReact-hermes -lReact-idlecallbacksnativemodule -lReact-jserrorhandler -lReact-jsi -lReact-jsiexecutor -lReact-jsinspector -lReact-jsinspectortracing -lReact-jsitooling -lReact-logger -lReact-microtasksnativemodule -lReact-oscompat -lReact-perflogger -lReact-performancetimeline -lReact-rendererconsistency -lReact-renderercss -lReact-rendererdebug -lReact-runtimescheduler -lReact-utils -lReactAppDependencyProvider -lReactCodegen -lReactCommon -lSocketRocket -lYoga -lc++ -lc++abi -lfmt -lglog -licucore -lreact-native-safe-area-context -framework Accelerate -framework AudioToolbox -framework CFNetwork -framework CoreGraphics -framework ImageIO -framework MobileCoreServices -framework QuartzCore -framework Security -framework UIKit -framework hermes -weak_framework JavaScriptCore -ObjC -lc++ -framework RealityKit -framework ARKit -lPods-fe -framework hermes -framework hermes -Xlinker -no_adhoc_codesign -Xlinker -dependency_info -Xlinker /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/fe_dependency_info.dat -o /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/fe.app/fe
+
+ld: warning: ignoring duplicate libraries: '-lc++'
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_React_CoreModules' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-CoreModules-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-CoreModules/libReact-CoreModules.a[29](React-CoreModules-dummy.o)
+duplicate symbol '_OBJC_IVAR_$_SRSecurityPolicy._certificateChainValidationEnabled' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRSecurityPolicy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[18](SRSecurityPolicy.o)
+duplicate symbol '_OBJC_IVAR_$_SRWebSocket._protocol' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRWebSocket.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[21](SRWebSocket.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_React_RuntimeCore' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-RuntimeCore-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-RuntimeCore/libReact-RuntimeCore.a[5](React-RuntimeCore-dummy.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_DoubleConversion' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/DoubleConversion-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/DoubleConversion/libDoubleConversion.a[7](DoubleConversion-dummy.o)
+duplicate symbol '__ZN8facebook5react28NativeSafeAreaContextSpecJSIC2ERKNS0_15ObjCTurboModule10InitParamsE' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/safeareacontext-generated.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/ReactCodegen/libReactCodegen.a[23](safeareacontext-generated.o)
+duplicate symbol '_OBJC_CLASS_$_NativeSvgViewModuleSpecBase' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/rnsvg-generated.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/ReactCodegen/libReactCodegen.a[21](rnsvg-generated.o)
+duplicate symbol '_OBJC_IVAR_$_SRIOConsumer._scanner' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRIOConsumer.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[10](SRIOConsumer.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_React_NativeModulesApple' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-NativeModulesApple-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-NativeModulesApple/libReact-NativeModulesApple.a[5](React-NativeModulesApple-dummy.o)
+duplicate symbol '_import_NSURLRequest_SRWebSocket' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/NSURLRequest+SRWebSocket.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[3](NSURLRequest+SRWebSocket.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_React_RuntimeCore' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-RuntimeCore-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-RuntimeCore/libReact-RuntimeCore.a[5](React-RuntimeCore-dummy.o)
+duplicate symbol '_OBJC_METACLASS_$_NativeScreensModuleSpecBase' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/rnscreens-generated.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/ReactCodegen/libReactCodegen.a[19](rnscreens-generated.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_fmt' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/fmt-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/fmt/libfmt.a[2](fmt-dummy.o)
+duplicate symbol '_OBJC_IVAR_$_SRWebSocket._securityPolicy' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRWebSocket.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[21](SRWebSocket.o)
+duplicate symbol '_OBJC_CLASS_$_SRIOConsumerPool' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRIOConsumerPool.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[11](SRIOConsumerPool.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_React_FabricComponents' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-FabricComponents-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-FabricComponents/libReact-FabricComponents.a[22](React-FabricComponents-dummy.o)
+duplicate symbol '_OBJC_IVAR_$_SRWebSocket._didFail' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRWebSocket.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[21](SRWebSocket.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_React_Fabric' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-Fabric-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-Fabric/libReact-Fabric.a[58](React-Fabric-dummy.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_React_defaultsnativemodule' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-defaultsnativemodule-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-defaultsnativemodule/libReact-defaultsnativemodule.a[3](React-defaultsnativemodule-dummy.o)
+duplicate symbol '_OBJC_IVAR_$_SRWebSocket._requestedProtocols' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRWebSocket.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[21](SRWebSocket.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_React_RCTSettings' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-RCTSettings-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-RCTSettings/libReact-RCTSettings.a[4](React-RCTSettings-dummy.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_React_debug' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-debug-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-debug/libReact-debug.a[2](React-debug-dummy.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_React_jsiexecutor' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-jsiexecutor-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-jsiexecutor/libReact-jsiexecutor.a[4](React-jsiexecutor-dummy.o)
+duplicate symbol '_OBJC_IVAR_$_SRWebSocket._closeReason' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRWebSocket.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[21](SRWebSocket.o)
+duplicate symbol '_OBJC_METACLASS_$_NativeSvgRenderableModuleSpecBase' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/rnsvg-generated.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/ReactCodegen/libReactCodegen.a[21](rnsvg-generated.o)
+duplicate symbol '__ZN8facebook5react32NativeSvgRenderableModuleSpecJSIC1ERKNS0_15ObjCTurboModule10InitParamsE' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/rnsvg-generated.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/ReactCodegen/libReactCodegen.a[21](rnsvg-generated.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_React_rendererdebug' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-rendererdebug-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-rendererdebug/libReact-rendererdebug.a[4](React-rendererdebug-dummy.o)
+duplicate symbol '_OBJC_IVAR_$_SRDelegateController._delegate' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRDelegateController.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[6](SRDelegateController.o)
+duplicate symbol '_OBJC_IVAR_$_SRWebSocket._cleanupScheduled' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRWebSocket.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[21](SRWebSocket.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_react_native_safe_area_context' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/react-native-safe-area-context-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/react-native-safe-area-context/libreact-native-safe-area-context.a[2](react-native-safe-area-context-dummy.o)
+duplicate symbol '__ZN8facebook5react29NativeReanimatedModuleSpecJSIC2ERKNS0_15ObjCTurboModule10InitParamsE' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/rnreanimated-generated.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/ReactCodegen/libReactCodegen.a[17](rnreanimated-generated.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_React_RCTImage' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-RCTImage-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-RCTImage/libReact-RCTImage.a[20](React-RCTImage-dummy.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_React_FabricComponents' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-FabricComponents-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-FabricComponents/libReact-FabricComponents.a[22](React-FabricComponents-dummy.o)
+duplicate symbol '_OBJC_IVAR_$_NativeRNBootSplashSpecBase._eventEmitterCallback' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/RNBootSplashSpec-generated.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/ReactCodegen/libReactCodegen.a[15](RNBootSplashSpec-generated.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_React_jserrorhandler' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-jserrorhandler-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-jserrorhandler/libReact-jserrorhandler.a[3](React-jserrorhandler-dummy.o)
+duplicate symbol '_OBJC_CLASS_$_SRSecurityPolicy' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRSecurityPolicy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[18](SRSecurityPolicy.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_React_RCTLinking' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-RCTLinking-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-RCTLinking/libReact-RCTLinking.a[4](React-RCTLinking-dummy.o)
+duplicate symbol '_OBJC_CLASS_$_NativeReanimatedModuleSpecBase' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/rnreanimated-generated.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/ReactCodegen/libReactCodegen.a[17](rnreanimated-generated.o)
+duplicate symbol '_OBJC_IVAR_$_SRRunLoopThread._waitGroup' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRRunLoopThread.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[17](SRRunLoopThread.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_React_defaultsnativemodule' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-defaultsnativemodule-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-defaultsnativemodule/libReact-defaultsnativemodule.a[3](React-defaultsnativemodule-dummy.o)
+duplicate symbol '_OBJC_IVAR_$_SRDelegateController._availableDelegateMethods' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRDelegateController.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[6](SRDelegateController.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_React_domnativemodule' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-domnativemodule-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-domnativemodule/libReact-domnativemodule.a[3](React-domnativemodule-dummy.o)
+duplicate symbol '_OBJC_METACLASS_$_RCTThirdPartyComponentsProvider' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/RCTThirdPartyComponentsProvider.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/ReactCodegen/libReactCodegen.a[13](RCTThirdPartyComponentsProvider.o)
+duplicate symbol '_OBJC_METACLASS_$_NativeReanimatedModuleSpecBase' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/rnreanimated-generated.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/ReactCodegen/libReactCodegen.a[17](rnreanimated-generated.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_React_RCTAnimation' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-RCTAnimation-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-RCTAnimation/libReact-RCTAnimation.a[26](React-RCTAnimation-dummy.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_React_featureflagsnativemodule' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-featureflagsnativemodule-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-featureflagsnativemodule/libReact-featureflagsnativemodule.a[3](React-featureflagsnativemodule-dummy.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_React_perflogger' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-perflogger-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-perflogger/libReact-perflogger.a[6](React-perflogger-dummy.o)
+duplicate symbol '_OBJC_IVAR_$_SRWebSocket._workQueue' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRWebSocket.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[21](SRWebSocket.o)
+duplicate symbol '_OBJC_CLASS_$_SRPinningSecurityPolicy' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRPinningSecurityPolicy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[14](SRPinningSecurityPolicy.o)
+duplicate symbol '__ZN8facebook5react27NativeWorkletsModuleSpecJSIC2ERKNS0_15ObjCTurboModule10InitParamsE' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/rnreanimated-generated.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/ReactCodegen/libReactCodegen.a[17](rnreanimated-generated.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_React_jsiexecutor' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-jsiexecutor-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-jsiexecutor/libReact-jsiexecutor.a[4](React-jsiexecutor-dummy.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_React_RCTAnimation' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-RCTAnimation-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-RCTAnimation/libReact-RCTAnimation.a[26](React-RCTAnimation-dummy.o)
+duplicate symbol '_OBJC_CLASS_$_RCTModuleProviders' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/RCTModuleProviders.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/ReactCodegen/libReactCodegen.a[11](RCTModuleProviders.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_RNScreens' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/RNScreens-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/RNScreens/libRNScreens.a[23](RNScreens-dummy.o)
+duplicate symbol '_OBJC_CLASS_$_SRDelegateController' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRDelegateController.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[6](SRDelegateController.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_React_jsinspectortracing' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-jsinspectortracing-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-jsinspectortracing/libReact-jsinspectortracing.a[4](React-jsinspectortracing-dummy.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_react_native_safe_area_context' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/react-native-safe-area-context-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/react-native-safe-area-context/libreact-native-safe-area-context.a[2](react-native-safe-area-context-dummy.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_React_RCTVibration' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-RCTVibration-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-RCTVibration/libReact-RCTVibration.a[4](React-RCTVibration-dummy.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_React_logger' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-logger-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-logger/libReact-logger.a[2](React-logger-dummy.o)
+duplicate symbol '_OBJC_IVAR_$_SRDelegateController._operationQueue' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRDelegateController.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[6](SRDelegateController.o)
+duplicate symbol '_OBJC_IVAR_$_SRPinningSecurityPolicy._pinnedCertificates' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRPinningSecurityPolicy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[14](SRPinningSecurityPolicy.o)
+duplicate symbol '_OBJC_CLASS_$_RCTAppDependencyProvider' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/RCTAppDependencyProvider.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/ReactAppDependencyProvider/libReactAppDependencyProvider.a[2](RCTAppDependencyProvider.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_React_graphics' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-graphics-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-graphics/libReact-graphics.a[7](React-graphics-dummy.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_React_RCTLinking' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-RCTLinking-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-RCTLinking/libReact-RCTLinking.a[4](React-RCTLinking-dummy.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_ReactAppDependencyProvider' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/ReactAppDependencyProvider-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/ReactAppDependencyProvider/libReactAppDependencyProvider.a[3](ReactAppDependencyProvider-dummy.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_React_ImageManager' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-ImageManager-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-ImageManager/libReact-ImageManager.a[5](React-ImageManager-dummy.o)
+duplicate symbol '_OBJC_IVAR_$_SRProxyConnect._httpProxyPort' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRProxyConnect.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[15](SRProxyConnect.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_React_Fabric' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-Fabric-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-Fabric/libReact-Fabric.a[58](React-Fabric-dummy.o)
+duplicate symbol '_OBJC_IVAR_$_SRWebSocket._urlRequest' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRWebSocket.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[21](SRWebSocket.o)
+duplicate symbol '__ZN8facebook5react26NativeScreensModuleSpecJSIC2ERKNS0_15ObjCTurboModule10InitParamsE' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/rnscreens-generated.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/ReactCodegen/libReactCodegen.a[19](rnscreens-generated.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_React_cxxreact' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-cxxreact-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-cxxreact/libReact-cxxreact.a[12](React-cxxreact-dummy.o)
+duplicate symbol '_OBJC_CLASS_$_NativeSvgRenderableModuleSpecBase' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/rnsvg-generated.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/ReactCodegen/libReactCodegen.a[21](rnsvg-generated.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_RCTTypeSafety' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/RCTTypeSafety-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/RCTTypeSafety/libRCTTypeSafety.a[4](RCTTypeSafety-dummy.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_RNBootSplash' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/RNBootSplash-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/RNBootSplash/libRNBootSplash.a[3](RNBootSplash-dummy.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_React_RuntimeHermes' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-RuntimeHermes-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-RuntimeHermes/libReact-RuntimeHermes.a[3](React-RuntimeHermes-dummy.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_React_oscompat' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-oscompat-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-oscompat/libReact-oscompat.a[4](React-oscompat-dummy.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_React_idlecallbacksnativemodule' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-idlecallbacksnativemodule-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-idlecallbacksnativemodule/libReact-idlecallbacksnativemodule.a[3](React-idlecallbacksnativemodule-dummy.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_React_performancetimeline' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-performancetimeline-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-performancetimeline/libReact-performancetimeline.a[7](React-performancetimeline-dummy.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_React_ImageManager' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-ImageManager-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-ImageManager/libReact-ImageManager.a[5](React-ImageManager-dummy.o)
+duplicate symbol '_OBJC_IVAR_$_SRWebSocket._readOpCount' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRWebSocket.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[21](SRWebSocket.o)
+duplicate symbol '_OBJC_IVAR_$_SRProxyConnect._socksProxyPassword' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRProxyConnect.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[15](SRProxyConnect.o)
+duplicate symbol '_OBJC_IVAR_$_NativeScreensModuleSpecBase._eventEmitterCallback' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/rnscreens-generated.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/ReactCodegen/libReactCodegen.a[19](rnscreens-generated.o)
+duplicate symbol '_OBJC_IVAR_$_SRWebSocket._readBuffer' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRWebSocket.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[21](SRWebSocket.o)
+duplicate symbol '_OBJC_IVAR_$_SRWebSocket._closeCode' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRWebSocket.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[21](SRWebSocket.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_RCTTypeSafety' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/RCTTypeSafety-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/RCTTypeSafety/libRCTTypeSafety.a[4](RCTTypeSafety-dummy.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_React_RCTBlob' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-RCTBlob-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-RCTBlob/libReact-RCTBlob.a[6](React-RCTBlob-dummy.o)
+duplicate symbol '_OBJC_IVAR_$_SRWebSocket._currentStringScanPosition' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRWebSocket.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[21](SRWebSocket.o)
+duplicate symbol '_OBJC_IVAR_$_SRProxyConnect._receivedHTTPHeaders' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRProxyConnect.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[15](SRProxyConnect.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_React_RuntimeApple' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-RuntimeApple-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-RuntimeApple/libReact-RuntimeApple.a[9](React-RuntimeApple-dummy.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_React_jsitooling' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-jsitooling-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-jsitooling/libReact-jsitooling.a[4](React-jsitooling-dummy.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_React_rendererconsistency' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-rendererconsistency-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-rendererconsistency/libReact-rendererconsistency.a[2](React-rendererconsistency-dummy.o)
+duplicate symbol '__ZN8facebook5react32NativeSvgRenderableModuleSpecJSIC2ERKNS0_15ObjCTurboModule10InitParamsE' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/rnsvg-generated.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/ReactCodegen/libReactCodegen.a[21](rnsvg-generated.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_React_graphics' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-graphics-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-graphics/libReact-graphics.a[7](React-graphics-dummy.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_ReactCodegen' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/ReactCodegen-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/ReactCodegen/libReactCodegen.a[14](ReactCodegen-dummy.o)
+duplicate symbol '_OBJC_METACLASS_$_SRWebSocket' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRWebSocket.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[21](SRWebSocket.o)
+duplicate symbol '_OBJC_IVAR_$_SRIOConsumer._readToCurrentFrame' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRIOConsumer.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[10](SRIOConsumer.o)
+duplicate symbol '_OBJC_METACLASS_$_SRIOConsumerPool' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRIOConsumerPool.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[11](SRIOConsumerPool.o)
+duplicate symbol '_OBJC_IVAR_$_SRProxyConnect._writeQueue' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRProxyConnect.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[15](SRProxyConnect.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_React_hermes' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-hermes-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-hermes/libReact-hermes.a[7](React-hermes-dummy.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_glog' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/glog-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/glog/libglog.a[3](glog-dummy.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_React_RCTBlob' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-RCTBlob-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-RCTBlob/libReact-RCTBlob.a[6](React-RCTBlob-dummy.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_React_utils' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-utils-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-utils/libReact-utils.a[4](React-utils-dummy.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_React_FabricImage' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-FabricImage-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-FabricImage/libReact-FabricImage.a[7](React-FabricImage-dummy.o)
+duplicate symbol '_OBJC_IVAR_$_SRWebSocket._currentFrameCount' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRWebSocket.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[21](SRWebSocket.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_ReactCodegen' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/ReactCodegen-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/ReactCodegen/libReactCodegen.a[14](ReactCodegen-dummy.o)
+duplicate symbol '_OBJC_IVAR_$_SRIOConsumer._unmaskBytes' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRIOConsumer.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[10](SRIOConsumer.o)
+duplicate symbol '_OBJC_METACLASS_$_SRRunLoopThread' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRRunLoopThread.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[17](SRRunLoopThread.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_SocketRocket' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SocketRocket-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[4](SocketRocket-dummy.o)
+duplicate symbol '_OBJC_METACLASS_$_RCTModuleProviders' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/RCTModuleProviders.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/ReactCodegen/libReactCodegen.a[11](RCTModuleProviders.o)
+duplicate symbol '_OBJC_IVAR_$_SRWebSocket._allowsUntrustedSSLCertificates' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRWebSocket.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[21](SRWebSocket.o)
+duplicate symbol '_import_NSRunLoop_SRWebSocket' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/NSRunLoop+SRWebSocket.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[2](NSRunLoop+SRWebSocket.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_ReactCommon' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/ReactCommon-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/ReactCommon/libReactCommon.a[4](ReactCommon-dummy.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_RNBootSplash' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/RNBootSplash-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/RNBootSplash/libRNBootSplash.a[3](RNBootSplash-dummy.o)
+duplicate symbol '_OBJC_IVAR_$_SRWebSocket._consumerPool' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRWebSocket.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[21](SRWebSocket.o)
+duplicate symbol '_OBJC_IVAR_$_SRDelegateController._dispatchQueue' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRDelegateController.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[6](SRDelegateController.o)
+duplicate symbol '_OBJC_CLASS_$_NativeWorkletsModuleSpecBase' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/rnreanimated-generated.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/ReactCodegen/libReactCodegen.a[17](rnreanimated-generated.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_RCTDeprecation' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/RCTDeprecation-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/RCTDeprecation/libRCTDeprecation.a[3](RCTDeprecation-dummy.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_React_idlecallbacksnativemodule' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-idlecallbacksnativemodule-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-idlecallbacksnativemodule/libReact-idlecallbacksnativemodule.a[3](React-idlecallbacksnativemodule-dummy.o)
+duplicate symbol '_OBJC_IVAR_$_NativeWorkletsModuleSpecBase._eventEmitterCallback' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/rnreanimated-generated.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/ReactCodegen/libReactCodegen.a[17](rnreanimated-generated.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_React_jsitooling' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-jsitooling-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-jsitooling/libReact-jsitooling.a[4](React-jsitooling-dummy.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_React_RuntimeHermes' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-RuntimeHermes-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-RuntimeHermes/libReact-RuntimeHermes.a[3](React-RuntimeHermes-dummy.o)
+duplicate symbol '_OBJC_CLASS_$_SRIOConsumer' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRIOConsumer.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[10](SRIOConsumer.o)
+duplicate symbol '__ZN8facebook5react26NativeScreensModuleSpecJSIC1ERKNS0_15ObjCTurboModule10InitParamsE' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/rnscreens-generated.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/ReactCodegen/libReactCodegen.a[19](rnscreens-generated.o)
+duplicate symbol '_OBJC_CLASS_$_NativeScreensModuleSpecBase' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/rnscreens-generated.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/ReactCodegen/libReactCodegen.a[19](rnscreens-generated.o)
+duplicate symbol '_OBJC_IVAR_$_NativeReanimatedModuleSpecBase._eventEmitterCallback' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/rnreanimated-generated.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/ReactCodegen/libReactCodegen.a[17](rnreanimated-generated.o)
+duplicate symbol '_OBJC_CLASS_$_NativeRNBootSplashSpecBase' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/RNBootSplashSpec-generated.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/ReactCodegen/libReactCodegen.a[15](RNBootSplashSpec-generated.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_React_RCTRuntime' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-RCTRuntime-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-RCTRuntime/libReact-RCTRuntime.a[3](React-RCTRuntime-dummy.o)
+duplicate symbol '_OBJC_IVAR_$_SRIOConsumer._handler' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRIOConsumer.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[10](SRIOConsumer.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_React_featureflagsnativemodule' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-featureflagsnativemodule-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-featureflagsnativemodule/libReact-featureflagsnativemodule.a[3](React-featureflagsnativemodule-dummy.o)
+duplicate symbol '_OBJC_IVAR_$_SRWebSocket._consumers' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRWebSocket.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[21](SRWebSocket.o)
+duplicate symbol '_OBJC_IVAR_$_SRWebSocket._failed' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRWebSocket.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[21](SRWebSocket.o)
+duplicate symbol '_OBJC_METACLASS_$_NativeSvgViewModuleSpecBase' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/rnsvg-generated.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/ReactCodegen/libReactCodegen.a[21](rnsvg-generated.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_React_RCTFBReactNativeSpec' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-RCTFBReactNativeSpec-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-RCTFBReactNativeSpec/libReact-RCTFBReactNativeSpec.a[4](React-RCTFBReactNativeSpec-dummy.o)
+duplicate symbol '_OBJC_IVAR_$_SRRunLoopThread._runLoop' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRRunLoopThread.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[17](SRRunLoopThread.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_React_jsinspector' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-jsinspector-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-jsinspector/libReact-jsinspector.a[17](React-jsinspector-dummy.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_React_rendererconsistency' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-rendererconsistency-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-rendererconsistency/libReact-rendererconsistency.a[2](React-rendererconsistency-dummy.o)
+duplicate symbol '_OBJC_IVAR_$_SRWebSocket._inputStream' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRWebSocket.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[21](SRWebSocket.o)
+duplicate symbol '_OBJC_IVAR_$_SRProxyConnect._inputStream' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRProxyConnect.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[15](SRProxyConnect.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_RNSVG' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/RNSVG-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/RNSVG/libRNSVG.a[3](RNSVG-dummy.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_React_utils' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-utils-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-utils/libReact-utils.a[4](React-utils-dummy.o)
+duplicate symbol '_OBJC_CLASS_$_SRWebSocket' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRWebSocket.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[21](SRWebSocket.o)
+duplicate symbol '_OBJC_METACLASS_$_NativeRNBootSplashSpecBase' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/RNBootSplashSpec-generated.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/ReactCodegen/libReactCodegen.a[15](RNBootSplashSpec-generated.o)
+duplicate symbol '_OBJC_IVAR_$_SRWebSocket._isPumping' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRWebSocket.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[21](SRWebSocket.o)
+duplicate symbol '_OBJC_CLASS_$_RCTThirdPartyComponentsProvider' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/RCTThirdPartyComponentsProvider.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/ReactCodegen/libReactCodegen.a[13](RCTThirdPartyComponentsProvider.o)
+duplicate symbol '_OBJC_IVAR_$_SRWebSocket._outputStream' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRWebSocket.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[21](SRWebSocket.o)
+duplicate symbol '_OBJC_IVAR_$_SRWebSocket._streamSecurityValidated' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRWebSocket.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[21](SRWebSocket.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_RCT_Folly' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/RCT-Folly-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/RCT-Folly/libRCT-Folly.a[19](RCT-Folly-dummy.o)
+duplicate symbol '_OBJC_IVAR_$_SRProxyConnect._socksProxyUsername' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRProxyConnect.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[15](SRProxyConnect.o)
+duplicate symbol '_OBJC_IVAR_$_SRWebSocket._delegateController' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRWebSocket.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[21](SRWebSocket.o)
+duplicate symbol '_OBJC_CLASS_$_RCTModulesConformingToProtocolsProvider' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/RCTModulesConformingToProtocolsProvider.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/ReactCodegen/libReactCodegen.a[12](RCTModulesConformingToProtocolsProvider.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_React_perflogger' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-perflogger-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-perflogger/libReact-perflogger.a[6](React-perflogger-dummy.o)
+duplicate symbol '_OBJC_METACLASS_$_RCTAppDependencyProvider' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/RCTAppDependencyProvider.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/ReactAppDependencyProvider/libReactAppDependencyProvider.a[2](RCTAppDependencyProvider.o)
+duplicate symbol '_OBJC_IVAR_$_SRWebSocket._requestCookies' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRWebSocket.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[21](SRWebSocket.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_RNSVG' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/RNSVG-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/RNSVG/libRNSVG.a[3](RNSVG-dummy.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_React_Mapbuffer' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-Mapbuffer-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-Mapbuffer/libReact-Mapbuffer.a[4](React-Mapbuffer-dummy.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_ReactCommon' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/ReactCommon-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/ReactCommon/libReactCommon.a[4](ReactCommon-dummy.o)
+duplicate symbol '__ZN8facebook5react29NativeReanimatedModuleSpecJSIC1ERKNS0_15ObjCTurboModule10InitParamsE' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/rnreanimated-generated.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/ReactCodegen/libReactCodegen.a[17](rnreanimated-generated.o)
+duplicate symbol '_OBJC_IVAR_$_SRProxyConnect._socksProxyPort' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRProxyConnect.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[15](SRProxyConnect.o)
+duplicate symbol '_OBJC_IVAR_$_SRWebSocket._outputBufferOffset' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRWebSocket.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[21](SRWebSocket.o)
+duplicate symbol '_OBJC_IVAR_$_SRWebSocket._scheduledRunloops' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRWebSocket.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[21](SRWebSocket.o)
+duplicate symbol '_OBJC_METACLASS_$_NativeWorkletsModuleSpecBase' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/rnreanimated-generated.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/ReactCodegen/libReactCodegen.a[17](rnreanimated-generated.o)
+duplicate symbol '_OBJC_IVAR_$_SRWebSocket._selfRetain' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRWebSocket.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[21](SRWebSocket.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_React_renderercss' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-renderercss-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-renderercss/libReact-renderercss.a[3](React-renderercss-dummy.o)
+duplicate symbol '_OBJC_IVAR_$_SRWebSocket._kvoLock' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRWebSocket.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[21](SRWebSocket.o)
+duplicate symbol '_OBJC_IVAR_$_SRWebSocket._readyState' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRWebSocket.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[21](SRWebSocket.o)
+duplicate symbol '_OBJC_IVAR_$_SRWebSocket._propertyLock' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRWebSocket.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[21](SRWebSocket.o)
+duplicate symbol '_OBJC_IVAR_$_SRWebSocket._currentReadMaskOffset' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRWebSocket.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[21](SRWebSocket.o)
+duplicate symbol '_OBJC_IVAR_$_NativeSafeAreaContextSpecBase._eventEmitterCallback' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/safeareacontext-generated.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/ReactCodegen/libReactCodegen.a[23](safeareacontext-generated.o)
+duplicate symbol '_OBJC_METACLASS_$_SRPinningSecurityPolicy' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRPinningSecurityPolicy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[14](SRPinningSecurityPolicy.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_React_microtasksnativemodule' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-microtasksnativemodule-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-microtasksnativemodule/libReact-microtasksnativemodule.a[3](React-microtasksnativemodule-dummy.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_React_microtasksnativemodule' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-microtasksnativemodule-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-microtasksnativemodule/libReact-microtasksnativemodule.a[3](React-microtasksnativemodule-dummy.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_React_featureflags' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-featureflags-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-featureflags/libReact-featureflags.a[2](React-featureflags-dummy.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_React_RCTNetwork' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-RCTNetwork-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-RCTNetwork/libReact-RCTNetwork.a[8](React-RCTNetwork-dummy.o)
+duplicate symbol '_OBJC_IVAR_$_SRProxyConnect._httpProxyHost' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRProxyConnect.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[15](SRProxyConnect.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_React_RCTText' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-RCTText-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-RCTText/libReact-RCTText.a[31](React-RCTText-dummy.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_React_RCTNetwork' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-RCTNetwork-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-RCTNetwork/libReact-RCTNetwork.a[8](React-RCTNetwork-dummy.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_React_RCTVibration' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-RCTVibration-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-RCTVibration/libReact-RCTVibration.a[4](React-RCTVibration-dummy.o)
+duplicate symbol '_OBJC_METACLASS_$_RCTModulesConformingToProtocolsProvider' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/RCTModulesConformingToProtocolsProvider.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/ReactCodegen/libReactCodegen.a[12](RCTModulesConformingToProtocolsProvider.o)
+duplicate symbol '__ZN8facebook5react28NativeSafeAreaContextSpecJSIC1ERKNS0_15ObjCTurboModule10InitParamsE' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/safeareacontext-generated.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/ReactCodegen/libReactCodegen.a[23](safeareacontext-generated.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_React_Mapbuffer' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-Mapbuffer-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-Mapbuffer/libReact-Mapbuffer.a[4](React-Mapbuffer-dummy.o)
+duplicate symbol '_OBJC_IVAR_$_SRWebSocket._proxyConnect' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRWebSocket.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[21](SRWebSocket.o)
+duplicate symbol '_OBJC_CLASS_$_SRProxyConnect' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRProxyConnect.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[15](SRProxyConnect.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_Yoga' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/Yoga-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/Yoga/libYoga.a[21](Yoga-dummy.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_React_cxxreact' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-cxxreact-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-cxxreact/libReact-cxxreact.a[12](React-cxxreact-dummy.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_React_Core' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-Core-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-Core/libReact-Core.a[131](React-Core-dummy.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_React_jsinspector' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-jsinspector-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-jsinspector/libReact-jsinspector.a[17](React-jsinspector-dummy.o)
+duplicate symbol '_OBJC_METACLASS_$_SRDelegateController' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRDelegateController.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[6](SRDelegateController.o)
+duplicate symbol '_OBJC_METACLASS_$_NativeSafeAreaContextSpecBase' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/safeareacontext-generated.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/ReactCodegen/libReactCodegen.a[23](safeareacontext-generated.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_React_RCTSettings' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-RCTSettings-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-RCTSettings/libReact-RCTSettings.a[4](React-RCTSettings-dummy.o)
+duplicate symbol '__ZN8facebook5react26NativeSvgViewModuleSpecJSIC1ERKNS0_15ObjCTurboModule10InitParamsE' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/rnsvg-generated.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/ReactCodegen/libReactCodegen.a[21](rnsvg-generated.o)
+duplicate symbol '__ZN8facebook5react25NativeRNBootSplashSpecJSIC1ERKNS0_15ObjCTurboModule10InitParamsE' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/RNBootSplashSpec-generated.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/ReactCodegen/libReactCodegen.a[15](RNBootSplashSpec-generated.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_React_featureflags' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-featureflags-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-featureflags/libReact-featureflags.a[2](React-featureflags-dummy.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_fmt' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/fmt-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/fmt/libfmt.a[2](fmt-dummy.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_React_Core' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-Core-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-Core/libReact-Core.a[131](React-Core-dummy.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_React_runtimescheduler' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-runtimescheduler-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-runtimescheduler/libReact-runtimescheduler.a[2](React-runtimescheduler-dummy.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_React_NativeModulesApple' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-NativeModulesApple-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-NativeModulesApple/libReact-NativeModulesApple.a[5](React-NativeModulesApple-dummy.o)
+duplicate symbol '_OBJC_IVAR_$_SRWebSocket._closeWhenFinishedWriting' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRWebSocket.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[21](SRWebSocket.o)
+duplicate symbol '__ZN8facebook5react27NativeWorkletsModuleSpecJSIC1ERKNS0_15ObjCTurboModule10InitParamsE' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/rnreanimated-generated.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/ReactCodegen/libReactCodegen.a[17](rnreanimated-generated.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_React_performancetimeline' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-performancetimeline-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-performancetimeline/libReact-performancetimeline.a[7](React-performancetimeline-dummy.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_RNReanimated' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/RNReanimated-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/RNReanimated/libRNReanimated.a[42](RNReanimated-dummy.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_React_RCTAppDelegate' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-RCTAppDelegate-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-RCTAppDelegate/libReact-RCTAppDelegate.a[7](React-RCTAppDelegate-dummy.o)
+duplicate symbol '_OBJC_IVAR_$_SRIOConsumer._bytesNeeded' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRIOConsumer.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[10](SRIOConsumer.o)
+duplicate symbol '_OBJC_METACLASS_$_SRIOConsumer' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRIOConsumer.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[10](SRIOConsumer.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_React_CoreModules' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-CoreModules-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-CoreModules/libReact-CoreModules.a[29](React-CoreModules-dummy.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_React_RuntimeApple' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-RuntimeApple-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-RuntimeApple/libReact-RuntimeApple.a[9](React-RuntimeApple-dummy.o)
+duplicate symbol '_OBJC_CLASS_$_NativeSafeAreaContextSpecBase' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/safeareacontext-generated.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/ReactCodegen/libReactCodegen.a[23](safeareacontext-generated.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_React_RCTFabric' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-RCTFabric-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-RCTFabric/libReact-RCTFabric.a[47](React-RCTFabric-dummy.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_React_rendererdebug' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-rendererdebug-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-rendererdebug/libReact-rendererdebug.a[4](React-rendererdebug-dummy.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_SocketRocket' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SocketRocket-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[4](SocketRocket-dummy.o)
+duplicate symbol '_OBJC_CLASS_$_SRRunLoopThread' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRRunLoopThread.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[17](SRRunLoopThread.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_React_jsi' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-jsi-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-jsi/libReact-jsi.a[3](React-jsi-dummy.o)
+duplicate symbol '_OBJC_IVAR_$_NativeSvgRenderableModuleSpecBase._eventEmitterCallback' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/rnsvg-generated.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/ReactCodegen/libReactCodegen.a[21](rnsvg-generated.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_React_oscompat' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-oscompat-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-oscompat/libReact-oscompat.a[4](React-oscompat-dummy.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_React_RCTFBReactNativeSpec' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-RCTFBReactNativeSpec-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-RCTFBReactNativeSpec/libReact-RCTFBReactNativeSpec.a[4](React-RCTFBReactNativeSpec-dummy.o)
+duplicate symbol '_OBJC_METACLASS_$_SRProxyConnect' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRProxyConnect.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[15](SRProxyConnect.o)
+duplicate symbol '_OBJC_IVAR_$_SRWebSocket._currentFrameData' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRWebSocket.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[21](SRWebSocket.o)
+duplicate symbol '_OBJC_IVAR_$_SRProxyConnect._completion' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRProxyConnect.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[15](SRProxyConnect.o)
+duplicate symbol '_OBJC_IVAR_$_SRIOConsumerPool._poolSize' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRIOConsumerPool.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[11](SRIOConsumerPool.o)
+duplicate symbol '__ZN8facebook5react26NativeSvgViewModuleSpecJSIC2ERKNS0_15ObjCTurboModule10InitParamsE' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/rnsvg-generated.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/ReactCodegen/libReactCodegen.a[21](rnsvg-generated.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_glog' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/glog-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/glog/libglog.a[3](glog-dummy.o)
+duplicate symbol '_OBJC_IVAR_$_SRWebSocket._secKey' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRWebSocket.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[21](SRWebSocket.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_React_jsinspectortracing' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-jsinspectortracing-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-jsinspectortracing/libReact-jsinspectortracing.a[4](React-jsinspectortracing-dummy.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_React_jsi' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-jsi-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-jsi/libReact-jsi.a[3](React-jsi-dummy.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_React_FabricImage' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-FabricImage-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-FabricImage/libReact-FabricImage.a[7](React-FabricImage-dummy.o)
+duplicate symbol '_OBJC_IVAR_$_SRWebSocket._requestRequiresSSL' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRWebSocket.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[21](SRWebSocket.o)
+duplicate symbol '_SRWebSocketErrorDomain' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRWebSocket.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[21](SRWebSocket.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_React_RCTFabric' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-RCTFabric-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-RCTFabric/libReact-RCTFabric.a[47](React-RCTFabric-dummy.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_React_domnativemodule' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-domnativemodule-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-domnativemodule/libReact-domnativemodule.a[3](React-domnativemodule-dummy.o)
+duplicate symbol '_main' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/main.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/AppDelegate-3410217579ae79d7d377fe85af9127fc.o
+duplicate symbol '_OBJC_IVAR_$_SRWebSocket._sentClose' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRWebSocket.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[21](SRWebSocket.o)
+duplicate symbol '_OBJC_IVAR_$_SRProxyConnect._socksProxyHost' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRProxyConnect.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[15](SRProxyConnect.o)
+duplicate symbol '_OBJC_IVAR_$_SRWebSocket._currentReadMaskKey' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRWebSocket.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[21](SRWebSocket.o)
+duplicate symbol '_OBJC_IVAR_$_SRDelegateController._accessQueue' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRDelegateController.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[6](SRDelegateController.o)
+duplicate symbol '_OBJC_IVAR_$_SRWebSocket._receivedHTTPHeaders' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRWebSocket.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[21](SRWebSocket.o)
+duplicate symbol '_OBJC_IVAR_$_SRProxyConnect._connectionRequiresSSL' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRProxyConnect.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[15](SRProxyConnect.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_React_logger' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-logger-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-logger/libReact-logger.a[2](React-logger-dummy.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_React_hermes' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-hermes-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-hermes/libReact-hermes.a[7](React-hermes-dummy.o)
+duplicate symbol '_OBJC_IVAR_$_NativeSvgViewModuleSpecBase._eventEmitterCallback' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/rnsvg-generated.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/ReactCodegen/libReactCodegen.a[21](rnsvg-generated.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_Yoga' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/Yoga-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/Yoga/libYoga.a[21](Yoga-dummy.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_React_RCTText' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-RCTText-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-RCTText/libReact-RCTText.a[31](React-RCTText-dummy.o)
+duplicate symbol '_OBJC_IVAR_$_SRWebSocket._url' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRWebSocket.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[21](SRWebSocket.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_React_runtimescheduler' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-runtimescheduler-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-runtimescheduler/libReact-runtimescheduler.a[2](React-runtimescheduler-dummy.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_ReactAppDependencyProvider' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/ReactAppDependencyProvider-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/ReactAppDependencyProvider/libReactAppDependencyProvider.a[3](ReactAppDependencyProvider-dummy.o)
+duplicate symbol '__ZN8facebook5react25NativeRNBootSplashSpecJSIC2ERKNS0_15ObjCTurboModule10InitParamsE' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/RNBootSplashSpec-generated.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/ReactCodegen/libReactCodegen.a[15](RNBootSplashSpec-generated.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_React_RCTAppDelegate' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-RCTAppDelegate-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-RCTAppDelegate/libReact-RCTAppDelegate.a[7](React-RCTAppDelegate-dummy.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_React_renderercss' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-renderercss-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-renderercss/libReact-renderercss.a[3](React-renderercss-dummy.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_RNScreens' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/RNScreens-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/RNScreens/libRNScreens.a[23](RNScreens-dummy.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_Pods_fe' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/Pods-fe-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/libPods-fe.a[2](Pods-fe-dummy.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_React_RCTRuntime' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-RCTRuntime-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-RCTRuntime/libReact-RCTRuntime.a[3](React-RCTRuntime-dummy.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_DoubleConversion' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/DoubleConversion-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/DoubleConversion/libDoubleConversion.a[7](DoubleConversion-dummy.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_RCT_Folly' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/RCT-Folly-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/RCT-Folly/libRCT-Folly.a[19](RCT-Folly-dummy.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_RCTDeprecation' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/RCTDeprecation-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/RCTDeprecation/libRCTDeprecation.a[3](RCTDeprecation-dummy.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_React_debug' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-debug-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-debug/libReact-debug.a[2](React-debug-dummy.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_Pods_fe' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/Pods-fe-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/libPods-fe.a[2](Pods-fe-dummy.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_React_RCTImage' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-RCTImage-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-RCTImage/libReact-RCTImage.a[20](React-RCTImage-dummy.o)
+duplicate symbol '_OBJC_IVAR_$_SRProxyConnect._outputStream' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRProxyConnect.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[15](SRProxyConnect.o)
+duplicate symbol '_OBJC_IVAR_$_SRWebSocket._outputBuffer' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRWebSocket.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[21](SRWebSocket.o)
+duplicate symbol '_OBJC_CLASS_$_PodsDummy_RNReanimated' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/RNReanimated-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/RNReanimated/libRNReanimated.a[42](RNReanimated-dummy.o)
+duplicate symbol '_SRHTTPResponseErrorKey' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRWebSocket.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[21](SRWebSocket.o)
+duplicate symbol '_OBJC_IVAR_$_SRWebSocket._readBufferOffset' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRWebSocket.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[21](SRWebSocket.o)
+duplicate symbol '_OBJC_IVAR_$_SRProxyConnect._inputQueue' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRProxyConnect.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[15](SRProxyConnect.o)
+duplicate symbol '_OBJC_METACLASS_$_PodsDummy_React_jserrorhandler' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/React-jserrorhandler-dummy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/React-jserrorhandler/libReact-jserrorhandler.a[3](React-jserrorhandler-dummy.o)
+duplicate symbol '_OBJC_METACLASS_$_SRSecurityPolicy' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRSecurityPolicy.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[18](SRSecurityPolicy.o)
+duplicate symbol '_OBJC_IVAR_$_SRWebSocket._currentFrameOpcode' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRWebSocket.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[21](SRWebSocket.o)
+duplicate symbol '_OBJC_IVAR_$_SRProxyConnect._url' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRProxyConnect.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[15](SRProxyConnect.o)
+duplicate symbol '_OBJC_IVAR_$_SRIOConsumerPool._bufferedConsumers' in:
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Intermediates.noindex/fe.build/Debug-iphoneos/fe.build/Objects-normal/arm64/SRIOConsumerPool.o
+    /Users/vodinaefem/Library/Developer/Xcode/DerivedData/fe-gkosgkapkzgcengfqsrgkaaiytqz/Build/Products/Debug-iphoneos/SocketRocket/libSocketRocket.a[11](SRIOConsumerPool.o)
+ld: 266 duplicate symbols
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+
+266 duplicate symbols
+
+Linker command failed with exit code 1 (use -v to see invocation)
+
+
+
+Build failed    15/11/2025, 17:51    152.8 seconds
