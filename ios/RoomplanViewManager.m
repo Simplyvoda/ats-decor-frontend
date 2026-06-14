@@ -1,6 +1,6 @@
 //
 //  RoomplanViewManager.m
-//  fe
+//  This is the bridging file
 //
 //  Created by Vodina Efem on 15/11/2025.
 //
@@ -13,7 +13,10 @@
 
 RCT_EXTERN_METHOD(startScanning:(nonnull NSNumber *)reactTag)
 RCT_EXTERN_METHOD(stopScanning:(nonnull NSNumber *)reactTag)
-RCT_EXTERN_METHOD(exportScanResults:(nonnull NSNumber *)reactTag)
+
+
+RCT_EXPORT_VIEW_PROPERTY(onScanFinished, RCTBubblingEventBlock)
+RCT_EXPORT_VIEW_PROPERTY(onExportComplete, RCTBubblingEventBlock)
 
 @end
 

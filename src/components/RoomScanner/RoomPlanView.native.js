@@ -1,3 +1,3 @@
 // RoomPlanView.js
-import { requireNativeComponent, UIManager, findNodeHandle } from 'react-native';
+import { requireNativeComponent } from 'react-native';
 export default requireNativeComponent('RoomplanView');

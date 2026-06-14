@@ -1,3 +1,5 @@
+ENV['RCT_NEW_ARCH_ENABLED'] = '0'
+
 # Resolve react_native_pods.rb with node to allow for hoisting
 require Pod::Executable.execute_command('node', ['-p',
   'require.resolve(
@@ -42,5 +44,23 @@ target 'fe' do
       :mac_catalyst_enabled => false,
       # :ccache_enabled => true
     )
+
+    installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |config|
+        if config.build_settings['OTHER_LDFLAGS']
+          config.build_settings['OTHER_LDFLAGS'] =
+            config.build_settings['OTHER_LDFLAGS']
+              .split
+              .reject { |flag|
+                flag.include?('DoubleConversion') ||
+                flag.include?('RCT-Folly') ||
+                flag.include?('fmt') ||
+                flag.include?('glog')
+              }
+              .join(' ')
+        end
+      end
+    end
   end
+  
 end

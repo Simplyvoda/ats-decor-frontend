@@ -92,7 +92,7 @@ const InitialScreen = () => {
               Ahmad Fola
             </Text>
             <Text className="text-white text-sm font-dm-sans">
-              Manage your All Things Snug
+              Manage your PlaDomus
             </Text>
             <Text className="text-white text-sm font-dm-sans">experience</Text>
           </View>

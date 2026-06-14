@@ -54,7 +54,6 @@ const Login = () => {
         position: 'bottom',
       });
 
-      navigateTo(navigation, 'HomeScreen');
     } catch (err: any) {
       console.log('Error:', err.response?.data || err.message);
       Toast.show({

@@ -40,12 +40,6 @@ export const UserProvider = ({children}: {children: React.ReactNode}) => {
     restoreUser();
   }, []);
 
-  const saveUserSession = async (res: ISignInResponse) => {
-    await AsyncStorage.setItem('token', res.data.session.access_token);
-    await AsyncStorage.setItem('user', JSON.stringify(res.data.user));
-    await AsyncStorage.setItem('session', JSON.stringify(res.data.session));
-  };
-
   const signInUser = async (data: ISignInResponse) => {
     const usr = data.data.user;
 
@@ -56,16 +50,15 @@ export const UserProvider = ({children}: {children: React.ReactNode}) => {
       last_name: usr.user_metadata?.last_name,
     };
 
-    // save in state
     setUser(simplifiedUser);
-    await saveUserSession(data);
+    await AsyncStorage.setItem('token', data.data.session.access_token);
+    await AsyncStorage.setItem('user', JSON.stringify(simplifiedUser));
+    await AsyncStorage.setItem('session', JSON.stringify(data.data.session));
   };
 
-  // Clear everything on logout
   const logoutUser = async () => {
     setUser(null);
-    await AsyncStorage.removeItem('user');
-    await AsyncStorage.removeItem('access_token');
+    await AsyncStorage.multiRemove(['user', 'token', 'session']);
   };
 
   return (

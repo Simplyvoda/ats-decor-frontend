@@ -36,9 +36,9 @@ const HelpFeedback = () => {
 When you’re ready for more, upgrade to Hobbyist (or higher) to unlock additional features.`,
     },
     {
-      question: 'Do I need to be a professional to use All Things Snug?',
+      question: 'Do I need to be a professional to use PlaDomus?',
       answer:
-        'Not at all! All Things Snug is built for everyone, from first-time DIYers to seasoned pros. We make it easy for anyone to design, visualize, and execute home projects without specialized training.',
+        'Not at all! PlaDomus is built for everyone, from first-time DIYers to seasoned pros. We make it easy for anyone to design, visualize, and execute home projects without specialized training.',
     },
     {
       question: 'Can I upgrade or downgrade my plan at any time?',

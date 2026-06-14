@@ -1,33 +1,34 @@
 import React, {useRef} from 'react';
 import {
-  View,
   Button,
-  UIManager,
-  findNodeHandle,
+  NativeModules,
   NativeSyntheticEvent,
+  UIManager,
+  View,
+  findNodeHandle,
 } from 'react-native';
+import {useNavigation} from '@react-navigation/native';
 import RoomPlanView from '../components/RoomScanner/RoomPlanView.native';
+
+const {RealityKitModule} = NativeModules;
 
 export default function ScannerScreen() {
   const ref = useRef(null);
+  const navigation = useNavigation();
 
-  // Called when scanning finishes (JSON string of CapturedRoom)
   const onScanFinished = (e: NativeSyntheticEvent<{roomJson: string}>) => {
-    const roomJson = e.nativeEvent.roomJson;
-    console.log('Scan JSON:', roomJson);
-    // Parse or save JSON as needed
+    console.log('Scan JSON:', e.nativeEvent.roomJson);
   };
-  
-  // Called when export is done (JSON + USDZ base64)
-  const onExportComplete = (e: NativeSyntheticEvent<{json: string; usdzBase64: string}>) => {
-    const {json, usdzBase64} = e.nativeEvent;
-    console.log('Export JSON:', json);
-    console.log('USDZ (base64) length:', usdzBase64.length);
-    // You can save or decode the USDZ for viewing
+
+  const onExportComplete = (
+    e: NativeSyntheticEvent<{json: string; usdzBase64: string; fileUrl: string}>,
+  ) => {
+    const {fileUrl} = e.nativeEvent;
+    console.log('Export complete, fileUrl:', fileUrl);
+    (navigation as any).navigate('ARViewer', {modelUrl: fileUrl});
   };
 
   const startScan = () => {
-    // Dispatch the native command to start scanning on the view ref
     UIManager.dispatchViewManagerCommand(
       findNodeHandle(ref.current),
       UIManager.getViewManagerConfig('RoomplanView').Commands.startScanning,
@@ -43,27 +44,29 @@ export default function ScannerScreen() {
     );
   };
 
-  const exportScan = () => {
-    UIManager.dispatchViewManagerCommand(
-      findNodeHandle(ref.current),
-      UIManager.getViewManagerConfig('RoomplanView').Commands.exportScanResults,
-      [],
-    );
-  };
-
   return (
     <View style={{flex: 1}}>
-      {/* A full-screen scanning view */}
       <RoomPlanView
         ref={ref}
         style={{flex: 1}}
         onScanFinished={onScanFinished}
         onExportComplete={onExportComplete}
       />
-      {/* Example buttons to control scan */}
       <Button title="Start Scan" onPress={startScan} />
       <Button title="Stop & Finish" onPress={finishScan} />
-      <Button title="Export Results" onPress={exportScan} />
+
+      {/* DEV: loads savedRoom.usdz straight into ARViewerScreen (no scan needed) */}
+      <Button
+        title="[Dev] Load saved room"
+        onPress={async () => {
+          try {
+            const url = await RealityKitModule.getSavedRoomUrl();
+            (navigation as any).navigate('ARViewer', {modelUrl: url});
+          } catch {
+            console.warn('[Dev] No savedRoom.usdz found — scan a room first');
+          }
+        }}
+      />
     </View>
   );
 }

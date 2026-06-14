@@ -25,13 +25,13 @@ const stepsData = [
       'Visualize How Your Beloved Items Will Fit In Your Redesigned Spaces.',
     buttonText: 'Next',
   },
-  {
-    image: require('../../assets/images/step2.png'),
-    title: 'Bring Your Existing Pieces to Life',
-    subtitle:
-      'Visualize How Your Beloved Items Will Fit In Your Redesigned Spaces.',
-    buttonText: 'Finish',
-  },
+  // {
+  //   image: require('../../assets/images/step2.png'),
+  //   title: 'Bring Your Existing Pieces to Life',
+  //   subtitle:
+  //     'Visualize How Your Beloved Items Will Fit In Your Redesigned Spaces.',
+  //   buttonText: 'Finish',
+  // },
 ];
 
 export default function StepsScreen() {

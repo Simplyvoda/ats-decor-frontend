@@ -1,10 +1,11 @@
-import React from 'react';
+import React, {useEffect} from 'react';
+import {View} from 'react-native';
+import BootSplash from 'react-native-bootsplash';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import StepsScreen from '../screens/StepsScreen';
+
 import WelcomeScreen from '../screens/WelcomeScreen';
-import ScanScreen from '../screens/ScanScreen';
-// import HomeScreen from '../screens/home_screens/HomeScreen';
-import ViewMoodboards from '../screens/home/moodboards/ViewMoodboards';
+import StepsScreen from '../screens/StepsScreen';
+import ViewMoodboards from '../screens/home_screens/moodboards/ViewMoodboards';
 import SignUp from '../screens/auth_screens/SignUp';
 import SetPassword from '../screens/auth_screens/SetPassword';
 import ForgotPassword from '../screens/auth_screens/ForgotPassword';
@@ -15,16 +16,15 @@ import ProfilePreference from '../screens/settings_screens/ProfilePreference';
 import Shopping from '../screens/settings_screens/Shopping';
 import SecurityPrivacy from '../screens/settings_screens/SecurityPrivacy';
 import HelpFeedback from '../screens/settings_screens/HelpFeedback';
-// import DesignScreen from '../screens/home_screens/DesignScreen';
-// import ExploreScreen from '../screens/home_screens/ExploreScreen';
-// import NotesScreen from '../screens/home_screens/NotesScreen';
-import HomeLayout from '../screens/home_screens/InitialScreen';
-
+import ScanScreen from '../screens/ScanScreen';
+import ARViewerScreen from '../screens/ARViewerScreen';
+import BlogPostScreen from '../screens/home_screens/blog/BlogPostScreen';
+import HomeTabNavigator from './HomeTabNavigator';
+import {useUserContext} from '../context/UserContext';
 
 const Stack = createNativeStackNavigator();
 const SettingsStack = createNativeStackNavigator();
 const AuthStack = createNativeStackNavigator();
-// const MainHomeStack = createNativeStackNavigator();
 
 function SettingsNavigator() {
   return (
@@ -56,29 +56,40 @@ function AuthNavigator() {
   );
 }
 
-// function MainNavigator() {
-//   return (
-//     <MainHomeStack.Navigator screenOptions={{headerShown: false}}>
-//       <MainHomeStack.Screen name="Home" component={HomeScreen} />
-//       <MainHomeStack.Screen name="Design" component={DesignScreen} />
-//       <MainHomeStack.Screen name="Explore" component={ExploreScreen} />
-//       <MainHomeStack.Screen name="Notes" component={NotesScreen} />
-//     </MainHomeStack.Navigator>
-//   );
-// }
-
 function AppNavigator(): React.JSX.Element {
+  const {user, isLoadingUser} = useUserContext();
+
+  useEffect(() => {
+    if (!isLoadingUser) {
+      BootSplash.hide({fade: true});
+    }
+  }, [isLoadingUser]);
+
+  if (isLoadingUser) {
+    return <View style={{flex: 1, backgroundColor: '#FAF9F6'}} />;
+  }
+
   return (
-    <Stack.Navigator
-      screenOptions={{headerShown: false}}
-      initialRouteName="Welcome">
-      <Stack.Screen name="Welcome" component={WelcomeScreen} />
-      <Stack.Screen name="Steps" component={StepsScreen} />
-      <Stack.Screen name="Auth" component={AuthNavigator} />
-      <Stack.Screen name="ScanScreen" component={ScanScreen} />
-      <Stack.Screen name="Moodboards" component={ViewMoodboards} />
-      <Stack.Screen name="Settings" component={SettingsNavigator} />
-      <Stack.Screen name="HomeScreen" component={HomeLayout} />
+    <Stack.Navigator screenOptions={{headerShown: false}}>
+      {user ? (
+        // ── Authenticated ──────────────────────────────────────────────────
+        <>
+          <Stack.Screen name="HomeTabs" component={HomeTabNavigator} />
+          {/* Full-screen flows pushed on top of the tab bar */}
+          <Stack.Screen name="ScanScreen" component={ScanScreen} />
+          <Stack.Screen name="ARViewer" component={ARViewerScreen} />
+          <Stack.Screen name="Settings" component={SettingsNavigator} />
+          <Stack.Screen name="Moodboards" component={ViewMoodboards} />
+          <Stack.Screen name="BlogPost" component={BlogPostScreen} />
+        </>
+      ) : (
+        // ── Unauthenticated ────────────────────────────────────────────────
+        <>
+          <Stack.Screen name="Welcome" component={WelcomeScreen} />
+          <Stack.Screen name="Steps" component={StepsScreen} />
+          <Stack.Screen name="Auth" component={AuthNavigator} />
+        </>
+      )}
     </Stack.Navigator>
   );
 }

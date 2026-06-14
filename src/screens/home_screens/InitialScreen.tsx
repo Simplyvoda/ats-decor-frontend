@@ -1,143 +1,129 @@
-import { Bell, Compass, FileText, Home, PenTool } from 'lucide-react-native';
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
-    Image,
-    SafeAreaView,
-    StatusBar,
-    Text,
-    TouchableOpacity,
-    View,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-// import HomeTabs from '../components/(tabs)/HomeTabNavigator';
-import { images } from '../../../assets/constants/images';
-import DesignScreen from '../../components/(home)/DesignScreen';
-import ExploreScreen from '../../components/(home)/ExploreScreen';
-import HomeScreen from '../../components/(home)/HomeScreen';
-import NotesScreen from '../../components/(home)/NotesScreen';
-import { useUserContext } from '../../context/UserContext';
+import StudioComponent from '../../components/(home)/(studio)/StudioComponent';
+import MoodBoardComponent from '../../components/(home)/(moodboard)/MoodBoardComponent';
+import BlogComponent from '../../components/(home)/(blog)/BlogComponent';
+import SharedHeader from '../../components/shared/Header';
+import {Plus} from 'lucide-react-native';
+import {navigateTo} from '../../utils/navigation';
+import {useNavigation} from '@react-navigation/native';
 
+type Tab = 'Studio' | 'MoodBoard' | 'Blog';
 
-const HomeLayout = () => {
-  const { user } = useUserContext();
-  const [activeTab, setActiveTab] = useState<string>('Home');
-  const onTabChange = (tabName: string) => {
-    setActiveTab(tabName);
-    // navigateTo(navigation, tabName);
-  };
+const TABS: {label: string; value: Tab}[] = [
+  {label: 'Studio', value: 'Studio'},
+  {label: 'Mood Board', value: 'MoodBoard'},
+  {label: 'Blog', value: 'Blog'},
+];
 
-  const tabScreens: Record<string, React.ReactNode> = {
-    Home: <HomeScreen />,
-    Design: <DesignScreen />,
-    Notes: <NotesScreen />,
-    Explore: <ExploreScreen />,
-  };
+const TAB_CONTENT: Record<Tab, React.ReactElement> = {
+  Studio: <StudioComponent />,
+  MoodBoard: <MoodBoardComponent />,
+  Blog: <BlogComponent />,
+};
+
+const HomeScreen = () => {
+  const [activeTab, setActiveTab] = useState<Tab>('Studio');
+  const navigation = useNavigation();
 
   return (
-    <View className="flex-1 bg-white">
-      <SafeAreaView className="flex-1">
-        <StatusBar barStyle="dark-content" backgroundColor="transparent" />
+    <ScrollView
+      style={styles.root}
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={styles.content}>
 
-        {user && (
-          <View className="flex-row justify-between items-center px-5 py-2 bg-white">
-            <View className="flex-row items-center">
-              <View className="mr-3">
-                <Image
-                  source={images.ats_logo}
-                  className="w-10 h-10 rounded-full"
-                />
-              </View>
-              <View>
-                <Text className="text-gray-500 text-sm">Welcome</Text>
-                <Text className="text-gray-800 text-base font-semibold">
-                  {user.first_name} {user.last_name}
-                </Text>
-              </View>
-            </View>
-            <TouchableOpacity className="relative">
-              <Bell size={24} color="#333" />
-              <View className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-red-500" />
-            </TouchableOpacity>
-          </View>
-        )}
+      <SharedHeader
+        subtitle="Design your dream home"
+        action={{
+          label: 'Start New Design',
+          icon: <Plus size={16} color="#fff" />,
+          onPress: () => navigateTo(navigation, 'Design'),
+        }}
+      />
 
-        {/* Main Content Area */}
-        <View className="flex-1">{tabScreens[activeTab]}</View>
+      {/* Tab row */}
+      <View style={styles.tabRow}>
+        {TABS.map(tab => (
+          <TouchableOpacity
+            key={tab.value}
+            style={[styles.tab, activeTab === tab.value && styles.activeTab]}
+            onPress={() => setActiveTab(tab.value)}
+            activeOpacity={0.7}>
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === tab.value && styles.activeTabText,
+              ]}>
+              {tab.label}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
 
-        {/* Bottom Navigation */}
-        {true && (
-          <View className="flex-row justify-around items-center bg-white border-t border-gray-200 py-3">
-            <TouchableOpacity
-              onPress={() => onTabChange('Home')}
-              className="items-center flex-1">
-              <Home
-                size={24}
-                color={activeTab === 'Home' ? '#C4A962' : '#999'}
-              />
-              <Text
-                className={
-                  activeTab === 'Home'
-                    ? 'text-[#C4A962] text-xs mt-1 font-semibold'
-                    : 'text-gray-500 text-xs mt-1'
-                }>
-                Home
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => onTabChange('Design')}
-              className="items-center flex-1">
-              <PenTool
-                size={24}
-                color={activeTab === 'Design' ? '#C4A962' : '#999'}
-              />
-              <Text
-                className={
-                  activeTab === 'Design'
-                    ? 'text-[#C4A962] text-xs mt-1 font-semibold'
-                    : 'text-gray-500 text-xs mt-1'
-                }>
-                Design
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => onTabChange('Notes')}
-              className="items-center flex-1">
-              <FileText
-                size={24}
-                color={activeTab === 'Notes' ? '#C4A962' : '#999'}
-              />
-              <Text
-                className={
-                  activeTab === 'Notes'
-                    ? 'text-[#C4A962] text-xs mt-1 font-semibold'
-                    : 'text-gray-500 text-xs mt-1'
-                }>
-                Notes
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => onTabChange('Explore')}
-              className="items-center flex-1">
-              <Compass
-                size={24}
-                color={activeTab === 'Explore' ? '#C4A962' : '#999'}
-              />
-              <Text
-                className={
-                  activeTab === 'Explore'
-                    ? 'text-[#C4A962] text-xs mt-1 font-semibold'
-                    : 'text-gray-500 text-xs mt-1'
-                }>
-                Explore
-              </Text>
-            </TouchableOpacity>
-          </View>
-        )}
-      </SafeAreaView>
-    </View>
+      {/* Tab content */}
+      <View style={styles.tabContent}>{TAB_CONTENT[activeTab]}</View>
+    </ScrollView>
   );
 };
 
-export default HomeLayout;
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    backgroundColor: '#FAF9F6',
+  },
+  content: {
+    paddingBottom: 24,
+  },
+
+  // Tabs
+  tabRow: {
+    flexDirection: 'row',
+    paddingHorizontal: 4,
+    paddingVertical: 5,
+    // paddingVertical: 14,
+    marginTop: 70,
+    marginBottom: 16,
+    backgroundColor: '#FFFFFF',
+    gap: 24,
+    borderRadius: 12,
+    width: '90%',
+    alignSelf: 'center',
+    display: 'flex',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  tab: {
+    paddingBottom: 4,
+    // width: '100%',
+    height: 40,
+    justifyContent: 'center',
+  },
+  activeTab: {
+    backgroundColor: '#2C2C2C08',
+    paddingHorizontal: 8,
+    borderRadius: 6,
+  },
+  tabText: {
+    fontFamily: 'DMSans-Regular',
+    fontSize: 15,
+    color: '#999',
+    paddingHorizontal: 15,
+  },
+  activeTabText: {
+    color: '#1a1a1a',
+    fontWeight: '600',
+  },
+  // Content
+  tabContent: {
+    paddingTop: 4,
+  },
+});
+
+export default HomeScreen;

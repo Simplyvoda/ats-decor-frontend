@@ -1,8 +1,8 @@
-import { Camera, LayoutPanelTop } from 'lucide-react-native';
+import {Camera, LayoutPanelTop} from 'lucide-react-native';
 import React from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
-import { navigateTo } from '../../utils/navigation';
-import { useNavigation } from '@react-navigation/native';
+import {Text, TouchableOpacity, View} from 'react-native';
+import {navigateTo} from '../../utils/navigation';
+import {useNavigation} from '@react-navigation/native';
 
 const DesignScreen = () => {
   const navigation = useNavigation();
@@ -18,7 +18,9 @@ const DesignScreen = () => {
         </Text>
       </View>
       <View className="flex flex-col px-4 gap-5 mt-[-45px]">
-        <TouchableOpacity onPress={() => navigateTo(navigation, 'ScanScreen')} className="px-3 py-5 flex flex-row justify-start items-center shadow-slate-600 shadow-sm rounded-[16px] bg-white">
+        <TouchableOpacity
+          onPress={() => navigateTo(navigation, 'ScanScreen')}
+          className="px-3 py-5 flex flex-row justify-start items-center shadow-slate-600 shadow-sm rounded-[16px] bg-white">
           <View className="bg-[#4169E1] w-[30px] h-[80px] rounded-[14px] flex items-center justify-center">
             <Camera color={'white'} />
           </View>
@@ -54,7 +56,7 @@ const DesignScreen = () => {
             <View className="flex-row items-center">
               <View className="h-3 w-3 rounded-full bg-brand" />
               <Text className="font-dm-sans text-base ml-2">
-                Scan in good lighting for best results
+                Test different ideas till you get it right
               </Text>
             </View>
           </View>

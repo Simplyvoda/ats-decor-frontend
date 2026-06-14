@@ -27,7 +27,7 @@ function WelcomeScreen(): React.JSX.Element {
 
         {/* Title */}
         <Text className="text-center text-[25px] leading-[25px] font-bold font-cormorant max-w-[80%] mt-5">
-          Welcome to All Things Snug!
+          Welcome to All Pladomus!
         </Text>
 
         {/* Subtitle */}

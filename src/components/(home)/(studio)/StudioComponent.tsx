@@ -1,81 +1,85 @@
-import React, {useEffect, useState} from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Image,
-  StyleSheet,
-  SafeAreaView,
-} from 'react-native';
-import Layout from '../../layout/HomeLayout';
-import {Plus, Lightbulb} from 'lucide-react-native';
-import StudioComponent from '../../components/(studio)/StudioComponent';
-import MoodBoardComponent from '../../components/(moodboard)/MoodBoardComponent';
-import BlogComponent from '../../components/(blog)/BlogComponent';
+import React from 'react';
+import {View, Text, TouchableOpacity, Image, StyleSheet} from 'react-native';
+import {Lightbulb} from 'lucide-react-native';
 
-const HomeScreen = () => {
-  const [activeTab, setActiveTab] = useState('Studio');
-  const tabs = [
-    {id: 1, label: 'Studio', value: 'Studio'},
-    {id: 2, label: 'Mood Board', value: 'MoodBoard'},
-    {id: 3, label: 'Blog', value: 'Blog'},
+const StudioComponent = () => {
+  // Tips data
+  const designTips = [
+    {
+      id: 1,
+      icon: Lightbulb,
+      text: 'Use the 60-30-10 rule for colour schemes',
+    },
+    {
+      id: 2,
+      icon: Lightbulb,
+      text: 'Layer different textures for visual interest',
+    },
+    {
+      id: 3,
+      icon: Lightbulb,
+      text: 'Mix high and low-end pieces',
+    },
   ];
 
-  const TAB_CONTENT: Record<string, React.JSX.Element> = {
-    Studio: <StudioComponent />,
-    MoodBoard: <MoodBoardComponent />,
-    Blog: <BlogComponent />,
-  };
-
+  const recentDesigns = [
+    {
+      id: 1,
+      title: 'Cozy Living Room',
+      style: 'Minimalist',
+      image: require('../../../../assets/images/step1.png'),
+    },
+    {
+      id: 2,
+      title: 'Cozy Living Room',
+      style: 'Minimalist',
+      image: require('../../../../assets/images/step1.png'),
+      isBookmarked: true,
+    },
+    {
+      id: 3,
+      title: 'Cozy Living Room',
+      style: 'Minimalist',
+      image: require('../../../../assets/images/step1.png'),
+    },
+  ];
   return (
-    <Layout activeTab="Home" showHeader={true}>
-      <SafeAreaView style={styles.container}>
-        <ScrollView
-          style={styles.scrollView}
-          showsVerticalScrollIndicator={false}>
-          <View style={styles.heroSection}>
-            <Text style={styles.heroTitle} className="text-red-500">All Things Snug</Text>
-            <Text style={styles.heroSubtitle}>
-              Create beautiful, cozy spaces
-            </Text>
+    <>
+      {/* Welcome Back Card */}
+      <View style={styles.welcomeCard}>
+        <Text style={styles.cardTitle}>Welcome Back!</Text>
+        <Text style={styles.cardSubtitle}>
+          Ready to design your next cozy space?
+        </Text>
 
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity style={styles.startButton}>
-                <Plus size={20} color="#fff" />
-                <Text style={styles.startButtonText}>Start New Design</Text>
-              </TouchableOpacity>
+        <View style={styles.tipsContainer}>
+          {designTips.map((tip, index) => {
+            const Icon = tip.icon;
+            return (
+              <View style={styles.tipItem} key={index}>
+                <Icon size={16} color="#D4A574" style={styles.tipIcon} />
+                <Text style={styles.tipText}>{tip.text}</Text>
+              </View>
+            );
+          })}
+        </View>
+      </View>
+
+      {/* Recent Designs */}
+      <View style={styles.recentSection}>
+        <Text style={styles.sectionTitle}>Recent Design</Text>
+
+        {recentDesigns.map(design => (
+          <TouchableOpacity key={design.id} style={styles.designItem}>
+            <Image source={design.image} style={styles.designImage} />
+            <View style={styles.designInfo}>
+              <Text style={styles.designTitle}>{design.title}</Text>
+              <Text style={styles.designStyle}>{design.style}</Text>
             </View>
-          </View>
-
-          <View style={{backgroundColor: '#FAF9F6', height: '100%'}}>
-            {/* Navigation Tabs */}
-
-            <View style={styles.tabsContainer}>
-              {tabs.map(tab => (
-                <TouchableOpacity
-                  key={tab.id}
-                  style={[
-                    styles.tab,
-                    activeTab === tab.value && styles.activeTab,
-                  ]}
-                  onPress={() => setActiveTab(tab.value)}>
-                  <Text
-                    style={[
-                      styles.tabText,
-                      activeTab === tab.value && styles.activeTabText,
-                    ]}>
-                    {tab.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-
-            {/* {TAB_CONTENT[activeTab] ?? <StudioComponent />} */}
-          </View>
-        </ScrollView>
-      </SafeAreaView>
-    </Layout>
+          </TouchableOpacity>
+        ))}
+      </View>
+    </>
   );
 };
 
@@ -174,7 +178,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   welcomeCard: {
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff',
     marginHorizontal: 20,
     marginBottom: 20,
     paddingHorizontal: 20,
@@ -214,7 +218,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   recentSection: {
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff',
     marginHorizontal: 20,
     marginBottom: 20,
     padding: 20,
@@ -223,6 +227,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   sectionTitle: {
+    fontFamily: 'CormorantGaramond-SemiBold',
     fontSize: 24,
     fontWeight: '600',
     color: '#333',
@@ -234,9 +239,9 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   designImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 8,
+    width: 80,
+    height: 80,
+    borderRadius: 10,
     marginRight: 16,
   },
   designInfo: {
@@ -278,4 +283,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default HomeScreen;
+export default StudioComponent;
