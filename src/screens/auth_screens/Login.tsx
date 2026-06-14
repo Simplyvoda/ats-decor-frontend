@@ -1,5 +1,5 @@
 import {ChevronLeft, LockKeyhole, Mail} from 'lucide-react-native';
-import React from 'react';
+import React, {useState} from 'react';
 import {Controller, useForm} from 'react-hook-form';
 import {Pressable, ScrollView, Text, TextInput, View} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
@@ -7,14 +7,26 @@ import PrimaryButton from '../../components/molecules/PrimaryButton';
 import {goBack, navigateTo} from '../../utils/navigation';
 import {useNavigation} from '@react-navigation/native';
 
+import Toast from 'react-native-toast-message';
+import {
+  ISignInPayload,
+  ISignInResponse,
+} from '../../../interface/auth_user.interface';
+import AuthService from '../../services/AuthService';
+import { useUserContext } from '../../context/UserContext';
+
 type FormData = {
   email: string;
   password: string;
 };
 
 const Login = () => {
+  const { signInUser } = useUserContext();
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const {
     control,
+    reset,
     handleSubmit,
     formState: {errors},
   } = useForm<FormData>({
@@ -26,8 +38,35 @@ const Login = () => {
 
   const navigation = useNavigation();
 
-  const onSubmit = (data: FormData) => {
-    console.log('Form data:', data);
+
+  const onSubmit = async (data: FormData) => {
+    try {
+      setIsSubmitting(true);
+      const res: ISignInResponse = await AuthService.signIn({
+        email: data.email,
+        password: data.password,
+      } as ISignInPayload);
+      await signInUser(res);
+      Toast.show({
+        type: 'success',
+        text1: 'Success',
+        text2: 'Login successful',
+        position: 'bottom',
+      });
+
+      navigateTo(navigation, 'HomeScreen');
+    } catch (err: any) {
+      console.log('Error:', err.response?.data || err.message);
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: err.response?.data?.message || err.message,
+        position: 'bottom',
+      });
+    } finally {
+      setIsSubmitting(false);
+      reset();
+    }
   };
 
   return (
@@ -117,14 +156,18 @@ const Login = () => {
           <Text className="w-full text-right">Forgot password ?</Text>
         </View>
         <View className="w-full flex-1 flex-col space-y-4 mt-20 items-center">
-          <PrimaryButton title="Log In" onPress={handleSubmit(onSubmit)} />
+          <PrimaryButton
+            title="Log In"
+            onPress={handleSubmit(onSubmit)}
+            isSubmitting={isSubmitting}
+          />
 
-          <Text className="w-full text-center self-end">
-            Don't have an account?
+          <View className="w-full flex-row justify-center items-center">
+            <Text>Don't have an account?</Text>
             <Pressable onPress={() => navigateTo(navigation, 'SignUp')}>
-              <Text className="text-brand">Sign Up</Text>
+              <Text className="text-brand ml-2">Sign Up</Text>
             </Pressable>
-          </Text>
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>

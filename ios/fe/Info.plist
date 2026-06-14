@@ -56,5 +56,15 @@
 	<string>Camera access is required to scan the room.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Required to save or share room scans.</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+	<dict>
+		<key>CFBundleURLSchemes</key>
+		<array>
+		<string>atsdecor</string>
+		</array>
+	</dict>
+	</array>
+
 </dict>
 </plist>

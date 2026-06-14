@@ -71,7 +71,7 @@ function AppNavigator(): React.JSX.Element {
   return (
     <Stack.Navigator
       screenOptions={{headerShown: false}}
-      initialRouteName="HomeScreen">
+      initialRouteName="Welcome">
       <Stack.Screen name="Welcome" component={WelcomeScreen} />
       <Stack.Screen name="Steps" component={StepsScreen} />
       <Stack.Screen name="Auth" component={AuthNavigator} />

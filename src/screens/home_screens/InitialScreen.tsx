@@ -14,10 +14,11 @@ import DesignScreen from '../../components/(home)/DesignScreen';
 import ExploreScreen from '../../components/(home)/ExploreScreen';
 import HomeScreen from '../../components/(home)/HomeScreen';
 import NotesScreen from '../../components/(home)/NotesScreen';
+import { useUserContext } from '../../context/UserContext';
 
 
 const HomeLayout = () => {
-
+  const { user } = useUserContext();
   const [activeTab, setActiveTab] = useState<string>('Home');
   const onTabChange = (tabName: string) => {
     setActiveTab(tabName);
@@ -36,7 +37,7 @@ const HomeLayout = () => {
       <SafeAreaView className="flex-1">
         <StatusBar barStyle="dark-content" backgroundColor="transparent" />
 
-        {true && (
+        {user && (
           <View className="flex-row justify-between items-center px-5 py-2 bg-white">
             <View className="flex-row items-center">
               <View className="mr-3">
@@ -48,7 +49,7 @@ const HomeLayout = () => {
               <View>
                 <Text className="text-gray-500 text-sm">Welcome</Text>
                 <Text className="text-gray-800 text-base font-semibold">
-                  Vodina Efem
+                  {user.first_name} {user.last_name}
                 </Text>
               </View>
             </View>

@@ -1,5 +1,5 @@
 import {ChevronLeft, LockKeyhole, Mail, User} from 'lucide-react-native';
-import React from 'react';
+import React, {useState} from 'react';
 import {Controller, useForm} from 'react-hook-form';
 import {
   Image,
@@ -12,8 +12,11 @@ import {
 import {SafeAreaView} from 'react-native-safe-area-context';
 import PrimaryButton from '../../components/molecules/PrimaryButton';
 import {useNavigation} from '@react-navigation/native';
-import {goBack} from '../../utils/navigation';
+import {goBack, navigateTo} from '../../utils/navigation';
 import {images} from '../../../assets/constants/images';
+import AuthService from '../../services/AuthService';
+import {ISignUpPayload} from '../../../interface/auth_user.interface';
+import Toast from 'react-native-toast-message';
 
 type FormData = {
   first_name: string;
@@ -40,9 +43,43 @@ const SignUp = () => {
   });
 
   const navigation = useNavigation();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const onSubmit = (data: FormData) => {
-    console.log('Form data:', data);
+  const onSubmit = async (data: FormData) => {
+    try {
+      setIsSubmitting(true);
+      const res: any = await AuthService.signUp({
+        first_name: data.first_name,
+        last_name: data.last_name,
+        email: data.email,
+        password: data.password,
+      } as ISignUpPayload);
+      Toast.show({
+        type: 'success',
+        text1: 'Success',
+        text2: 'Sign up successful',
+        position: 'bottom',
+      });
+      Toast.show({
+        type: 'info',
+        text1: 'Info',
+        text2: 'Please check your email for verification',
+        position: 'bottom',
+      });
+
+      navigateTo(navigation, 'Login');
+    } catch (err: any) {
+      console.log('Error:', err.response?.data || err.message);
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: err.response?.data?.message || err.message,
+        position: 'bottom',
+      });
+    } finally {
+      setIsSubmitting(false);
+      reset();
+    }
   };
 
   const password = watch('password');
@@ -225,7 +262,11 @@ const SignUp = () => {
           </Text>
         </View>
         <View className="w-full flex-1 flex-col space-y-4 items-center">
-          <PrimaryButton title="Sign Up" onPress={handleSubmit(onSubmit)} />
+          <PrimaryButton
+            title="Sign Up"
+            onPress={handleSubmit(onSubmit)}
+            isSubmitting={isSubmitting}
+          />
 
           <Text className="text-center text-light-gray text-sm">
             Or Sign Up with
@@ -254,7 +295,7 @@ const SignUp = () => {
           <Text className="w-full text-center self-end items-center">
             Already have an account?
             {/* <Pressable onPress={() => navigation.navigate('Login')}> */}
-              <Text className="text-brand">{" "}Log In</Text>
+            <Text className="text-brand"> Log In</Text>
             {/* </Pressable> */}
           </Text>
         </View>
