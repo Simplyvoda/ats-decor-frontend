@@ -1,12 +1,14 @@
 import React, {createContext, useContext, useEffect, useState} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {ISignInResponse} from '../../interface/auth_user.interface';
+import UserService, { IUpdateProfilePayload, IGetProfileResponse } from '../services/UserService';
 
 interface IUser {
   id: string;
   email: string;
   first_name?: string;
   last_name?: string;
+  bio?: string;
 }
 
 interface IUserContext {
@@ -14,6 +16,7 @@ interface IUserContext {
   isLoadingUser: boolean;
   signInUser: (data: ISignInResponse) => Promise<void>;
   logoutUser: () => Promise<void>;
+  updateUser: (payload: IUpdateProfilePayload) => Promise<void>;
 }
 
 const UserContext = createContext<IUserContext | undefined>(undefined);
@@ -29,6 +32,21 @@ export const UserProvider = ({children}: {children: React.ReactNode}) => {
         const storedUser = await AsyncStorage.getItem('user');
         if (storedUser) {
           setUser(JSON.parse(storedUser));
+        }
+        // Try to fetch fresh profile from API
+        try {
+          const freshProfile = await UserService.getProfile();
+          const simplifiedUser: IUser = {
+            id: freshProfile.id,
+            email: freshProfile.email,
+            first_name: freshProfile.first_name,
+            last_name: freshProfile.last_name,
+            bio: freshProfile.bio,
+          };
+          setUser(simplifiedUser);
+          await AsyncStorage.setItem('user', JSON.stringify(simplifiedUser));
+        } catch (err) {
+          console.log('Error fetching fresh profile:', err);
         }
       } catch (err) {
         console.log('Error restoring user:', err);
@@ -56,13 +74,26 @@ export const UserProvider = ({children}: {children: React.ReactNode}) => {
     await AsyncStorage.setItem('session', JSON.stringify(data.data.session));
   };
 
+  const updateUser = async (payload: IUpdateProfilePayload) => {
+    const updatedProfile = await UserService.updateProfile(payload);
+    const simplifiedUser: IUser = {
+      id: updatedProfile.id,
+      email: updatedProfile.email,
+      first_name: updatedProfile.first_name,
+      last_name: updatedProfile.last_name,
+      bio: updatedProfile.bio,
+    };
+    setUser(simplifiedUser);
+    await AsyncStorage.setItem('user', JSON.stringify(simplifiedUser));
+  };
+
   const logoutUser = async () => {
     setUser(null);
     await AsyncStorage.multiRemove(['user', 'token', 'session']);
   };
 
   return (
-    <UserContext.Provider value={{user, isLoadingUser, signInUser, logoutUser}}>
+    <UserContext.Provider value={{user, isLoadingUser, signInUser, logoutUser, updateUser}}>
       {children}
     </UserContext.Provider>
   );
