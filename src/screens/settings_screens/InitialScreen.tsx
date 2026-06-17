@@ -5,7 +5,7 @@ import {
   ScrollView,
   TouchableOpacity,
 } from 'react-native';
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {goBack, navigateTo} from '../../utils/navigation';
 import {useNavigation} from '@react-navigation/native';
@@ -22,6 +22,7 @@ import {images} from '../../../assets/constants/images';
 
 const InitialScreen = () => {
   const navigation = useNavigation();
+  const [searchQuery, setSearchQuery] = useState('');
 
   const iconMap = {
     User,
@@ -71,6 +72,19 @@ const InitialScreen = () => {
     },
   ];
 
+  const filteredSettings = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return settings_data;
+    }
+    const query = searchQuery.toLowerCase();
+    return settings_data.filter(
+      (section) =>
+        section.title.toLowerCase().includes(query) ||
+        section.subtitle.toLowerCase().includes(query) ||
+        section.tags.some(tag => tag.toLowerCase().includes(query))
+    );
+  }, [searchQuery]);
+
   return (
     <SafeAreaView className="flex-1 bg-offWhite gap-5">
       <View className="bg-brand h-32 w-full flex flex-row justify-start  items-center pl-5">
@@ -107,9 +121,12 @@ const InitialScreen = () => {
             autoCapitalize="none"
             placeholderTextColor="#9ca3af"
             placeholder="Search settings"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
           />
         </View>
-        {settings_data.map((section, i) => {
+        {filteredSettings.length > 0 ? (
+          filteredSettings.map((section, i) => {
           const Icon = iconMap[section?.icon as keyof typeof iconMap];
           return (
             <TouchableOpacity
@@ -144,7 +161,14 @@ const InitialScreen = () => {
               </View>
             </TouchableOpacity>
           );
-        })}
+        })
+        ) : (
+          <View className="flex-1 items-center justify-center py-10">
+            <Text className="text-[#2C2C2C80] text-center font-dm-sans">
+              No settings found matching "{searchQuery}"
+            </Text>
+          </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
