@@ -1,19 +1,5 @@
 import api from '../config/api';
-
-export interface IUpdateProfilePayload {
-  first_name?: string;
-  last_name?: string;
-  email?: string;
-  bio?: string;
-}
-
-export interface IGetProfileResponse {
-  id: string;
-  email: string;
-  first_name?: string;
-  last_name?: string;
-  bio?: string;
-}
+import { IUpdateProfilePayload, IGetProfileResponse } from '../../interface/user_profile.interface';
 
 const UserService = {
   async getProfile(): Promise<IGetProfileResponse> {

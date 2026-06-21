@@ -9,6 +9,7 @@ interface IUser {
   first_name?: string;
   last_name?: string;
   bio?: string;
+  design_style?: string;
 }
 
 interface IUserContext {
@@ -82,6 +83,7 @@ export const UserProvider = ({children}: {children: React.ReactNode}) => {
       first_name: updatedProfile.first_name,
       last_name: updatedProfile.last_name,
       bio: updatedProfile.bio,
+      design_style: updatedProfile.design_style,
     };
     setUser(simplifiedUser);
     await AsyncStorage.setItem('user', JSON.stringify(simplifiedUser));

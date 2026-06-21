@@ -354,10 +354,19 @@ const ProfilePreference = () => {
         <Text className="text-[14px] font-dm-sans font-medium mt-1 mb-2 text-[#444]">
           Add Personal Design Style
         </Text>
-        <TextInput
-          className="border border-[#F1EADC] bg-[#FFFDF8] rounded-lg py-2.5 px-3 text-[14px]"
-          placeholder="e.g. tech minimalist, bohemian, Scandinavian..."
-          placeholderTextColor="#2C2C2C80"
+        <Controller
+          control={control}
+          name="design_style"
+          render={({field: {onChange, onBlur, value}}) => (
+            <TextInput
+              className="border border-[#F1EADC] bg-[#FFFDF8] rounded-lg py-2.5 px-3 text-[14px]"
+              placeholder="e.g. tech minimalist, bohemian, Scandinavian..."
+              placeholderTextColor="#2C2C2C80"
+              value={value}
+              onBlur={onBlur}
+              onChangeText={onChange}
+            />
+          )}
         />
       </View>
 
