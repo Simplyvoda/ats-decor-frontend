@@ -4,7 +4,6 @@ import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {useNavigation} from '@react-navigation/native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {
-  Bell,
   Compass,
   FileText,
   Home,
@@ -56,7 +55,9 @@ function TabHeader() {
           <View>
             <Text style={{color: '#6b7280', fontSize: 12}}>Welcome!</Text>
             <Text style={{color: '#1f2937', fontSize: 16, fontWeight: '600'}}>
-              {user?.first_name} {user?.last_name}
+              {user?.first_name && user?.last_name
+                ? `${user.first_name} ${user.last_name}`
+                : user?.email ?? ''}
             </Text>
           </View>
         </TouchableOpacity>

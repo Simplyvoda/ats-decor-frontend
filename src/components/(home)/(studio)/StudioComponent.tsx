@@ -1,48 +1,61 @@
-import React from 'react';
-import {View, Text, TouchableOpacity, Image, StyleSheet} from 'react-native';
-import {Lightbulb} from 'lucide-react-native';
+import React, {useEffect, useState} from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import {Lightbulb, Trash2} from 'lucide-react-native';
+import {useNavigation} from '@react-navigation/native';
+import DesignService from '../../../services/DesignService';
+import {IDesign} from '../../../../interface/design.interface';
+
+const designTips = [
+  {id: 1, text: 'Use the 60-30-10 rule for colour schemes'},
+  {id: 2, text: 'Layer different textures for visual interest'},
+  {id: 3, text: 'Mix high and low-end pieces'},
+];
+
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
+}
 
 const StudioComponent = () => {
-  // Tips data
-  const designTips = [
-    {
-      id: 1,
-      icon: Lightbulb,
-      text: 'Use the 60-30-10 rule for colour schemes',
-    },
-    {
-      id: 2,
-      icon: Lightbulb,
-      text: 'Layer different textures for visual interest',
-    },
-    {
-      id: 3,
-      icon: Lightbulb,
-      text: 'Mix high and low-end pieces',
-    },
-  ];
+  const navigation = useNavigation();
+  const [designs, setDesigns] = useState<IDesign[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const recentDesigns = [
-    {
-      id: 1,
-      title: 'Cozy Living Room',
-      style: 'Minimalist',
-      image: require('../../../../assets/images/step1.png'),
-    },
-    {
-      id: 2,
-      title: 'Cozy Living Room',
-      style: 'Minimalist',
-      image: require('../../../../assets/images/step1.png'),
-      isBookmarked: true,
-    },
-    {
-      id: 3,
-      title: 'Cozy Living Room',
-      style: 'Minimalist',
-      image: require('../../../../assets/images/step1.png'),
-    },
-  ];
+  useEffect(() => {
+    DesignService.getDesigns()
+      .then(res => setDesigns(res.data))
+      .catch(err => console.warn('Failed to load designs:', err?.message ?? err))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const handleDelete = (design: IDesign) => {
+    Alert.alert('Delete scan', `Remove "${design.name}"?`, [
+      {text: 'Cancel', style: 'cancel'},
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await DesignService.deleteDesign(design.id);
+            setDesigns(prev => prev.filter(d => d.id !== design.id));
+          } catch (err: any) {
+            Alert.alert('Error', err?.message ?? 'Failed to delete');
+          }
+        },
+      },
+    ]);
+  };
+
   return (
     <>
       {/* Welcome Back Card */}
@@ -51,17 +64,13 @@ const StudioComponent = () => {
         <Text style={styles.cardSubtitle}>
           Ready to design your next cozy space?
         </Text>
-
         <View style={styles.tipsContainer}>
-          {designTips.map((tip, index) => {
-            const Icon = tip.icon;
-            return (
-              <View style={styles.tipItem} key={index}>
-                <Icon size={16} color="#D4A574" style={styles.tipIcon} />
-                <Text style={styles.tipText}>{tip.text}</Text>
-              </View>
-            );
-          })}
+          {designTips.map(tip => (
+            <View style={styles.tipItem} key={tip.id}>
+              <Lightbulb size={16} color="#D4A574" style={styles.tipIcon} />
+              <Text style={styles.tipText}>{tip.text}</Text>
+            </View>
+          ))}
         </View>
       </View>
 
@@ -69,116 +78,49 @@ const StudioComponent = () => {
       <View style={styles.recentSection}>
         <Text style={styles.sectionTitle}>Recent Design</Text>
 
-        {recentDesigns.map(design => (
-          <TouchableOpacity key={design.id} style={styles.designItem}>
-            <Image source={design.image} style={styles.designImage} />
-            <View style={styles.designInfo}>
-              <Text style={styles.designTitle}>{design.title}</Text>
-              <Text style={styles.designStyle}>{design.style}</Text>
-            </View>
-          </TouchableOpacity>
-        ))}
+        {loading ? (
+          <ActivityIndicator color="#C1A36A" style={{marginVertical: 20}} />
+        ) : designs.length === 0 ? (
+          <Text style={styles.emptyText}>
+            No saved scans yet — scan a room to get started.
+          </Text>
+        ) : (
+          designs.map(design => (
+            <TouchableOpacity
+              key={design.id}
+              style={styles.designItem}
+              onPress={() =>
+                (navigation as any).navigate('ARViewer', {
+                  modelUrl: design.file_url,
+                })
+              }
+              activeOpacity={0.7}>
+              <View style={styles.designIcon}>
+                <Text style={styles.designIconText}>3D</Text>
+              </View>
+              <View style={styles.designInfo}>
+                <Text style={styles.designTitle} numberOfLines={1}>
+                  {design.name}
+                </Text>
+                <Text style={styles.designStyle}>
+                  {formatDate(design.createdAt)}
+                </Text>
+              </View>
+              <TouchableOpacity
+                onPress={() => handleDelete(design)}
+                hitSlop={{top: 8, bottom: 8, left: 8, right: 8}}>
+                <Trash2 size={18} color="#ccc" />
+              </TouchableOpacity>
+            </TouchableOpacity>
+          ))
+        )}
       </View>
     </>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#ffffff',
-  },
-  welcomeText: {
-    fontSize: 14,
-    color: '#666',
-  },
-  nameText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-  },
-  notificationButton: {
-    position: 'relative',
-  },
-  notificationDot: {
-    position: 'absolute',
-    top: -2,
-    right: -2,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#FF4444',
-  },
-  scrollView: {
-    flex: 1,
-  },
-  heroSection: {
-    backgroundColor: '#C1A36A',
-    paddingHorizontal: 20,
-    paddingVertical: 20,
-    borderBottomLeftRadius: 0,
-    borderBottomRightRadius: 0,
-  },
-  heroTitle: {
-    fontSize: 32,
-    fontWeight: '300',
-    fontFamily: 'CormorantGaramond-SemiBold',
-    color: '#fff',
-    marginBottom: 8,
-  },
-  heroSubtitle: {
-    fontSize: 16,
-    fontFamily: 'DMSans-Regular',
-    color: '#fff',
-    opacity: 0.9,
-    marginBottom: 30,
-  },
-  buttonContainer: {
-    backgroundColor: '#fff',
-    padding: 10,
-    borderRadius: 12,
-  },
-  startButton: {
-    backgroundColor: '#C1A36A',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 16,
-    borderRadius: 12,
-    marginHorizontal: 10,
-  },
-  startButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '500',
-    marginLeft: 8,
-  },
-  tabsContainer: {
-    flexDirection: 'row',
-    paddingHorizontal: 20,
-    paddingVertical: 20,
-    // backgroundColor: '#fff',
-    marginLeft: 'auto',
-    marginRight: 'auto',
-  },
-  tab: {
-    marginRight: 30,
-    paddingBottom: 5,
-  },
-  activeTab: {
-    borderBottomWidth: 2,
-    borderBottomColor: '#D4A574',
-  },
-  tabText: {
-    fontSize: 16,
-    color: '#999',
-  },
-  activeTabText: {
-    color: '#333',
-    fontWeight: '500',
-  },
   welcomeCard: {
-    // backgroundColor: '#fff',
     marginHorizontal: 20,
     marginBottom: 20,
     paddingHorizontal: 20,
@@ -218,7 +160,6 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   recentSection: {
-    // backgroundColor: '#fff',
     marginHorizontal: 20,
     marginBottom: 20,
     padding: 20,
@@ -233,16 +174,31 @@ const styles = StyleSheet.create({
     color: '#333',
     marginBottom: 20,
   },
+  emptyText: {
+    fontSize: 14,
+    color: '#999',
+    fontFamily: 'DMSans-Regular',
+    textAlign: 'center',
+    paddingVertical: 16,
+  },
   designItem: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 16,
   },
-  designImage: {
+  designIcon: {
     width: 80,
     height: 80,
     borderRadius: 10,
     marginRight: 16,
+    backgroundColor: '#f3f4f6',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  designIconText: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#C1A36A',
   },
   designInfo: {
     flex: 1,
@@ -256,30 +212,6 @@ const styles = StyleSheet.create({
   designStyle: {
     fontSize: 14,
     color: '#999',
-  },
-  bookmarkIcon: {
-    marginLeft: 12,
-  },
-  bottomNav: {
-    flexDirection: 'row',
-    backgroundColor: '#fff',
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
-  },
-  navItem: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  navText: {
-    fontSize: 12,
-    color: '#999',
-    marginTop: 4,
-  },
-  activeNavText: {
-    color: '#D4A574',
   },
 });
 

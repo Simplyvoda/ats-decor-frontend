@@ -28,7 +28,13 @@ export const UserProvider = ({children}: {children: React.ReactNode}) => {
       try {
         const storedUser = await AsyncStorage.getItem('user');
         if (storedUser) {
-          setUser(JSON.parse(storedUser));
+          const parsed: IUser = JSON.parse(storedUser);
+          // Clear stale sessions missing name data so the user re-authenticates
+          if (!parsed.first_name || !parsed.last_name) {
+            await AsyncStorage.multiRemove(['user', 'token', 'session']);
+          } else {
+            setUser(parsed);
+          }
         }
       } catch (err) {
         console.log('Error restoring user:', err);

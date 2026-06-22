@@ -2,7 +2,7 @@ import UIKit
 import RealityKit
 
 @objc(RealityKitView)
-class RealityKitView: UIView {
+class RealityKitView: UIView, UIGestureRecognizerDelegate {
 
     private var arView: ARView!
 
@@ -14,6 +14,7 @@ class RealityKitView: UIView {
 
     private var pendingFurniture: Entity?
     private var placedFurniture: [Entity] = []
+    private var selectedFurniture: Entity?
 
     // Prop set by React Native
     @objc var modelUrl: NSString? {
@@ -130,17 +131,48 @@ class RealityKitView: UIView {
         let pinch = UIPinchGestureRecognizer(target: self, action: #selector(handlePinch(_:)))
         arView.addGestureRecognizer(pinch)
 
-        // Tap to place furniture on the floor
         let tap = UITapGestureRecognizer(target: self, action: #selector(handleTap(_:)))
         arView.addGestureRecognizer(tap)
+
+        let rotation = UIRotationGestureRecognizer(target: self, action: #selector(handleRotation(_:)))
+        rotation.delegate = self
+        arView.addGestureRecognizer(rotation)
+    }
+
+    // Allow pinch and rotation gestures to fire simultaneously
+    func gestureRecognizer(_ g: UIGestureRecognizer,
+                           shouldRecognizeSimultaneouslyWith other: UIGestureRecognizer) -> Bool {
+        return (g is UIRotationGestureRecognizer && other is UIPinchGestureRecognizer) ||
+               (g is UIPinchGestureRecognizer   && other is UIRotationGestureRecognizer)
     }
 
     @objc private func handleTap(_ gesture: UITapGestureRecognizer) {
-        guard let pending = pendingFurniture else { return }
-
         let location = gesture.location(in: arView)
-        guard let ray = arView.ray(through: location) else { return }
 
+        guard let pending = pendingFurniture else {
+            // Nothing pending — try to select a placed piece for rotation
+            guard let ray = arView.ray(through: location) else { return }
+            let hits = arView.scene.raycast(
+                from: ray.origin,
+                to: ray.origin + ray.direction * 100,
+                query: .nearest,
+                mask: .all,
+                relativeTo: nil
+            )
+            if let hit = hits.first {
+                for furniture in placedFurniture {
+                    if isDescendant(hit.entity, of: furniture) {
+                        selectedFurniture = furniture
+                        showToast("Twist two fingers to rotate")
+                        return
+                    }
+                }
+            }
+            selectedFurniture = nil
+            return
+        }
+
+        guard let ray = arView.ray(through: location) else { return }
         let results = arView.scene.raycast(
             from: ray.origin,
             to: ray.origin + ray.direction * 100,
@@ -155,14 +187,50 @@ class RealityKitView: UIView {
         }
 
         let placed = pending.clone(recursive: true)
-        placed.position = hit.position
 
+        // Scale to a sensible real-world size (chair: ~0.6 m wide).
+        // RoomPlan exports in metres; USDZ assets can have arbitrary units.
+        let localBounds = placed.visualBounds(relativeTo: placed)
+        let currentWidth = localBounds.extents.x
+        if currentWidth > 0.001 {
+            let targetWidth: Float = 0.6
+            let s = targetWidth / currentWidth
+            placed.scale = SIMD3<Float>(repeating: s)
+            // Snap bottom to floor: min.y is bottom in local space; multiply by scale for world offset
+            placed.position = SIMD3<Float>(0, -localBounds.min.y * s, 0)
+        } else {
+            placed.position = .zero
+        }
+
+        // Anchor sits at the floor hit point; entity position is relative to it
         let anchor = AnchorEntity(world: hit.position)
+        placed.generateCollisionShapes(recursive: true)
         anchor.addChild(placed)
         arView.scene.addAnchor(anchor)
         placedFurniture.append(placed)
+        selectedFurniture = placed
 
+        // Clear pending so next tap doesn't place again
+        pendingFurniture = nil
+
+        showToast("Twist two fingers to rotate")
         print("🪑 Placed furniture — total:", placedFurniture.count)
+    }
+
+    @objc private func handleRotation(_ gesture: UIRotationGestureRecognizer) {
+        guard let selected = selectedFurniture, gesture.state == .changed else { return }
+        let delta = Float(gesture.rotation)
+        selected.transform.rotation *= simd_quatf(angle: -delta, axis: [0, 1, 0])
+        gesture.rotation = 0
+    }
+
+    private func isDescendant(_ entity: Entity, of ancestor: Entity) -> Bool {
+        var current: Entity? = entity
+        while let e = current {
+            if e === ancestor { return true }
+            current = e.parent
+        }
+        return false
     }
 
     @objc private func handlePan(_ gesture: UIPanGestureRecognizer) {
