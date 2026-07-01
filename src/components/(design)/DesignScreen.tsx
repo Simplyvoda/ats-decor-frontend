@@ -32,7 +32,9 @@ const DesignScreen = () => {
           </View>
         </TouchableOpacity>
 
-        <View className="px-3 py-5 flex flex-row justify-start items-center shadow-sm rounded-[16px] bg-white">
+        <TouchableOpacity
+          onPress={() => navigateTo(navigation, 'ChooseModel')}
+          className="px-3 py-5 flex flex-row justify-start items-center shadow-slate-600 shadow-sm rounded-[16px] bg-white">
           <View className="bg-[#0E920E] w-[30px] h-[80px] rounded-[14px] flex items-center justify-center">
             <LayoutPanelTop color={'white'} />
           </View>
@@ -42,7 +44,7 @@ const DesignScreen = () => {
               Choose a house model and start designing⁠
             </Text>
           </View>
-        </View>
+        </TouchableOpacity>
 
         <View className="px-3 py-8 flex flex-row justify-start items-center  rounded-[16px] bg-transparent border-[1px] border-[#2C2C2C33]">
           <View className="ml-5">

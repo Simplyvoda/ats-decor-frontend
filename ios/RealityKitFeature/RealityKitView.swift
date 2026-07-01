@@ -19,9 +19,20 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
     // Prop set by React Native
     @objc var modelUrl: NSString? {
         didSet {
-            guard let urlStr = modelUrl as String?, let url = URL(string: urlStr) else { return }
+            guard let urlStr = modelUrl as String?, let url = resolveURL(urlStr) else { return }
             loadRoom(from: url)
         }
+    }
+
+    // Resolves "bundle://name.usdz" (app bundle), "https://..." (remote), or "file://..." (local) into a loadable URL.
+    private func resolveURL(_ urlString: String) -> URL? {
+        if urlString.hasPrefix("bundle://") {
+            let filename = String(urlString.dropFirst("bundle://".count))
+            let name = (filename as NSString).deletingPathExtension
+            let ext = (filename as NSString).pathExtension
+            return Bundle.main.url(forResource: name, withExtension: ext.isEmpty ? nil : ext)
+        }
+        return URL(string: urlString)
     }
 
     override init(frame: CGRect) {
@@ -93,19 +104,7 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
     // MARK: - Furniture
 
     func loadFurniture(urlString: String) {
-        let url: URL?
-
-        if urlString.hasPrefix("bundle://") {
-            // Resolve from app bundle: "bundle://chair.usdz" → Bundle.main/.../chair.usdz
-            let filename = String(urlString.dropFirst("bundle://".count))
-            let name = (filename as NSString).deletingPathExtension
-            let ext = (filename as NSString).pathExtension
-            url = Bundle.main.url(forResource: name, withExtension: ext.isEmpty ? nil : ext)
-        } else {
-            url = URL(string: urlString)
-        }
-
-        guard let resolvedURL = url else {
+        guard let resolvedURL = resolveURL(urlString) else {
             print("❌ Could not resolve furniture URL:", urlString)
             return
         }

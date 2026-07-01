@@ -17,6 +17,7 @@ import Shopping from '../screens/settings_screens/Shopping';
 import SecurityPrivacy from '../screens/settings_screens/SecurityPrivacy';
 import HelpFeedback from '../screens/settings_screens/HelpFeedback';
 import ScanScreen from '../screens/ScanScreen';
+import ChooseModelScreen from '../screens/ChooseModelScreen';
 import ARViewerScreen from '../screens/ARViewerScreen';
 import BlogPostScreen from '../screens/home_screens/blog/BlogPostScreen';
 import HomeTabNavigator from './HomeTabNavigator';
@@ -77,6 +78,7 @@ function AppNavigator(): React.JSX.Element {
           <Stack.Screen name="HomeTabs" component={HomeTabNavigator} />
           {/* Full-screen flows pushed on top of the tab bar */}
           <Stack.Screen name="ScanScreen" component={ScanScreen} />
+          <Stack.Screen name="ChooseModel" component={ChooseModelScreen} />
           <Stack.Screen name="ARViewer" component={ARViewerScreen} />
           <Stack.Screen name="Settings" component={SettingsNavigator} />
           <Stack.Screen name="Moodboards" component={ViewMoodboards} />
