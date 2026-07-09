@@ -26,6 +26,8 @@
 		A02821672EC8AB5300F31026 /* RoomplanView.m in Sources */ = {isa = PBXBuildFile; fileRef = A02821662EC8AB5300F31026 /* RoomplanView.m */; };
 		A0679A322F33B975002EF03A /* RealityKitModule.m in Sources */ = {isa = PBXBuildFile; fileRef = A0679A302F33B975002EF03A /* RealityKitModule.m */; };
 		A0679A332F33B975002EF03A /* RealityKitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0679A312F33B975002EF03A /* RealityKitViewController.swift */; };
+		A0D618392FF648670005B6BC /* Polycam_Room_plan.usdz in Resources */ = {isa = PBXBuildFile; fileRef = A0D618382FF648670005B6BC /* Polycam_Room_plan.usdz */; };
+		A0D6183B2FFFA3CB0005B6BC /* room_apartment_2.usdz in Resources */ = {isa = PBXBuildFile; fileRef = A0D6183A2FFFA3CB0005B6BC /* room_apartment_2.usdz */; };
 		CEA2952313CD45C0B7E58240 /* Colors.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5C452F58C2DC42B2BD956E2D /* Colors.xcassets */; };
 		F2DBCCAAE06C42F3BBAD6361 /* BootSplash.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E8317B5416F649B5BC4CD939 /* BootSplash.storyboard */; };
 /* End PBXBuildFile section */
@@ -53,6 +55,8 @@
 		A0679A302F33B975002EF03A /* RealityKitModule.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RealityKitModule.m; sourceTree = "<group>"; };
 		A0679A312F33B975002EF03A /* RealityKitViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RealityKitViewController.swift; sourceTree = "<group>"; };
 		A0A60AD22EC8E4380095C3EB /* fe-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "fe-Bridging-Header.h"; sourceTree = "<group>"; };
+		A0D618382FF648670005B6BC /* Polycam_Room_plan.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = Polycam_Room_plan.usdz; sourceTree = "<group>"; };
+		A0D6183A2FFFA3CB0005B6BC /* room_apartment_2.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = room_apartment_2.usdz; sourceTree = "<group>"; };
 		B117C1DDF4102B1971873677 /* Pods-fe.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-fe.debug.xcconfig"; path = "Target Support Files/Pods-fe/Pods-fe.debug.xcconfig"; sourceTree = "<group>"; };
 		E1AAB0AC09FFF17147F5A577 /* Pods-fe.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-fe.release.xcconfig"; path = "Target Support Files/Pods-fe/Pods-fe.release.xcconfig"; sourceTree = "<group>"; };
 		E8317B5416F649B5BC4CD939 /* BootSplash.storyboard */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = BootSplash.storyboard; path = fe/BootSplash.storyboard; sourceTree = "<group>"; };
@@ -118,6 +122,8 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
+				A0D6183A2FFFA3CB0005B6BC /* room_apartment_2.usdz */,
+				A0D618382FF648670005B6BC /* Polycam_Room_plan.usdz */,
 				A016CC132FDA3B1B00C215B3 /* test_chair.usdz */,
 				A0679A2F2F33B975002EF03A /* RealityKitFeature */,
 				A0A60AD22EC8E4380095C3EB /* fe-Bridging-Header.h */,
@@ -230,7 +236,9 @@
 				A016CC142FDA3B1B00C215B3 /* test_chair.usdz in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				51DC9810477F8FC2683D429F /* PrivacyInfo.xcprivacy in Resources */,
+				A0D618392FF648670005B6BC /* Polycam_Room_plan.usdz in Resources */,
 				F2DBCCAAE06C42F3BBAD6361 /* BootSplash.storyboard in Resources */,
+				A0D6183B2FFFA3CB0005B6BC /* room_apartment_2.usdz in Resources */,
 				CEA2952313CD45C0B7E58240 /* Colors.xcassets in Resources */,
 				58027BFBC61B45D0A14FE933 /* CormorantGaramond-Medium.ttf in Resources */,
 				566E3793A2904823BDFA927B /* DMSans-Medium.ttf in Resources */,

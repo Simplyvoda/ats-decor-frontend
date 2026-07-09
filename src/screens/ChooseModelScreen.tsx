@@ -52,10 +52,19 @@ export default function ChooseModelScreen() {
       style={styles.card}
       onPress={() => handleSelectTemplate(item)}
       activeOpacity={0.7}>
-      <Image source={{uri: item.image_url}} style={styles.thumbnail} />
+      {item.image_url ? (
+        <Image source={{uri: item.image_url}} style={styles.thumbnail} />
+      ) : (
+        <View style={[styles.thumbnail, styles.thumbnailPlaceholder]}>
+          <Text style={styles.placeholderInitial}>{item.title[0]}</Text>
+        </View>
+      )}
       <Text style={styles.title} numberOfLines={1}>
         {item.title}
       </Text>
+      {item.type ? (
+        <Text style={styles.typeTag}>{item.type.replace(/-/g, ' ')}</Text>
+      ) : null}
     </TouchableOpacity>
   );
 
@@ -132,5 +141,12 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     backgroundColor: '#f0f0f0',
   },
+  thumbnailPlaceholder: {
+    backgroundColor: '#E8E0D0',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  placeholderInitial: {fontSize: 40, fontWeight: '700', color: '#C4A962'},
   title: {marginTop: 8, fontSize: 14, color: '#1a1a1a', textAlign: 'center'},
+  typeTag: {fontSize: 11, color: '#999', marginTop: 2, textTransform: 'capitalize'},
 });
