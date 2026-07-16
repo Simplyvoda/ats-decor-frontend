@@ -20,6 +20,7 @@ import ScanScreen from '../screens/ScanScreen';
 import ChooseModelScreen from '../screens/ChooseModelScreen';
 import ARViewerScreen from '../screens/ARViewerScreen';
 import BlogPostScreen from '../screens/home_screens/blog/BlogPostScreen';
+import CreateNoteScreen from '../components/(notes)/CreateNoteScreen';
 import HomeTabNavigator from './HomeTabNavigator';
 import {useUserContext} from '../context/UserContext';
 
@@ -83,6 +84,7 @@ function AppNavigator(): React.JSX.Element {
           <Stack.Screen name="Settings" component={SettingsNavigator} />
           <Stack.Screen name="Moodboards" component={ViewMoodboards} />
           <Stack.Screen name="BlogPost" component={BlogPostScreen} />
+          <Stack.Screen name="CreateNote" component={CreateNoteScreen} />
         </>
       ) : (
         // ── Unauthenticated ────────────────────────────────────────────────

@@ -21,4 +21,22 @@ export const loadFurnitureCommand = (ref: React.RefObject<any>, urlString: strin
   );
 };
 
+// Toggle between the normal orbit view and a top-down (floor plan) view.
+export const toggleTopViewCommand = (ref: React.RefObject<any>) => {
+  UIManager.dispatchViewManagerCommand(
+    findNodeHandle(ref.current),
+    UIManager.getViewManagerConfig('RealityKitView').Commands.toggleTopView,
+    [],
+  );
+};
+
+// Reset the camera back to its initial position inside the room.
+export const resetCameraCommand = (ref: React.RefObject<any>) => {
+  UIManager.dispatchViewManagerCommand(
+    findNodeHandle(ref.current),
+    UIManager.getViewManagerConfig('RealityKitView').Commands.resetCamera,
+    [],
+  );
+};
+
 export default RealityKitNativeView;

@@ -1,4 +1,4 @@
-import {ChevronLeft, Eye, MoreVertical, RotateCcw, Settings, X} from 'lucide-react-native';
+import {ChevronLeft, Eye, MoreVertical, NotebookPen, RotateCcw, Settings, X} from 'lucide-react-native';
 import React, {useRef, useState} from 'react';
 import {
   Animated,
@@ -15,6 +15,8 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import RealityKitNativeView, {
   loadFurnitureCommand,
+  resetCameraCommand,
+  toggleTopViewCommand,
 } from '../components/RoomScanner/RealityKitView.native';
 import {images} from '../../assets/constants/images';
 
@@ -136,6 +138,7 @@ export default function ARViewerScreen() {
   const realityKitRef = useRef(null);
   const [activeCategory, setActiveCategory] =
     useState<FurnitureCategory | null>(null);
+  const [showToolsMenu, setShowToolsMenu] = useState(false);
 
   const sheetAnim = useRef(new Animated.Value(SHEET_PEEK)).current;
   const isExpanded = useRef(false);
@@ -239,7 +242,9 @@ export default function ARViewerScreen() {
           {/* Right side: tool card + reset */}
           <View style={styles.rightSide} pointerEvents="box-none">
             <View style={styles.toolCard}>
-              <TouchableOpacity style={styles.toolBtn}>
+              <TouchableOpacity
+                style={styles.toolBtn}
+                onPress={() => toggleTopViewCommand(realityKitRef)}>
                 <Eye color="#C4A962" size={20} />
               </TouchableOpacity>
               <View style={styles.toolDivider} />
@@ -247,12 +252,31 @@ export default function ARViewerScreen() {
                 <Settings color="#C4A962" size={20} />
               </TouchableOpacity>
               <View style={styles.toolDivider} />
-              <TouchableOpacity style={styles.toolBtn}>
+              <TouchableOpacity
+                style={styles.toolBtn}
+                onPress={() => setShowToolsMenu(v => !v)}>
                 <MoreVertical color="#C4A962" size={20} />
               </TouchableOpacity>
             </View>
 
-            <TouchableOpacity style={styles.resetBtn}>
+            {/* 3-dot dropdown menu */}
+            {showToolsMenu && (
+              <View style={styles.toolsMenu}>
+                <TouchableOpacity
+                  style={styles.toolsMenuItem}
+                  onPress={() => {
+                    setShowToolsMenu(false);
+                    navigation.navigate('CreateNote' as never);
+                  }}>
+                  <NotebookPen color="#C4A962" size={18} />
+                  <Text style={styles.toolsMenuText}>Notes</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            <TouchableOpacity
+              style={styles.resetBtn}
+              onPress={() => resetCameraCommand(realityKitRef)}>
               <RotateCcw color="#333" size={18} />
             </TouchableOpacity>
           </View>
@@ -351,6 +375,24 @@ const styles = StyleSheet.create({
   },
   toolBtn: {width: 44, height: 40, alignItems: 'center', justifyContent: 'center'},
   toolDivider: {height: 1, backgroundColor: '#f0f0f0', marginHorizontal: 8},
+  toolsMenu: {
+    backgroundColor: 'white',
+    borderRadius: 14,
+    paddingVertical: 4,
+    paddingHorizontal: 4,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    elevation: 8,
+  },
+  toolsMenuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  toolsMenuText: {fontSize: 15, color: '#333', marginLeft: 10},
   resetBtn: {
     width: 44,
     height: 44,
