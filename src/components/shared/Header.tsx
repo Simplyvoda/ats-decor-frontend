@@ -8,15 +8,18 @@ interface HeaderAction {
 }
 
 interface HeaderProps {
+  title?: string;
   subtitle?: string;
   action?: HeaderAction;
 }
 
-const SharedHeader = ({subtitle, action}: HeaderProps) => {
+const SharedHeader = ({title, subtitle, action}: HeaderProps) => {
   return (
-    <View className="bg-brand px-5 pt-6 pb-2 h-[160px] relative flex flex-col" style={styles.container}>
+    <View
+      className="bg-brand px-5 pt-6 pb-2 h-[160px] relative flex flex-col"
+      style={styles.container}>
       <Text className="font-cormorant text-[36px] text-white mb-1.5">
-        PlaDomus
+        {title ? title : 'PlaDomus'}
       </Text>
 
       {subtitle && (

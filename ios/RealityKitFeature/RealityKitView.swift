@@ -1,10 +1,18 @@
 import UIKit
 import RealityKit
+import CryptoKit
+import React
 
 @objc(RealityKitView)
 class RealityKitView: UIView, UIGestureRecognizerDelegate {
 
     private var arView: ARView!
+
+    // Fired with {path} after captureSnapshot(), or {error} on failure
+    @objc var onSnapshotReady: RCTDirectEventBlock?
+
+    // Fired with {selected: Bool} whenever furniture selection changes
+    @objc var onFurnitureSelectionChanged: RCTDirectEventBlock?
 
     private var yaw: Float = 0
     private var pitch: Float = 0
@@ -57,12 +65,33 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
         setupGestures()
     }
 
+    // Remote https models are downloaded once and cached; local URLs pass through.
+    private func localFileURL(for url: URL) async throws -> URL {
+        guard url.scheme == "https" || url.scheme == "http" else { return url }
+
+        let caches = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+        let modelsDir = caches.appendingPathComponent("models", isDirectory: true)
+        try FileManager.default.createDirectory(at: modelsDir, withIntermediateDirectories: true)
+
+        let digest = SHA256.hash(data: Data(url.absoluteString.utf8))
+        let hex = digest.map { String(format: "%02x", $0) }.joined().prefix(16)
+        let dest = modelsDir.appendingPathComponent("\(hex)_\(url.lastPathComponent)")
+
+        if FileManager.default.fileExists(atPath: dest.path) { return dest }
+
+        let (tmp, _) = try await URLSession.shared.download(from: url)
+        try? FileManager.default.removeItem(at: dest)
+        try FileManager.default.moveItem(at: tmp, to: dest)
+        return dest
+    }
+
     // MARK: - Room Loading
 
     func loadRoom(from url: URL) {
         Task { @MainActor in
             do {
-                let entity = try await Entity.load(contentsOf: url)
+                let localURL = try await self.localFileURL(for: url)
+                let entity = try await Entity.load(contentsOf: localURL)
                 let bounds = entity.visualBounds(relativeTo: nil)
                 entity.position -= bounds.center
 
@@ -183,6 +212,54 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
         return nil
     }
 
+    // MARK: - Furniture Selection
+
+    // All selection changes go through here so React Native can mirror the
+    // state (e.g. show a delete button while something is selected).
+    private func setSelectedFurniture(_ entity: Entity?) {
+        let changed = selectedFurniture !== entity
+        selectedFurniture = entity
+        if changed {
+            onFurnitureSelectionChanged?(["selected": entity != nil])
+        }
+    }
+
+    func removeSelectedFurniture() {
+        guard let selected = selectedFurniture else { return }
+        if let anchor = selected.parent as? AnchorEntity {
+            arView.scene.removeAnchor(anchor)
+        } else {
+            selected.removeFromParent()
+        }
+        placedFurniture.removeAll { $0 === selected }
+        setSelectedFurniture(nil)
+        showToast("Removed")
+        print("🗑️ Furniture removed — remaining:", placedFurniture.count)
+    }
+
+    // MARK: - Snapshot
+
+    // Captures the current scene to a PNG in the temp dir and reports the
+    // file path back to React Native via onSnapshotReady.
+    func captureSnapshot() {
+        arView.snapshot(saveToHDR: false) { [weak self] image in
+            guard let self = self else { return }
+            guard let image = image, let data = image.pngData() else {
+                self.onSnapshotReady?(["error": "Snapshot capture failed"])
+                return
+            }
+            let filename = "design_snapshot_\(Int(Date().timeIntervalSince1970 * 1000)).png"
+            let fileURL = URL(fileURLWithPath: NSTemporaryDirectory())
+                .appendingPathComponent(filename)
+            do {
+                try data.write(to: fileURL)
+                self.onSnapshotReady?(["path": fileURL.path])
+            } catch {
+                self.onSnapshotReady?(["error": error.localizedDescription])
+            }
+        }
+    }
+
     // MARK: - Camera Commands
 
     func toggleTopView() {
@@ -228,7 +305,7 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
         )
         pivot.orientation = simd_quatf(angle: 0, axis: [0, 1, 0])
         pivot.position = initialPivotPosition
-        selectedFurniture = nil
+        setSelectedFurniture(nil)
     }
 
     // MARK: - Furniture
@@ -242,7 +319,8 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
 
         Task { @MainActor in
             do {
-                let item = try await Entity.load(contentsOf: resolvedURL)
+                let localURL = try await self.localFileURL(for: resolvedURL)
+                let item = try await Entity.load(contentsOf: localURL)
                 self.pendingFurniture = item
                 self.showToast("Tap the floor to place")
                 print("✅ Furniture ready:", resolvedURL.lastPathComponent)
@@ -297,10 +375,10 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
         guard let pending = pendingFurniture else {
             // Nothing pending — try to select a placed piece
             if let furniture = furnitureHit(at: location) {
-                selectedFurniture = furniture
+                setSelectedFurniture(furniture)
                 showToast("Drag to move · Pinch to resize · Twist to rotate")
             } else {
-                selectedFurniture = nil
+                setSelectedFurniture(nil)
             }
             return
         }
@@ -338,7 +416,7 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
 
         placed.generateCollisionShapes(recursive: true)
         placedFurniture.append(placed)
-        selectedFurniture = placed
+        setSelectedFurniture(placed)
 
         // Clear pending so next tap doesn't place again
         pendingFurniture = nil
@@ -372,7 +450,7 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
             // so panning elsewhere never flings furniture around.
             draggingFurniture = furnitureHit(at: location)
             if let dragging = draggingFurniture {
-                selectedFurniture = dragging
+                setSelectedFurniture(dragging)
             }
         case .changed:
             if let dragging = draggingFurniture {

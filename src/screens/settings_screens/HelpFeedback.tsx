@@ -5,12 +5,12 @@ import {
   ScrollView,
   TouchableOpacity,
   TextInput,
+  Linking,
 } from 'react-native';
 import {
   HelpCircle,
   Mail,
   MessageSquare,
-  Star,
   ChevronDown,
   ChevronUp,
   ChevronLeft,
@@ -18,12 +18,40 @@ import {
 } from 'lucide-react-native';
 import { goBack } from '../../utils/navigation';
 import { useNavigation } from '@react-navigation/native';
+import Toast from 'react-native-toast-message';
 import PrimaryButton from '../../components/molecules/PrimaryButton';
 import SecondaryButton from '../../components/molecules/SecondaryButton';
+import FeedbackService from '../../services/FeedbackService';
+
+const SUPPORT_EMAIL = 'support@pladomus.com';
 
 const HelpFeedback = () => {
   const navigation = useNavigation();
-  const [openIndex, setOpenIndex] = useState(null);
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const [faqSearch, setFaqSearch] = useState('');
+  const [feedback, setFeedback] = useState('');
+  const [isSending, setIsSending] = useState(false);
+
+  const handleSendFeedback = async () => {
+    if (!feedback.trim()) {
+      Toast.show({type: 'error', text1: 'Write some feedback first'});
+      return;
+    }
+    setIsSending(true);
+    try {
+      await FeedbackService.send(feedback.trim());
+      Toast.show({type: 'success', text1: 'Feedback sent — thank you!'});
+      setFeedback('');
+    } catch (err: any) {
+      Toast.show({
+        type: 'error',
+        text1: 'Could not send feedback',
+        text2: err.response?.data?.message || err.message,
+      });
+    } finally {
+      setIsSending(false);
+    }
+  };
 
   const faqs = [
     {
@@ -98,10 +126,24 @@ When you’re ready for more, upgrade to Hobbyist (or higher) to unlock addition
           className="border border-[#2C2C2C33] bg-white rounded-lg py-2.5 px-3 text-[14px] text-[#333] mt-4 mb-8"
           placeholder="Search FAQs"
           placeholderTextColor="#2C2C2C80"
+          value={faqSearch}
+          onChangeText={text => {
+            setFaqSearch(text);
+            setOpenIndex(null);
+          }}
         />
 
         {/* FAQ List */}
-        {faqs.map((faq, index) => {
+        {faqs
+          .filter(faq => {
+            const q = faqSearch.trim().toLowerCase();
+            return (
+              !q ||
+              faq.question.toLowerCase().includes(q) ||
+              faq.answer.toLowerCase().includes(q)
+            );
+          })
+          .map((faq, index) => {
           const isOpen = openIndex === index;
           return (
             <View
@@ -144,11 +186,23 @@ When you’re ready for more, upgrade to Hobbyist (or higher) to unlock addition
           </Text>
         </View>
         <View className="flex-row gap-2 justify-between">
-          <TouchableOpacity className="flex-1 border border-[#2C2C2C33] rounded-xl py-3 mr-2 flex-col items-center justify-center gap-2">
+          <TouchableOpacity
+            className="flex-1 border border-[#2C2C2C33] rounded-xl py-3 mr-2 flex-col items-center justify-center gap-2"
+            onPress={() =>
+              Linking.openURL(
+                `mailto:${SUPPORT_EMAIL}?subject=PlaDomus Support`,
+              ).catch(() =>
+                Toast.show({type: 'error', text1: 'Could not open mail app'}),
+              )
+            }>
             <Mail size={16} color="#C4A663" />
             <Text className="text-[#2C2C2C] font-medium">Email</Text>
           </TouchableOpacity>
-          <TouchableOpacity className="flex-1 border border-[#2C2C2C33] rounded-xl py-3 ml-2 flex-col items-center justify-center gap-2">
+          <TouchableOpacity
+            className="flex-1 border border-[#2C2C2C33] rounded-xl py-3 ml-2 flex-col items-center justify-center gap-2"
+            onPress={() =>
+              Toast.show({type: 'info', text1: 'Live chat coming soon'})
+            }>
             <MessageSquare size={16} color="#C4A663" />
             <Text className="text-[#2C2C2C] font-medium">Live Chat</Text>
           </TouchableOpacity>
@@ -173,8 +227,13 @@ When you’re ready for more, upgrade to Hobbyist (or higher) to unlock addition
           className="border border-[#F1EADC] bg-white rounded-lg py-5 px-3 text-[14px] text-[#333] mb-6"
           placeholder="Tell us what you think or suggest improvements..."
           placeholderTextColor="#2C2C2C80"
+          value={feedback}
+          onChangeText={setFeedback}
         />
-        <PrimaryButton title='Send Feedback' onPress={() => {}}/>
+        <PrimaryButton
+          title={isSending ? 'Sending...' : 'Send Feedback'}
+          onPress={handleSendFeedback}
+        />
       </View>
 
       {/* APP INFORMATION */}
@@ -186,7 +245,15 @@ When you’re ready for more, upgrade to Hobbyist (or higher) to unlock addition
         <Text className="text-[#444] text-sm mb-3 font-dm-sans">
           Last Updated: July 3, 2025
         </Text>
-        <SecondaryButton title='Rate App' onPress={() => {}}/>
+        <SecondaryButton
+          title="Rate App"
+          onPress={() =>
+            Toast.show({
+              type: 'info',
+              text1: 'Rating available once we hit the App Store',
+            })
+          }
+        />
       </View>
     </ScrollView>
   );

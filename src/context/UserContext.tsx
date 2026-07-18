@@ -14,6 +14,7 @@ interface IUserContext {
   isLoadingUser: boolean;
   signInUser: (data: ISignInResponse) => Promise<void>;
   logoutUser: () => Promise<void>;
+  updateUser: (partial: Partial<IUser>) => Promise<void>;
 }
 
 const UserContext = createContext<IUserContext | undefined>(undefined);
@@ -67,8 +68,21 @@ export const UserProvider = ({children}: {children: React.ReactNode}) => {
     await AsyncStorage.multiRemove(['user', 'token', 'session']);
   };
 
+  // Merge profile edits (e.g. name changes) into the cached session user
+  const updateUser = async (partial: Partial<IUser>) => {
+    setUser(prev => {
+      if (!prev) {
+        return prev;
+      }
+      const next = {...prev, ...partial};
+      AsyncStorage.setItem('user', JSON.stringify(next)).catch(() => {});
+      return next;
+    });
+  };
+
   return (
-    <UserContext.Provider value={{user, isLoadingUser, signInUser, logoutUser}}>
+    <UserContext.Provider
+      value={{user, isLoadingUser, signInUser, logoutUser, updateUser}}>
       {children}
     </UserContext.Provider>
   );

@@ -26,6 +26,7 @@ import Toast from 'react-native-toast-message';
 import NoteService from '../../services/NoteService';
 import {INote} from '../../../interface/note.interface';
 import {navigateTo} from '../../utils/navigation';
+import SharedHeader from '../shared/Header';
 
 export const NOTES_LIMIT = 50;
 
@@ -84,7 +85,11 @@ export default function NotesScreen() {
     const source = activeTab === 'active' ? notes : trashedNotes;
     const q = search.trim().toLowerCase();
     return source.filter(n => {
-      if (q && !n.title.toLowerCase().includes(q) && !(n.description || '').toLowerCase().includes(q)) {
+      if (
+        q &&
+        !n.title.toLowerCase().includes(q) &&
+        !(n.description || '').toLowerCase().includes(q)
+      ) {
         return false;
       }
       if (activeTag && !n.tags?.some(t => t.id === activeTag)) {
@@ -193,41 +198,31 @@ export default function NotesScreen() {
 
   const goToCreate = () => {
     if (!canCreate) {
-      Toast.show({type: 'error', text1: `Limit of ${NOTES_LIMIT} notes reached`});
+      Toast.show({
+        type: 'error',
+        text1: `Limit of ${NOTES_LIMIT} notes reached`,
+      });
       return;
     }
     navigateTo(navigation, 'CreateNote');
   };
 
-  // ── Render pieces ─────────────────────────────────────────────────────────
+
 
   const renderHeader = () => (
     <View>
-      {/* Gold hero */}
-      <View className="h-[170px] bg-brand w-full px-5 pt-6">
-        <Text className="font-cormorant text-white text-[32px] mb-1">Notes</Text>
-        <Text className="font-dm-sans text-white text-[16px]">
-          Keep Your Thoughts in One Place
-        </Text>
-      </View>
+      <SharedHeader
+        title="Notes"
+        subtitle="Keep Your Thoughts in One Place"
+        action={{
+          label: 'New Notes',
+          icon: <Plus size={16} color="#fff" />,
+          onPress: goToCreate,
+        }}
+      />
 
-      {/* New Notes card overlapping the hero */}
-      <View className="px-4 mt-[-55px]">
-        <View className="bg-white rounded-[18px] p-4 shadow-sm shadow-slate-600">
-          <TouchableOpacity
-            onPress={goToCreate}
-            activeOpacity={0.8}
-            className="bg-brand rounded-[14px] py-4 flex-row items-center justify-center">
-            <Plus color="white" size={20} />
-            <Text className="font-cormorant text-white text-[18px] ml-2">
-              New Notes
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {/* Search */}
-      <View className="px-4 mt-5">
+      {/* mt clears the action card hanging below the shared header */}
+      <View className="px-4 mt-16">
         <View className="flex-row items-center bg-white border border-[#E5E0D5] rounded-[12px] px-4">
           <Search size={18} color="#999" />
           <TextInput
@@ -249,7 +244,9 @@ export default function NotesScreen() {
           <TouchableOpacity
             onPress={() => setActiveTag(null)}
             className={`px-4 py-2 rounded-[8px] ${
-              activeTag === null ? 'bg-brand' : 'bg-white border border-[#E5E0D5]'
+              activeTag === null
+                ? 'bg-brand'
+                : 'bg-white border border-[#E5E0D5]'
             }`}>
             <Text
               className={`font-dm-sans text-[14px] ${
@@ -263,7 +260,9 @@ export default function NotesScreen() {
               key={tag.id}
               onPress={() => setActiveTag(activeTag === tag.id ? null : tag.id)}
               className={`px-4 py-2 rounded-[8px] flex-row items-center ${
-                activeTag === tag.id ? 'bg-brand' : 'bg-white border border-[#E5E0D5]'
+                activeTag === tag.id
+                  ? 'bg-brand'
+                  : 'bg-white border border-[#E5E0D5]'
               }`}>
               <TagIcon
                 size={14}
@@ -514,7 +513,18 @@ export default function NotesScreen() {
         // Keep the open popover menu above the cards below it
         CellRendererComponent={({children, style, ...props}: any) => (
           <View
-            style={[style, menuNoteId ? {zIndex: props.index === visibleNotes.findIndex(n => n.id === menuNoteId) ? 10 : 0} : null]}
+            style={[
+              style,
+              menuNoteId
+                ? {
+                    zIndex:
+                      props.index ===
+                      visibleNotes.findIndex(n => n.id === menuNoteId)
+                        ? 10
+                        : 0,
+                  }
+                : null,
+            ]}
             {...props}>
             {children}
           </View>

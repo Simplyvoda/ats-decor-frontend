@@ -9,7 +9,6 @@ import {
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import RoomPlanView from '../components/RoomScanner/RoomPlanView.native';
-import DesignService from '../services/DesignService';
 
 const {RealityKitModule} = NativeModules;
 
@@ -27,19 +26,9 @@ export default function ScannerScreen() {
     const {fileUrl} = e.nativeEvent;
     console.log('Export complete, fileUrl:', fileUrl);
 
-    // Navigate immediately — don't block on upload
-    (navigation as any).navigate('ARViewer', {modelUrl: fileUrl});
-
-    // Auto-name: "Room Scan - 15 Jun 2026"
-    const scanName = `Room Scan - ${new Date().toLocaleDateString('en-GB', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-    })}`;
-
-    DesignService.upload(fileUrl, scanName)
-      .then(() => console.log('Scan saved to cloud'))
-      .catch(err => console.warn('Scan upload failed:', err?.message ?? err));
+    // Saving happens in ARViewer (⋮ → Save design) so the design gets a
+    // real snapshot thumbnail instead of a blind background upload here.
+    (navigation as any).navigate('ARViewer', {modelUrl: fileUrl, fromScan: true});
   };
 
   const startScan = () => {

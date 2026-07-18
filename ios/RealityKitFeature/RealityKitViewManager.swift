@@ -16,6 +16,8 @@ class RealityKitViewManager: RCTViewManager {
                 "loadFurniture": "loadFurniture",
                 "toggleTopView": "toggleTopView",
                 "resetCamera": "resetCamera",
+                "captureSnapshot": "captureSnapshot",
+                "removeSelectedFurniture": "removeSelectedFurniture",
             ],
         ]
     }
@@ -38,6 +40,20 @@ class RealityKitViewManager: RCTViewManager {
         bridge.uiManager.addUIBlock { _, viewRegistry in
             guard let view = viewRegistry?[reactTag] as? RealityKitView else { return }
             view.resetCamera()
+        }
+    }
+
+    @objc func captureSnapshot(_ reactTag: NSNumber) {
+        bridge.uiManager.addUIBlock { _, viewRegistry in
+            guard let view = viewRegistry?[reactTag] as? RealityKitView else { return }
+            view.captureSnapshot()
+        }
+    }
+
+    @objc func removeSelectedFurniture(_ reactTag: NSNumber) {
+        bridge.uiManager.addUIBlock { _, viewRegistry in
+            guard let view = viewRegistry?[reactTag] as? RealityKitView else { return }
+            view.removeSelectedFurniture()
         }
     }
 }

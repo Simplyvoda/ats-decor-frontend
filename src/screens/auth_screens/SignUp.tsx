@@ -32,6 +32,7 @@ const SignUp = () => {
     handleSubmit,
     formState: {errors},
     watch,
+    reset,
   } = useForm<FormData>({
     defaultValues: {
       first_name: '',

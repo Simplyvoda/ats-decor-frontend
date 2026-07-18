@@ -4,6 +4,14 @@ import { UIManager, findNodeHandle, requireNativeComponent } from 'react-native'
 interface RealityKitViewProps {
   modelUrl: string;
   style?: object;
+  // Fired after captureSnapshotCommand with {path} or {error}
+  onSnapshotReady?: (e: {
+    nativeEvent: {path?: string; error?: string};
+  }) => void;
+  // Fired whenever furniture selection changes
+  onFurnitureSelectionChanged?: (e: {
+    nativeEvent: {selected: boolean};
+  }) => void;
 }
 
 const RealityKitNativeView = requireNativeComponent<RealityKitViewProps>('RealityKitView');
@@ -35,6 +43,25 @@ export const resetCameraCommand = (ref: React.RefObject<any>) => {
   UIManager.dispatchViewManagerCommand(
     findNodeHandle(ref.current),
     UIManager.getViewManagerConfig('RealityKitView').Commands.resetCamera,
+    [],
+  );
+};
+
+// Capture the current scene as a PNG; result arrives via onSnapshotReady.
+export const captureSnapshotCommand = (ref: React.RefObject<any>) => {
+  UIManager.dispatchViewManagerCommand(
+    findNodeHandle(ref.current),
+    UIManager.getViewManagerConfig('RealityKitView').Commands.captureSnapshot,
+    [],
+  );
+};
+
+// Remove the currently selected furniture piece from the scene.
+export const removeSelectedFurnitureCommand = (ref: React.RefObject<any>) => {
+  UIManager.dispatchViewManagerCommand(
+    findNodeHandle(ref.current),
+    UIManager.getViewManagerConfig('RealityKitView').Commands
+      .removeSelectedFurniture,
     [],
   );
 };

@@ -12,6 +12,26 @@ const AuthService = {
     const res = await api.post<ISignInResponse>('/auth/signup', payload);
     return res.data;
   },
+
+  async signOut(token: string): Promise<void> {
+    await api.post('/auth/signout', {token});
+  },
+
+  async updatePassword(
+    currentPassword: string,
+    newPassword: string,
+    confirmPassword: string,
+  ): Promise<void> {
+    await api.patch('/auth/update-password', {
+      currentPassword,
+      newPassword,
+      confirmPassword,
+    });
+  },
+
+  async deleteAccount(): Promise<void> {
+    await api.delete('/auth/delete-account');
+  },
 };
 
 export default AuthService;

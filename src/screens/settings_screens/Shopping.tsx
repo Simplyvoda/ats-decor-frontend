@@ -9,8 +9,12 @@ import {
 } from 'lucide-react-native';
 import {goBack} from '../../utils/navigation';
 import {useNavigation} from '@react-navigation/native';
+import Toast from 'react-native-toast-message';
 import PrimaryButton from '../../components/molecules/PrimaryButton';
 import SecondaryButton from '../../components/molecules/SecondaryButton';
+
+const comingSoon = () =>
+  Toast.show({type: 'info', text1: 'Payments & subscriptions coming soon'});
 
 const ShoppingScreen = () => {
   const navigation = useNavigation();
@@ -103,7 +107,7 @@ const ShoppingScreen = () => {
               ))}
             </View>
 
-            <PrimaryButton title="Upgrade to Casual" onPress={() => {}} />
+            <PrimaryButton title="Upgrade to Casual" onPress={comingSoon} />
           </View>
         </View>
       </View>
@@ -143,7 +147,7 @@ const ShoppingScreen = () => {
           ))}
         </View>
 
-        <SecondaryButton title="Add a payment method" onPress={() => {}} />
+        <SecondaryButton title="Add a payment method" onPress={comingSoon} />
       </View>
 
       {/* PURCHASE HISTORY */}
