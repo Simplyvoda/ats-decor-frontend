@@ -21,8 +21,7 @@ const BlogComponent = () => {
   const fetchPosts = async () => {
     try {
       const data = await BlogService.getPosts();
-      const res: BlogPost[] = Object.values(data);
-      setPosts(res as BlogPost[]);
+      setPosts(data);
     } catch (error) {
       console.error('Failed to fetch posts:', error);
     } finally {
@@ -33,12 +32,6 @@ const BlogComponent = () => {
   useEffect(() => {
     fetchPosts();
   }, []);
-
-  if(loading) {
-    return (
-      <Text>Loadingg</Text>
-    );
-  }
 
   return (
     <View style={styles.card}>

@@ -57,10 +57,14 @@ export const UserProvider = ({children}: {children: React.ReactNode}) => {
       last_name: usr.user_metadata?.last_name,
     };
 
-    setUser(simplifiedUser);
+    // Persist before flipping `user` — that state change swaps the navigator
+    // to the authenticated stack, whose screens fire API calls immediately.
+    // If the token write hasn't landed yet, those first requests go out
+    // with no (or a stale) Authorization header.
     await AsyncStorage.setItem('token', data.data.session.access_token);
     await AsyncStorage.setItem('user', JSON.stringify(simplifiedUser));
     await AsyncStorage.setItem('session', JSON.stringify(data.data.session));
+    setUser(simplifiedUser);
   };
 
   const logoutUser = async () => {

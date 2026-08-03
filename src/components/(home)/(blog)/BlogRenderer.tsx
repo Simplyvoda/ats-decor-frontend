@@ -8,17 +8,22 @@ import {
   ScrollView,
   StyleSheet,
 } from 'react-native';
-import {PortableText} from '@portabletext/react-native';
+import {
+  PortableText,
+  type PortableTextComponents,
+} from '@portabletext/react-native';
 import imageUrlBuilder from '@sanity/image-url';
+import type {SanityImageSource} from '@sanity/image-url/lib/types/types';
+import {BlogPost} from '../../../../interface/blog.interface';
 
 const builder = imageUrlBuilder({
   projectId: 'qcm46niu',
   dataset: 'production',
 });
 
-const urlFor = (source) => builder.image(source);
+const urlFor = (source: SanityImageSource) => builder.image(source);
 
-export function slugify(text) {
+export function slugify(text: string) {
   return text
     .toLowerCase()
     .replace(/[^\w\s-]/g, '')
@@ -26,32 +31,10 @@ export function slugify(text) {
     .replace(/\s+/g, '-');
 }
 
-// Fixed getTextContent function
-function getTextContent(children) {
-  if (typeof children === 'string') return stripHtmlTags(children);
-
-  if (Array.isArray(children)) {
-    return children.map(getTextContent).join('');
-  }
-  if (typeof children === 'object' && children?.props?.children) {
-    return getTextContent(children.props.children);
-  }
-  if (typeof children === 'object' && children?.text) {
-    return children.text;
-  }
-  return '';
-}
-
-export const portableTextComponents = {
+export const portableTextComponents: PortableTextComponents = {
   types: {
     image: ({value}) => {
-      // You'll need to implement urlFor from @sanity/image-url
-      const src = value?.asset?._ref
-        ? `https://your-project-id.cdn.sanity.io/images/your-dataset/${value.asset._ref
-            .replace('image-', '')
-            .replace('-jpg', '.jpg')
-            .replace('-png', '.png')}`
-        : '';
+      const src = value?.asset ? urlFor(value).width(800).url() : '';
       const alt = value.alt || 'Image';
       const caption = value.caption || '';
 
@@ -87,9 +70,9 @@ export const portableTextComponents = {
         <View style={styles.tableContainer}>
           <ScrollView horizontal showsHorizontalScrollIndicator={true}>
             <View style={styles.table}>
-              {table.rows.map((row, rowIndex) => (
+              {table.rows.map((row: any, rowIndex: number) => (
                 <View key={rowIndex} style={styles.tableRow}>
-                  {row.cells.map((cell, cellIndex) => (
+                  {row.cells.map((cell: any, cellIndex: number) => (
                     <View
                       key={cellIndex}
                       style={[
@@ -377,14 +360,12 @@ const styles = StyleSheet.create({
 
   // Links
   link: {
-    color: '#3b82f6',
+    color: '#C1A36A',
     textDecorationLine: 'underline',
-    fontStyle: 'italic',
   },
   internalLink: {
-    color: '#3b82f6',
+    color: '#C1A36A',
     textDecorationLine: 'underline',
-    fontStyle: 'italic',
   },
 
   // Text formatting
@@ -403,43 +384,54 @@ const styles = StyleSheet.create({
 
   // Headings
   h1: {
-    fontSize: 32,
-    fontWeight: 'bold',
+    fontFamily: 'CormorantGaramond-SemiBold',
+    fontSize: 30,
+    fontWeight: '600',
+    color: '#2C2C2C',
     marginVertical: 16,
   },
   h2: {
-    fontSize: 28,
+    fontFamily: 'CormorantGaramond-SemiBold',
+    fontSize: 26,
     fontWeight: '600',
+    color: '#2C2C2C',
     marginVertical: 16,
   },
   h3: {
-    fontSize: 24,
-    fontWeight: '500',
+    fontFamily: 'CormorantGaramond-SemiBold',
+    fontSize: 22,
+    fontWeight: '600',
+    color: '#2C2C2C',
     marginVertical: 12,
   },
   h4: {
-    fontSize: 20,
-    fontWeight: '500',
+    fontFamily: 'CormorantGaramond-SemiBold',
+    fontSize: 19,
+    fontWeight: '600',
+    color: '#2C2C2C',
     marginVertical: 8,
   },
 
   // Text blocks
   paragraph: {
-    fontSize: 16,
+    fontFamily: 'DMSans-Regular',
+    fontSize: 15,
     lineHeight: 24,
+    color: '#2C2C2C',
     marginVertical: 8,
   },
   blockquoteContainer: {
     borderLeftWidth: 4,
-    borderLeftColor: '#d1d5db',
+    borderLeftColor: '#C1A36A',
     paddingLeft: 16,
     marginVertical: 16,
   },
   blockquote: {
     fontStyle: 'italic',
-    fontSize: 16,
+    fontFamily: 'DMSans-Regular',
+    fontSize: 15,
     lineHeight: 24,
-    color: '#374151',
+    color: '#555',
   },
 
   // Lists
@@ -457,14 +449,16 @@ const styles = StyleSheet.create({
     minWidth: 20,
   },
   listItemText: {
-    fontSize: 16,
+    fontFamily: 'DMSans-Regular',
+    fontSize: 15,
+    color: '#2C2C2C',
     flex: 1,
     lineHeight: 24,
   },
 });
 
 // Usage in your component:
-export const BlogPostRenderer = ({post}) => {
+export const BlogPostRenderer = ({post}: {post: BlogPost}) => {
   return (
     <ScrollView style={{flex: 1, padding: 16}}>
       <Text style={styles.h1}>{post.title}</Text>

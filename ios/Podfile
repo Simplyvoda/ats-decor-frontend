@@ -61,6 +61,19 @@ target 'fe' do
         end
       end
     end
+
+    # Patch upstream Sentry bug: SentrySDK.swift's deprecated capture(userFeedback:)
+    # wrapper doesn't compile — SentrySDKInternal.capture(userFeedback:) fails to
+    # resolve. Deprecated + unused by us, so disable that block after every install.
+    sentry_sdk_file = File.join(installer.sandbox.pod_dir('Sentry').to_s, 'Sources/Swift/Helper/SentrySDK.swift')
+    if File.exist?(sentry_sdk_file)
+      content = File.read(sentry_sdk_file)
+      if content.include?('SentrySDKInternal.capture(userFeedback: userFeedback)') && content.include?("    #if !SDK_V9\n")
+        patched = content.sub("    #if !SDK_V9\n", "    #if false // patched: see ios/Podfile post_install\n")
+        File.write(sentry_sdk_file, patched)
+        Pod::UI.puts 'Patched Sentry SentrySDK.swift captureUserFeedback bug'.green
+      end
+    end
   end
-  
+
 end

@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
 import {
+  Image,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -10,8 +11,10 @@ import {
 } from 'react-native';
 import {ChevronLeft, Heart, MessageCircle, ChevronDown, Share2} from 'lucide-react-native';
 import {useNavigation, useRoute, RouteProp} from '@react-navigation/native';
+import {PortableText} from '@portabletext/react-native';
 import {goBack} from '../../../utils/navigation';
-import {BlogPost} from '../../../components/(home)/(blog)/BlogComponent';
+import {BlogPost} from '../../../../interface/blog.interface';
+import {portableTextComponents} from '../../../components/(home)/(blog)/BlogRenderer';
 
 type BlogPostRouteParams = {
   BlogPost: {post: BlogPost};
@@ -65,15 +68,37 @@ const BlogPostScreen = () => {
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         {/* Hero image */}
-        <View style={styles.heroImage} />
+        {post.mainImage?.asset?.url ? (
+          <Image
+            source={{uri: post.mainImage.asset.url}}
+            style={styles.heroImage}
+            resizeMode="cover"
+          />
+        ) : (
+          <View style={styles.heroImage} />
+        )}
+
+        {/* Author + date */}
+        <Text style={styles.postMeta}>
+          {[
+            post.author,
+            new Date(post.datePosted).toLocaleDateString('en-US', {
+              month: 'short',
+              day: 'numeric',
+              year: 'numeric',
+            }),
+          ]
+            .filter(Boolean)
+            .join('  ·  ')}
+        </Text>
 
         {/* Body */}
-        <Text style={styles.body}>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque justo
-          sapien, aliquet id facilisis vitae, feugiat eget metus. Curabitur ut dui
-          pulvinar, luctus urna eget, porta lacus In fringilla at lacus at semper.
-          Aliquam molestie ante laoreet.
-        </Text>
+        <View style={styles.body}>
+          <PortableText
+            value={post.body ?? []}
+            components={portableTextComponents}
+          />
+        </View>
 
         <View style={styles.divider} />
 
@@ -161,11 +186,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#D8CBBA',
     marginBottom: 20,
   },
-  body: {
+  postMeta: {
     fontFamily: 'DMSans-Regular',
-    fontSize: 15,
-    lineHeight: 24,
-    color: '#2C2C2C',
+    fontSize: 13,
+    color: '#999',
+    paddingHorizontal: 20,
+    marginBottom: 12,
+  },
+  body: {
     paddingHorizontal: 20,
     marginBottom: 20,
   },

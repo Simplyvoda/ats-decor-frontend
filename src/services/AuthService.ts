@@ -32,6 +32,14 @@ const AuthService = {
   async deleteAccount(): Promise<void> {
     await api.delete('/auth/delete-account');
   },
+
+  async forgotPassword(email: string): Promise<void> {
+    await api.post('/auth/forgot-password', {email});
+  },
+
+  async resetPassword(accessToken: string, newPassword: string): Promise<void> {
+    await api.post('/auth/reset-password', {accessToken, newPassword});
+  },
 };
 
 export default AuthService;

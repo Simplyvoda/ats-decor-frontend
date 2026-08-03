@@ -152,7 +152,11 @@ const Login = () => {
               )}
             </View>
           </View>
-          <Text className="w-full text-right">Forgot password ?</Text>
+          <Pressable onPress={() => navigateTo(navigation, 'ForgotPassword')}>
+            <Text className="w-full text-right text-brand">
+              Forgot password ?
+            </Text>
+          </Pressable>
         </View>
         <View className="w-full flex-1 flex-col space-y-4 mt-20 items-center">
           <PrimaryButton
