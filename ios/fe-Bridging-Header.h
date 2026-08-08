@@ -1,4 +1,12 @@
 //
-//  Use this file to import your target's public headers that you would like to expose to Swift.
+//  fe-Bridging-Header.h
+//  fe
 //
-#import <React/RCTBridgeModule.h>
+//  Created by Vodina Efem on 15/11/2025.
+//
+
+#ifndef fe_Bridging_Header_h
+#define fe_Bridging_Header_h
+
+
+#endif /* fe_Bridging_Header_h */

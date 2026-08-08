@@ -1,12 +1,8 @@
-import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  SafeAreaView,
-} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
+import React from 'react';
+import {SafeAreaView, Text, TouchableOpacity, View} from 'react-native';
+import PrimaryButton from '../../components/molecules/PrimaryButton';
+import SecondaryButton from '../../components/molecules/SecondaryButton';
 
 export default function GetReady() {
   const navigation = useNavigation();
@@ -20,35 +16,28 @@ export default function GetReady() {
   };
 
   return (
-<View className="flex-1 bg-[#FAF9F6] justify-between px-6 py-10">
+    <SafeAreaView className="h-screen bg-offWhite flex flex-col justify-between items-center p-6">
       {/* Content */}
-      <View className="mt-20 items-center">
-        <Text className="text-[20px] font-semibold text-black text-center mb-2">
-          Ready to Design Your Dream Home?
+      <View className="mt-32 items-center">
+        <Text className="text-[25px] font-semibold font-cormorant text-black text-center mb-2">
+          Ready to Design Your Dream
         </Text>
-        <Text className="text-[14px] text-[#7A7A7A] text-center leading-5 max-w-[300px]">
+        <Text className="text-[25px] font-semibold font-cormorant text-black text-center mb-2">
+          Home?
+        </Text>
+        <Text className="text-[16px] text-[#7A7A7A] font-dm-sans text-center leading-5 max-w-[300px]">
           Join us to save your styles and get personalized design inspiration.
         </Text>
       </View>
 
-      {/* Buttons */}
-      <View className="w-full space-y-4">
-        <TouchableOpacity
-          className="bg-[#C9A56A] rounded-lg py-3.5 items-center"
-          onPress={handleSignUp}
-        >
-          <Text className="text-white font-semibold text-[16px]">Sign Up</Text>
-        </TouchableOpacity>
+      <View className="w-full p-6 mx-auto flex flex-col space-x-3">
+        <View className='w-full mb-5'>
 
-        <TouchableOpacity
-          className="border border-[#C9A56A] rounded-lg py-3.5 items-center"
-          onPress={handleLogin}
-        >
-          <Text className="text-black font-semibold text-[16px]">Log In</Text>
-        </TouchableOpacity>
+        <PrimaryButton title="Sign Up" onPress={handleSignUp} />
+        </View>
+
+        <SecondaryButton title="Log In" onPress={handleLogin} />
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
-
-

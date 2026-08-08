@@ -1,10 +1,17 @@
-import {View, Text, TextInput, ScrollView, TouchableOpacity} from 'react-native';
-import React from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  ScrollView,
+  TouchableOpacity,
+} from 'react-native';
+import React, {useState} from 'react';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {goBack, navigateTo} from '../../utils/navigation';
 import {useNavigation} from '@react-navigation/native';
 import {
   ChevronLeft,
+  LogOut,
   Search,
   User,
   ShoppingCart,
@@ -12,10 +19,15 @@ import {
   HelpCircle,
 } from 'lucide-react-native';
 import {Image} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {images} from '../../../assets/constants/images';
+import {useUserContext} from '../../context/UserContext';
+import AuthService from '../../services/AuthService';
 
 const InitialScreen = () => {
   const navigation = useNavigation();
+  const {user, logoutUser} = useUserContext();
+  const [search, setSearch] = useState('');
 
   const iconMap = {
     User,
@@ -65,6 +77,33 @@ const InitialScreen = () => {
     },
   ];
 
+  const q = search.trim().toLowerCase();
+  const visibleSections = q
+    ? settings_data.filter(
+        s =>
+          s.title.toLowerCase().includes(q) ||
+          s.subtitle.toLowerCase().includes(q) ||
+          s.tags.some(t => t.toLowerCase().includes(q)),
+      )
+    : settings_data;
+
+  const displayName =
+    user?.first_name && user?.last_name
+      ? `${user.first_name} ${user.last_name}`
+      : user?.email ?? 'Guest';
+
+  const handleLogout = async () => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      if (token) {
+        await AuthService.signOut(token);
+      }
+    } catch {
+      // Sign-out API failure shouldn't block local logout
+    }
+    await logoutUser();
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-offWhite gap-5">
       <View className="bg-brand h-32 w-full flex flex-row justify-start  items-center pl-5">
@@ -83,10 +122,10 @@ const InitialScreen = () => {
           {/* flex with text */}
           <View className="text-white flex flex-col ml-4">
             <Text className="text-white text-2xl font-cormorant">
-              Ahmad Fola
+              {displayName}
             </Text>
             <Text className="text-white text-sm font-dm-sans">
-              Manage your All Things Snug
+              Manage your PlaDomus
             </Text>
             <Text className="text-white text-sm font-dm-sans">experience</Text>
           </View>
@@ -101,15 +140,17 @@ const InitialScreen = () => {
             autoCapitalize="none"
             placeholderTextColor="#9ca3af"
             placeholder="Search settings"
+            value={search}
+            onChangeText={setSearch}
           />
         </View>
-        {settings_data.map((section, i) => {
+        {visibleSections.map((section, i) => {
           const Icon = iconMap[section?.icon as keyof typeof iconMap];
           return (
             <TouchableOpacity
               key={i}
               onPress={() => navigateTo(navigation, section.screen)}
-              className="w-full border-[1px] border-[#2C2C2C33] rounded-[16px] flex flex-row h-[196px] p-6">
+              className="w-full border-[1px] border-[#2C2C2C33] rounded-[16px] flex flex-row min-h-[196px] p-6">
               <View className="bg-[#C1A36A26] w-[42px] h-[39px] rounded-md flex items-center justify-center">
                 <Icon color="#C1A36A" size={18} />
               </View>
@@ -139,6 +180,18 @@ const InitialScreen = () => {
             </TouchableOpacity>
           );
         })}
+
+        {/* Log out */}
+        <TouchableOpacity
+          onPress={handleLogout}
+          className="w-full border-[1px] border-[#2C2C2C33] rounded-[16px] flex flex-row items-center p-6 mb-10">
+          <View className="bg-[#D216161A] w-[42px] h-[39px] rounded-md flex items-center justify-center">
+            <LogOut color="#D21616" size={18} />
+          </View>
+          <Text className="text-[#D21616] text-xl font-cormorant ml-4">
+            Log Out
+          </Text>
+        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
