@@ -58,6 +58,7 @@
 		A0679A312F33B975002EF03A /* RealityKitViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RealityKitViewController.swift; sourceTree = "<group>"; };
 		A090A679300BC46900C746E3 /* empty_room.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = empty_room.usdz; sourceTree = "<group>"; };
 		A090A67A300BC46900C746E3 /* Stylized_One_Unit_Apartment.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = Stylized_One_Unit_Apartment.usdz; sourceTree = "<group>"; };
+		A0A43A723025661300D60071 /* fe.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = fe.entitlements; path = fe/fe.entitlements; sourceTree = "<group>"; };
 		A0A60AD22EC8E4380095C3EB /* fe-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "fe-Bridging-Header.h"; sourceTree = "<group>"; };
 		A0D618382FF648670005B6BC /* Polycam_Room_plan.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = Polycam_Room_plan.usdz; sourceTree = "<group>"; };
 		A0D6183A2FFFA3CB0005B6BC /* room_apartment_2.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = room_apartment_2.usdz; sourceTree = "<group>"; };
@@ -85,6 +86,7 @@
 		13B07FAE1A68108700A75B9A /* fe */ = {
 			isa = PBXGroup;
 			children = (
+				A0A43A723025661300D60071 /* fe.entitlements */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				761780EC2CA45674006654EE /* AppDelegate.swift */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
@@ -357,6 +359,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = fe/fe.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 6L2SPZVK8C;
 				ENABLE_BITCODE = NO;
@@ -537,6 +540,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = fe/fe.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = NO;
 				DEVELOPMENT_TEAM = 6L2SPZVK8C;

@@ -13,6 +13,15 @@ const AuthService = {
     return res.data;
   },
 
+  async appleSignIn(payload: {
+    identityToken: string;
+    firstName?: string;
+    lastName?: string;
+  }): Promise<ISignInResponse> {
+    const res = await api.post<ISignInResponse>('/auth/apple', payload);
+    return res.data;
+  },
+
   async signOut(token: string): Promise<void> {
     await api.post('/auth/signout', {token});
   },

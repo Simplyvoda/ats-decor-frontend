@@ -17,6 +17,8 @@ import {images} from '../../../assets/constants/images';
 import AuthService from '../../services/AuthService';
 import {ISignUpPayload} from '../../../interface/auth_user.interface';
 import Toast from 'react-native-toast-message';
+import {appleAuth} from '@invertase/react-native-apple-authentication';
+import {useUserContext} from '../../context/UserContext';
 
 type FormData = {
   first_name: string;
@@ -44,7 +46,50 @@ const SignUp = () => {
   });
 
   const navigation = useNavigation();
+  const {signInUser} = useUserContext();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isAppleSubmitting, setIsAppleSubmitting] = useState(false);
+
+  const onApplePress = async () => {
+    try {
+      setIsAppleSubmitting(true);
+      const appleResponse = await appleAuth.performRequest({
+        requestedOperation: appleAuth.Operation.LOGIN,
+        requestedScopes: [appleAuth.Scope.EMAIL, appleAuth.Scope.FULL_NAME],
+      });
+
+      if (!appleResponse.identityToken) {
+        throw new Error('Apple sign-in did not return an identity token');
+      }
+
+      const res = await AuthService.appleSignIn({
+        identityToken: appleResponse.identityToken,
+        firstName: appleResponse.fullName?.givenName ?? undefined,
+        lastName: appleResponse.fullName?.familyName ?? undefined,
+      });
+
+      await signInUser(res);
+      Toast.show({
+        type: 'success',
+        text1: 'Success',
+        text2: 'Signed in with Apple',
+        position: 'bottom',
+      });
+    } catch (err: any) {
+      if (err.code === appleAuth.Error.CANCELED) {
+        return;
+      }
+      console.log('Apple sign-in error:', err.response?.data || err.message);
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: err.response?.data?.message || err.message,
+        position: 'bottom',
+      });
+    } finally {
+      setIsAppleSubmitting(false);
+    }
+  };
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -273,23 +318,34 @@ const SignUp = () => {
             Or Sign Up with
           </Text>
 
-          <View className="flex flex-row justify-center items-center space-x-6 mt-2">
-            <Pressable className="flex flex-row items-center justify-center bg-white border border-gray-300 rounded-full p-3 w-20 h-20">
-              <Image
-                source={images.google_icon}
-                style={{width: 20, height: 20}}
-              />
-            </Pressable>
+          <View className="w-full mt-2">
+            {/* Google and Facebook sign-up disabled for MVP — Apple only for now */}
+            {/*
+            <View className="flex flex-row justify-center items-center space-x-6">
+              <Pressable className="flex flex-row items-center justify-center bg-white border border-gray-300 rounded-full p-3 w-20 h-20">
+                <Image
+                  source={images.google_icon}
+                  style={{width: 20, height: 20}}
+                />
+              </Pressable>
 
-            <Pressable className="flex flex-row items-center justify-center bg-white border border-gray-300 rounded-full p-3 w-20 h-20">
-              <Image source={images.fb_icon} style={{width: 20, height: 20}} />
-            </Pressable>
+              <Pressable className="flex flex-row items-center justify-center bg-white border border-gray-300 rounded-full p-3 w-20 h-20">
+                <Image source={images.fb_icon} style={{width: 20, height: 20}} />
+              </Pressable>
+            </View>
+            */}
 
-            <Pressable className="flex flex-row items-center justify-center bg-white border border-gray-300 rounded-full p-3 w-20 h-20">
+            <Pressable
+              onPress={onApplePress}
+              disabled={isAppleSubmitting}
+              className="w-full flex flex-row items-center justify-center bg-white border border-gray-800 rounded-full py-3 space-x-2">
               <Image
                 source={images.apple_icon}
-                style={{width: 20, height: 20}}
+                style={{width: 18, height: 18}}
               />
+              <Text className="text-black font-semibold text-base">
+                {isAppleSubmitting ? 'Signing in…' : 'Continue with Apple'}
+              </Text>
             </Pressable>
           </View>
 
