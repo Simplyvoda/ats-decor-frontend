@@ -30,6 +30,11 @@ export default function CreateNoteScreen() {
   // (e.g. jotting a note from the AR viewer)
   const existingNote: INote | undefined = route.params?.note;
   const presetProjectId: string | undefined = route.params?.projectId;
+  // Opened from the AR viewer's Notes shortcut — the note always belongs to
+  // whatever design is open there, so there's nothing to pick manually. If
+  // that design hasn't been saved yet (no presetProjectId), the note is held
+  // as a draft until the design is saved.
+  const fromARViewer: boolean = route.params?.fromARViewer ?? false;
 
   const [title, setTitle] = useState(existingNote?.title ?? '');
   const [description, setDescription] = useState(
@@ -48,12 +53,15 @@ export default function CreateNoteScreen() {
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    DesignService.getDesigns()
-      .then(res => setProjects(res.data))
-      .catch(() => {});
+    if (!fromARViewer) {
+      DesignService.getDesigns()
+        .then(res => setProjects(res.data))
+        .catch(() => {});
+    }
     NoteService.getNotes({isActive: true})
       .then(res => setNotesUsed(res.total))
       .catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const canSave = title.trim().length > 0 && !isSaving;
@@ -79,6 +87,19 @@ export default function CreateNoteScreen() {
         project_id: projectId ?? undefined,
         tags,
       };
+
+      // Design not saved yet — hold the note as a draft until it is.
+      if (fromARViewer && !projectId && !existingNote) {
+        await NoteService.saveDraftNote(payload);
+        Toast.show({
+          type: 'success',
+          text1: 'Note saved as draft',
+          text2: "It'll attach automatically when you save the design",
+        });
+        goBack(navigation);
+        return;
+      }
+
       if (existingNote) {
         await NoteService.updateNote(existingNote.id, payload);
       } else {
@@ -210,32 +231,36 @@ export default function CreateNoteScreen() {
               />
             </View>
 
-            <View className="flex-row items-center mb-2">
-              <Paperclip size={16} color="#C1A36A" />
-              <Text className="font-cormorant text-[17px] text-gray-primary ml-2">
-                Attach to project
-              </Text>
-            </View>
-            <Dropdown
-              data={[
-                {label: 'None', value: ''},
-                ...projects.map(p => ({label: p.name, value: p.id})),
-              ]}
-              labelField="label"
-              valueField="value"
-              value={projectId ?? ''}
-              onChange={item => setProjectId(item.value || null)}
-              placeholder="Project (Optional)"
-              placeholderStyle={{color: '#999', fontSize: 14}}
-              selectedTextStyle={{color: '#2C2C2C', fontSize: 14}}
-              style={{
-                borderWidth: 1,
-                borderColor: '#E5E0D5',
-                borderRadius: 10,
-                paddingHorizontal: 12,
-                paddingVertical: 10,
-              }}
-            />
+            {!fromARViewer && (
+              <>
+                <View className="flex-row items-center mb-2">
+                  <Paperclip size={16} color="#C1A36A" />
+                  <Text className="font-cormorant text-[17px] text-gray-primary ml-2">
+                    Attach to project
+                  </Text>
+                </View>
+                <Dropdown
+                  data={[
+                    {label: 'None', value: ''},
+                    ...projects.map(p => ({label: p.name, value: p.id})),
+                  ]}
+                  labelField="label"
+                  valueField="value"
+                  value={projectId ?? ''}
+                  onChange={item => setProjectId(item.value || null)}
+                  placeholder="Project (Optional)"
+                  placeholderStyle={{color: '#999', fontSize: 14}}
+                  selectedTextStyle={{color: '#2C2C2C', fontSize: 14}}
+                  style={{
+                    borderWidth: 1,
+                    borderColor: '#E5E0D5',
+                    borderRadius: 10,
+                    paddingHorizontal: 12,
+                    paddingVertical: 10,
+                  }}
+                />
+              </>
+            )}
           </View>
 
           {/* Quota banner */}

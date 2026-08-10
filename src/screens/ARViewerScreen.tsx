@@ -1,4 +1,4 @@
-import {ChevronLeft, Eye, Globe, MoreVertical, NotebookPen, RotateCcw, Save, Settings, Trash2, X} from 'lucide-react-native';
+import {ChevronLeft, Eye, Globe, MoreVertical, NotebookPen, RotateCcw, Save, Trash2, X} from 'lucide-react-native';
 import React, {useEffect, useRef, useState} from 'react';
 import {
   ActivityIndicator,
@@ -28,6 +28,7 @@ import RealityKitNativeView, {
 } from '../components/RoomScanner/RealityKitView.native';
 import DesignService from '../services/DesignService';
 import FurnitureService from '../services/FurnitureService';
+import NoteService from '../services/NoteService';
 import {IFurniture} from '../../interface/furniture.interface';
 import {images} from '../../assets/constants/images';
 
@@ -200,6 +201,18 @@ export default function ARViewerScreen() {
         setPubName('');
         setPubStyle(null);
         setPubTags([]);
+
+        // Attach any note jotted before this design had an id
+        const draft = await NoteService.getDraftNote();
+        if (draft) {
+          try {
+            await NoteService.createNote({...draft, project_id: res.data.id});
+          } catch {
+            // Best-effort — the design save itself already succeeded
+          } finally {
+            await NoteService.clearDraftNote();
+          }
+        }
       } catch (err: any) {
         Toast.show({
           type: 'error',
@@ -326,10 +339,6 @@ export default function ARViewerScreen() {
                 <Eye color="#C4A962" size={20} />
               </TouchableOpacity>
               <View style={styles.toolDivider} />
-              <TouchableOpacity style={styles.toolBtn}>
-                <Settings color="#C4A962" size={20} />
-              </TouchableOpacity>
-              <View style={styles.toolDivider} />
               <TouchableOpacity
                 style={styles.toolBtn}
                 onPress={() => setShowToolsMenu(v => !v)}>
@@ -346,6 +355,7 @@ export default function ARViewerScreen() {
                     setShowToolsMenu(false);
                     (navigation as any).navigate('CreateNote', {
                       projectId: currentDesignId ?? undefined,
+                      fromARViewer: true,
                     });
                   }}>
                   <NotebookPen color="#C4A962" size={18} />
