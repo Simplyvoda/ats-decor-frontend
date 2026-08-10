@@ -1,9 +1,15 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../config/api';
 import {
   ICreateNotePayload,
   INoteResponse,
   INotesResponse,
 } from '../../interface/note.interface';
+
+// A note jotted from the AR viewer before its design has been saved has
+// nowhere to attach to yet — it's held here as a single pending draft until
+// the design is saved, at which point it's created with that design's id.
+const PENDING_AR_NOTE_DRAFT_KEY = 'pendingArNoteDraft';
 
 const NoteService = {
   async getNotes(params: {
@@ -50,6 +56,19 @@ const NoteService = {
 
   async deleteForever(id: string): Promise<void> {
     await api.delete(`/notes/${id}`);
+  },
+
+  async saveDraftNote(payload: ICreateNotePayload): Promise<void> {
+    await AsyncStorage.setItem(PENDING_AR_NOTE_DRAFT_KEY, JSON.stringify(payload));
+  },
+
+  async getDraftNote(): Promise<ICreateNotePayload | null> {
+    const raw = await AsyncStorage.getItem(PENDING_AR_NOTE_DRAFT_KEY);
+    return raw ? JSON.parse(raw) : null;
+  },
+
+  async clearDraftNote(): Promise<void> {
+    await AsyncStorage.removeItem(PENDING_AR_NOTE_DRAFT_KEY);
   },
 };
 
