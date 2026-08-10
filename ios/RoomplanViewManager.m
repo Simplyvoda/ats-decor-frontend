@@ -13,6 +13,8 @@
 
 RCT_EXTERN_METHOD(startScanning:(nonnull NSNumber *)reactTag)
 RCT_EXTERN_METHOD(stopScanning:(nonnull NSNumber *)reactTag)
+RCT_EXTERN_METHOD(resetScanning:(nonnull NSNumber *)reactTag)
+RCT_EXTERN_METHOD(abortScanning:(nonnull NSNumber *)reactTag)
 
 
 RCT_EXPORT_VIEW_PROPERTY(onScanFinished, RCTBubblingEventBlock)
