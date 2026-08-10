@@ -31,7 +31,9 @@ class RoomplanViewManager: RCTViewManager {
     return [
       "Commands": [
         "startScanning": "startScanning",
-        "stopScanning": "stopScanning"
+        "stopScanning": "stopScanning",
+        "resetScanning": "resetScanning",
+        "abortScanning": "abortScanning"
       ]
     ]
   }
@@ -53,6 +55,26 @@ class RoomplanViewManager: RCTViewManager {
       else { return }
 
       view.stopScanning()
+    }
+  }
+
+  @objc func resetScanning(_ reactTag: NSNumber) {
+    bridge.uiManager.addUIBlock { _, viewRegistry in
+      guard
+        let view = viewRegistry?[reactTag] as? RoomplanView
+      else { return }
+
+      view.resetScanning()
+    }
+  }
+
+  @objc func abortScanning(_ reactTag: NSNumber) {
+    bridge.uiManager.addUIBlock { _, viewRegistry in
+      guard
+        let view = viewRegistry?[reactTag] as? RoomplanView
+      else { return }
+
+      view.abortScanning()
     }
   }
 }
@@ -95,15 +117,8 @@ class RoomplanView: UIView, RoomCaptureSessionDelegate {
     guard !didCreateView else { return }
     didCreateView = true
 
-    DispatchQueue.main.async {
-      let captureView = RoomCaptureView(frame: self.bounds)
-      captureView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-      captureView.backgroundColor = .black
-
-      self.addSubview(captureView)
-      self.roomCaptureView = captureView
-
-      NSLog("✅ RoomCaptureView created and attached")
+    DispatchQueue.main.async { [weak self] in
+      self?.createCaptureView()
     }
   }
 
@@ -112,50 +127,110 @@ class RoomplanView: UIView, RoomCaptureSessionDelegate {
     super.layoutSubviews()
   }
 
+  // Synchronous — caller must already be on main thread. Extracted so
+  // resetScanning() can recreate the capture view without duplicating
+  // this setup.
+  private func createCaptureView() {
+    let captureView = RoomCaptureView(frame: self.bounds)
+    captureView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+    captureView.backgroundColor = .black
+
+    self.addSubview(captureView)
+    self.roomCaptureView = captureView
+    didCreateView = true
+
+    NSLog("✅ RoomCaptureView created and attached")
+  }
+
+  // Synchronous — caller must already be on main thread. Extracted so
+  // resetScanning() can restart a session without duplicating this guard
+  // chain.
+  private func beginSession() {
+    guard !isCleaningUp else { return }
+
+    guard
+      UIApplication.shared.applicationState == .active
+    else {
+      NSLog("⚠️ beginSession aborted: app not active")
+      return
+    }
+
+    guard
+      let rcv = roomCaptureView,
+      bounds.width > 0,
+      bounds.height > 0,
+      rcv.bounds.width > 0,
+      rcv.bounds.height > 0
+    else {
+      NSLog("⚠️ beginSession aborted: invalid layout")
+      return
+    }
+
+    guard !didStartSession else {
+      NSLog("⚠️ scan already running")
+      return
+    }
+
+    rcv.captureSession.delegate = nil
+
+    let configuration = RoomCaptureSession.Configuration()
+
+    NSLog("🪟 RoomPlan scan starting")
+    didStartSession = true
+
+    // ⚠️ Run FIRST, then assign delegates (prevents race)
+    rcv.captureSession.run(configuration: configuration)
+    rcv.captureSession.delegate = self
+  }
 
   func startScanning() {
-    DispatchQueue.main.async {
-      guard !self.isCleaningUp else { return }
+    DispatchQueue.main.async { [weak self] in
+      self?.beginSession()
+    }
+  }
 
-      guard
-        UIApplication.shared.applicationState == .active
-      else {
-        NSLog("⚠️ startScanning aborted: app not active")
+  // Discards any in-progress capture and immediately starts a fresh one,
+  // in a single JS-triggered call ("redo" button).
+  func resetScanning() {
+    DispatchQueue.main.async { [weak self] in
+      guard let self = self, !self.isCleaningUp else { return }
+
+      NSLog("🔄 resetScanning: discarding in-progress capture and restarting")
+
+      // Nil the delegate BEFORE stopping so a late didEndWith from the old
+      // session can never fire and leak stale data into onExportComplete.
+      self.roomCaptureView?.captureSession.delegate = nil
+      self.roomCaptureView?.captureSession.stop()
+      self.didStartSession = false
+
+      // Tear down the capture view entirely rather than re-running the same
+      // session object — Apple doesn't document that a stopped session
+      // discards previously accumulated room geometry on re-run.
+      self.roomCaptureView?.delegate = nil
+      self.roomCaptureView?.removeFromSuperview()
+      self.roomCaptureView = nil
+      self.didCreateView = false
+
+      guard self.window != nil, self.bounds.width > 0, self.bounds.height > 0 else {
+        NSLog("⚠️ resetScanning aborted: view not attached / no layout")
         return
       }
 
-      guard
-        let rcv = self.roomCaptureView,
-        self.bounds.width > 0,
-        self.bounds.height > 0,
-        rcv.bounds.width > 0,
-        rcv.bounds.height > 0
-      else {
-        NSLog("⚠️ startScanning aborted: invalid layout")
-        return
-      }
+      self.createCaptureView()
+      self.beginSession()
+    }
+  }
 
-      guard !self.didStartSession else {
-        NSLog("⚠️ scan already running")
-        return
-      }
+  // Silently ends the session with no export, so navigating back mid-scan
+  // doesn't trigger onExportComplete (that's stopScanning's job).
+  func abortScanning() {
+    DispatchQueue.main.async { [weak self] in
+      guard let self = self, self.didStartSession else { return }
 
-      // 🚨 HARD STOP before starting
-
-      // commented out the stop first cause i noticed that we already have a guard to prevent scan running twice
-      // rcv.captureSession.stop() 
-      rcv.captureSession.delegate = nil
-      // rcv.delegate = nil
-
-      let configuration = RoomCaptureSession.Configuration()
-
-      NSLog("🪟 RoomPlan scan starting")
-      self.didStartSession = true
-
-      // ⚠️ Run FIRST, then assign delegates (prevents race)
-      rcv.captureSession.run(configuration: configuration)
-      rcv.captureSession.delegate = self
-      // rcv.delegate = self
+      NSLog("🚪 abortScanning: stopping session without export (back navigation)")
+      self.roomCaptureView?.captureSession.delegate = nil
+      self.roomCaptureView?.captureSession.stop()
+      self.didStartSession = false
     }
   }
 
