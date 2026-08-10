@@ -8,7 +8,6 @@ import {
   FileText,
   Home,
   PenTool,
-  User,
   Settings,
 } from 'lucide-react-native';
 
@@ -16,6 +15,7 @@ import DesignScreen from '../components/(design)/DesignScreen';
 import ExploreScreen from '../components/(explore)/ExploreScreen';
 import HomeScreen from '../screens/home_screens/InitialScreen';
 import NotesScreen from '../components/(notes)/NotesScreen';
+import InitialsAvatar from '../components/molecules/InitialsAvatar';
 import {useUserContext} from '../context/UserContext';
 
 const Tab = createBottomTabNavigator();
@@ -40,17 +40,13 @@ function TabHeader() {
           style={{flexDirection: 'row', alignItems: 'center'}}
           onPress={() => navigation.navigate('Settings', {screen: 'ProfilePreferences'})}
           hitSlop={{top: 8, bottom: 8, left: 8, right: 8}}>
-          <View
-            style={{
-              width: 40,
-              height: 40,
-              borderRadius: 20,
-              marginRight: 12,
-              backgroundColor: '#f3f4f6',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
-            <User size={22} color="#6b7280" />
+          <View style={{marginRight: 12}}>
+            <InitialsAvatar
+              firstName={user?.first_name}
+              lastName={user?.last_name}
+              email={user?.email}
+              size={40}
+            />
           </View>
           <View>
             <Text style={{color: '#6b7280', fontSize: 12}}>Welcome!</Text>

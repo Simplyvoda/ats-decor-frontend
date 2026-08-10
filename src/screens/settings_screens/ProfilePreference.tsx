@@ -1,5 +1,5 @@
 import {useNavigation} from '@react-navigation/native';
-import {Camera, ChevronLeft, Palette, Sun, User} from 'lucide-react-native';
+import {Camera, ChevronLeft, Palette, User} from 'lucide-react-native';
 import React, {useEffect, useState} from 'react';
 import {
   ActivityIndicator,
@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
-import AppSwitch from '../../components/molecules/AppSwitch';
+import InitialsAvatar from '../../components/molecules/InitialsAvatar';
 import PrimaryButton from '../../components/molecules/PrimaryButton';
 import {goBack} from '../../utils/navigation';
 import UserService from '../../services/UserService';
@@ -22,7 +22,6 @@ const ProfilePreference = () => {
   const navigation = useNavigation();
   const {updateUser} = useUserContext();
 
-  const [darkMode, setDarkMode] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -119,14 +118,19 @@ const ProfilePreference = () => {
 
               {/* Avatar */}
               <View className="relative items-center justify-center my-3">
-                <Image
-                  source={{
-                    uri:
-                      profilePicture ??
-                      'https://cdn-icons-png.flaticon.com/512/147/147144.png',
-                  }}
-                  className="w-20 h-20 rounded-full"
-                />
+                {profilePicture ? (
+                  <Image
+                    source={{uri: profilePicture}}
+                    className="w-20 h-20 rounded-full"
+                  />
+                ) : (
+                  <InitialsAvatar
+                    firstName={firstName}
+                    lastName={lastName}
+                    email={email}
+                    size={80}
+                  />
+                )}
                 <View className="absolute inset-0 bg-black/50 rounded-full" />
                 <TouchableOpacity
                   className="absolute inset-0 items-center justify-center"
@@ -187,7 +191,7 @@ const ProfilePreference = () => {
             </View>
 
             {/* APPEARANCE */}
-            <View className="bg-transparent border-[1px] border-[#2C2C2C33]  rounded-2xl p-4 mb-5">
+            {/* <View className="bg-transparent border-[1px] border-[#2C2C2C33]  rounded-2xl p-4 mb-5">
               <View className="flex-row items-center gap-2 mb-3">
                 <Sun size={18} color="#C4A663" />
                 <Text className="text-[20px] font-semibold font-cormorant text-[#1A1A1A]">
@@ -201,7 +205,7 @@ const ProfilePreference = () => {
                 </Text>
                 <AppSwitch value={darkMode} onValueChange={setDarkMode} />
               </View>
-            </View>
+            </View> */}
 
             {/* DESIGN STYLE */}
             <View className="bg-transparent border-[1px] border-[#2C2C2C33] rounded-2xl p-4 mb-20">

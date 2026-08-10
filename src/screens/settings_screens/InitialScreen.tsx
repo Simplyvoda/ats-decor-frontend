@@ -18,9 +18,8 @@ import {
   Shield,
   HelpCircle,
 } from 'lucide-react-native';
-import {Image} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {images} from '../../../assets/constants/images';
+import InitialsAvatar from '../../components/molecules/InitialsAvatar';
 import {useUserContext} from '../../context/UserContext';
 import AuthService from '../../services/AuthService';
 
@@ -44,8 +43,8 @@ const InitialScreen = () => {
       tags: [
         'Edit profile',
         'Account Settings',
-        'Language & Region',
-        '+1 more',
+        // 'Language & Region', // not implemented on Profile & Preferences
+        // '+1 more', // was Appearance/Dark Mode — removed from that screen
       ],
       screen: 'ProfilePreferences',
     },
@@ -57,7 +56,7 @@ const InitialScreen = () => {
         'Payment Methods',
         'Subscription Plan',
         'Purchase History',
-        '+1 more',
+        // '+1 more', // no 4th section on the Shopping screen
       ],
       screen: 'Shopping',
     },
@@ -65,7 +64,12 @@ const InitialScreen = () => {
       icon: 'Shield',
       title: 'Security & Privacy',
       subtitle: 'Protect your account and data',
-      tags: ['Privacy Settings', 'Data Export', 'Account Security', '+1 more'],
+      tags: [
+        'Privacy Settings',
+        // 'Data Export', // not implemented on Security & Privacy
+        'Account Security',
+        '+1 more',
+      ],
       screen: 'SecurityPrivacy',
     },
     {
@@ -114,10 +118,12 @@ const InitialScreen = () => {
         />
 
         <View className="flex flex-row justify-start items-center px-2">
-          {/* image */}
-          <Image
-            source={images.placeholder_icon}
-            className="w-12 h-12 rounded-full"
+          {/* avatar */}
+          <InitialsAvatar
+            firstName={user?.first_name}
+            lastName={user?.last_name}
+            email={user?.email}
+            size={48}
           />
           {/* flex with text */}
           <View className="text-white flex flex-col ml-4">
