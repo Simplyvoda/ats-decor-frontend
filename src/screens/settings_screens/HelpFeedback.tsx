@@ -10,7 +10,6 @@ import {
 import {
   HelpCircle,
   Mail,
-  MessageSquare,
   ChevronDown,
   ChevronUp,
   ChevronLeft,
@@ -185,9 +184,9 @@ When you’re ready for more, upgrade to Hobbyist (or higher) to unlock addition
             Contact Support
           </Text>
         </View>
-        <View className="flex-row gap-2 justify-between">
+        <View className="flex-row">
           <TouchableOpacity
-            className="flex-1 border border-[#2C2C2C33] rounded-xl py-3 mr-2 flex-col items-center justify-center gap-2"
+            className="flex-1 border border-[#2C2C2C33] rounded-xl py-3 flex-col items-center justify-center gap-2"
             onPress={() =>
               Linking.openURL(
                 `mailto:${SUPPORT_EMAIL}?subject=PlaDomus Support`,
@@ -198,6 +197,7 @@ When you’re ready for more, upgrade to Hobbyist (or higher) to unlock addition
             <Mail size={16} color="#C4A663" />
             <Text className="text-[#2C2C2C] font-medium">Email</Text>
           </TouchableOpacity>
+          {/* Live Chat — coming soon
           <TouchableOpacity
             className="flex-1 border border-[#2C2C2C33] rounded-xl py-3 ml-2 flex-col items-center justify-center gap-2"
             onPress={() =>
@@ -206,6 +206,7 @@ When you’re ready for more, upgrade to Hobbyist (or higher) to unlock addition
             <MessageSquare size={16} color="#C4A663" />
             <Text className="text-[#2C2C2C] font-medium">Live Chat</Text>
           </TouchableOpacity>
+          */}
         </View>
       </View>
 

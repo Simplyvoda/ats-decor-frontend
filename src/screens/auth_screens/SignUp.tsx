@@ -303,8 +303,17 @@ const SignUp = () => {
           </View>
           <Text className="w-full">
             By signing up, you agree to our{' '}
-            <Text className="text-brand">Terms and Conditions</Text> and{' '}
-            <Text className="text-brand">Privacy Policy.</Text>
+            <Text
+              className="text-brand"
+              onPress={() => (navigation as any).navigate('TermsOfService')}>
+              Terms and Conditions
+            </Text>{' '}
+            and{' '}
+            <Text
+              className="text-brand"
+              onPress={() => (navigation as any).navigate('PrivacyPolicy')}>
+              Privacy Policy.
+            </Text>
           </Text>
         </View>
         <View className="w-full flex-1 flex-col space-y-4 items-center">

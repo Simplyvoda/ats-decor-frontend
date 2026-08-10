@@ -11,6 +11,8 @@ import SetPassword from '../screens/auth_screens/SetPassword';
 import ForgotPassword from '../screens/auth_screens/ForgotPassword';
 import GetReady from '../screens/auth_screens/GetReady';
 import Login from '../screens/auth_screens/Login';
+import PrivacyPolicyScreen from '../screens/legal_screens/PrivacyPolicyScreen';
+import TermsOfServiceScreen from '../screens/legal_screens/TermsOfServiceScreen';
 import SettingsScreen from '../screens/settings_screens/InitialScreen';
 import ProfilePreference from '../screens/settings_screens/ProfilePreference';
 import Shopping from '../screens/settings_screens/Shopping';
@@ -54,6 +56,8 @@ function AuthNavigator() {
       <AuthStack.Screen name="GetReady" component={GetReady} />
       <AuthStack.Screen name="SetPassword" component={SetPassword} />
       <AuthStack.Screen name="ForgotPassword" component={ForgotPassword} />
+      <AuthStack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
+      <AuthStack.Screen name="TermsOfService" component={TermsOfServiceScreen} />
     </AuthStack.Navigator>
   );
 }
