@@ -65,13 +65,20 @@ target 'fe' do
     # Work around fmt's use of C++20 `consteval`, which newer Xcode/Clang
     # enforce more strictly than this bundled fmt version supports — causes
     # "call to consteval function ... is not a constant expression" in
-    # format.cc during archive builds. Falling back to constexpr (via
-    # FMT_CONSTEVAL) compiles fine.
-    installer.pods_project.targets.each do |target|
-      next unless target.name == 'fmt'
-      target.build_configurations.each do |config|
-        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= ['$(inherited)']
-        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << 'FMT_CONSTEVAL='
+    # format.cc during archive builds. fmt/base.h decides this via its own
+    # FMT_USE_CONSTEVAL feature-detection chain and unconditionally
+    # #defines FMT_CONSTEVAL from it — a compiler -D flag can't override
+    # that because the header doesn't guard it with #ifndef, so patch the
+    # header directly to always take the "disabled" branch.
+    fmt_base_h = File.join(installer.sandbox.pod_dir('fmt').to_s, 'include/fmt/base.h')
+    if File.exist?(fmt_base_h)
+      content = File.read(fmt_base_h)
+      needle = '#if !defined(__cpp_lib_is_constant_evaluated)'
+      if content.include?(needle) && !content.include?('patched: see ios/Podfile post_install')
+        patched = content.sub(needle, '#if 1 // patched: see ios/Podfile post_install — force-disable consteval')
+        File.chmod(0644, fmt_base_h)
+        File.write(fmt_base_h, patched)
+        Pod::UI.puts 'Patched fmt base.h to force-disable FMT_USE_CONSTEVAL'.green
       end
     end
 
