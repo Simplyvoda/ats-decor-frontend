@@ -62,6 +62,19 @@ target 'fe' do
       end
     end
 
+    # Work around fmt's use of C++20 `consteval`, which newer Xcode/Clang
+    # enforce more strictly than this bundled fmt version supports — causes
+    # "call to consteval function ... is not a constant expression" in
+    # format.cc during archive builds. Falling back to constexpr (via
+    # FMT_CONSTEVAL) compiles fine.
+    installer.pods_project.targets.each do |target|
+      next unless target.name == 'fmt'
+      target.build_configurations.each do |config|
+        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= ['$(inherited)']
+        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << 'FMT_CONSTEVAL='
+      end
+    end
+
     # Patch upstream Sentry bug: SentrySDK.swift's deprecated capture(userFeedback:)
     # wrapper doesn't compile — SentrySDKInternal.capture(userFeedback:) fails to
     # resolve. Deprecated + unused by us, so disable that block after every install.
