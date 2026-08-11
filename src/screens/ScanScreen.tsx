@@ -139,9 +139,9 @@ export default function ScannerScreen() {
         </View>
 
         {/* Dev-only affordance, preserved from the old UI */}
-        <TouchableOpacity onPress={loadSavedRoomDev} hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
+        {/* <TouchableOpacity onPress={loadSavedRoomDev} hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
           <Text style={styles.devLink}>[Dev] Load saved room</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </SafeAreaView>
 
       {processing && (
