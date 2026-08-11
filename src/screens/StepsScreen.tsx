@@ -5,7 +5,6 @@ import {
   Image,
   SafeAreaView,
   Text,
-  TouchableOpacity,
   View
 } from 'react-native';
 import PrimaryButton from '../components/molecules/PrimaryButton';
@@ -72,8 +71,24 @@ export default function StepsScreen() {
 
 
 
-        <View className="absolute bottom-4 w-[90%]">
-          <PrimaryButton title={buttonText} onPress={nextStep} />
+        <View className="absolute bottom-4 w-[90%] flex-row items-center justify-between">
+          {/* Slide indicator */}
+          <View className="flex-row items-center gap-1.5">
+            {stepsData.map((_, i) => (
+              <View
+                key={i}
+                className={
+                  i === step
+                    ? 'w-7 h-2 rounded-full bg-[#C1A36A]'
+                    : 'w-2 h-2 rounded-full bg-[#E5DFCE]'
+                }
+              />
+            ))}
+          </View>
+
+          <View className="w-[45%]">
+            <PrimaryButton title={buttonText} onPress={nextStep} />
+          </View>
         </View>
       </View>
     </SafeAreaView>

@@ -360,9 +360,12 @@ const SignUp = () => {
 
           <Text className="w-full text-center self-end items-center">
             Already have an account?
-            {/* <Pressable onPress={() => navigation.navigate('Login')}> */}
-            <Text className="text-brand"> Log In</Text>
-            {/* </Pressable> */}
+            <Text
+              className="text-brand"
+              onPress={() => navigateTo(navigation, 'Login')}>
+              {' '}
+              Log In
+            </Text>
           </Text>
         </View>
       </ScrollView>

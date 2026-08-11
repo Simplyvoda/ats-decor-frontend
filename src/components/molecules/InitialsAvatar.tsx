@@ -42,9 +42,9 @@ export default function InitialsAvatar({firstName, lastName, email, size = 40}: 
 
 const styles = StyleSheet.create({
   circle: {
-    backgroundColor: '#C4A962',
+    backgroundColor: '#D9D9D9',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  text: {color: 'white', fontWeight: '600'},
+  text: {color: '#000', fontWeight: '600'},
 });

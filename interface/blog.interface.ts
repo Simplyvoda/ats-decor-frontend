@@ -10,10 +10,14 @@ export interface BlogPost {
   body: any[];
   datePosted: string;
   author: string;
-};
+}
 
 export interface BlogPostsResponse {
   status: string;
   message: string;
   data: BlogPost[];
-};
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}

@@ -1,5 +1,5 @@
 import {useNavigation} from '@react-navigation/native';
-import {Camera, ChevronLeft, Palette, User} from 'lucide-react-native';
+import {ChevronLeft, Palette, User} from 'lucide-react-native';
 import React, {useEffect, useState} from 'react';
 import {
   ActivityIndicator,
@@ -7,7 +7,6 @@ import {
   ScrollView,
   Text,
   TextInput,
-  TouchableOpacity,
   View,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
@@ -131,19 +130,6 @@ const ProfilePreference = () => {
                     size={80}
                   />
                 )}
-                <View className="absolute inset-0 bg-black/50 rounded-full" />
-                <TouchableOpacity
-                  className="absolute inset-0 items-center justify-center"
-                  onPress={() =>
-                    Toast.show({
-                      type: 'info',
-                      text1: 'Photo upload coming soon',
-                    })
-                  }>
-                  <View className="p-2 rounded-full">
-                    <Camera size={20} color="#fff" />
-                  </View>
-                </TouchableOpacity>
               </View>
 
               <Text className="text-[14px] font-medium font-dm-sans mb-1 text-[#444]">

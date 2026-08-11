@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import {
-  ScrollView,
+  ActivityIndicator,
+  FlatList,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -8,11 +9,13 @@ import {
 } from 'react-native';
 import StudioComponent from '../../components/(home)/(studio)/StudioComponent';
 import MoodBoardComponent from '../../components/(home)/(moodboard)/MoodBoardComponent';
-import BlogComponent from '../../components/(home)/(blog)/BlogComponent';
+import {BlogHeader, BlogPostRow} from '../../components/(home)/(blog)/BlogComponent';
 import SharedHeader from '../../components/shared/Header';
 import {Plus} from 'lucide-react-native';
 import {navigateTo} from '../../utils/navigation';
 import {useNavigation} from '@react-navigation/native';
+import useBlogFeed from '../../hooks/useBlogFeed';
+import {BlogPost} from '../../../interface/blog.interface';
 
 type Tab = 'Studio' | 'MoodBoard' | 'Blog';
 
@@ -22,22 +25,24 @@ const TABS: {label: string; value: Tab}[] = [
   {label: 'Blog', value: 'Blog'},
 ];
 
-const TAB_CONTENT: Record<Tab, React.ReactElement> = {
-  Studio: <StudioComponent />,
-  MoodBoard: <MoodBoardComponent />,
-  Blog: <BlogComponent />,
-};
-
 const HomeScreen = () => {
   const [activeTab, setActiveTab] = useState<Tab>('Studio');
   const navigation = useNavigation();
+  const isBlogTab = activeTab === 'Blog';
 
-  return (
-    <ScrollView
-      style={styles.root}
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={styles.content}>
+  const {
+    posts,
+    loading,
+    loadingMore,
+    search,
+    setSearch,
+    sort,
+    setSort,
+    loadMore,
+  } = useBlogFeed();
 
+  const listHeader = (
+    <>
       <SharedHeader
         subtitle="Design your dream home"
         action={{
@@ -67,8 +72,48 @@ const HomeScreen = () => {
       </View>
 
       {/* Tab content */}
-      <View style={styles.tabContent}>{TAB_CONTENT[activeTab]}</View>
-    </ScrollView>
+      <View style={styles.tabContent}>
+        {activeTab === 'Studio' && <StudioComponent />}
+        {activeTab === 'MoodBoard' && <MoodBoardComponent />}
+        {isBlogTab && (
+          <BlogHeader
+            search={search}
+            onSearchChange={setSearch}
+            sort={sort}
+            onToggleSort={() => setSort(s => (s === 'DESC' ? 'ASC' : 'DESC'))}
+          />
+        )}
+      </View>
+    </>
+  );
+
+  return (
+    <FlatList
+      style={styles.root}
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={styles.content}
+      data={isBlogTab ? posts : []}
+      keyExtractor={(item: BlogPost) => item._id}
+      renderItem={({item}) => (
+        <BlogPostRow
+          post={item}
+          onPress={() => navigateTo(navigation, 'BlogPost', {post: item})}
+        />
+      )}
+      ListHeaderComponent={listHeader}
+      onEndReached={isBlogTab ? loadMore : undefined}
+      onEndReachedThreshold={0.4}
+      ListFooterComponent={
+        isBlogTab && (loading || loadingMore) ? (
+          <ActivityIndicator color="#C1A36A" style={styles.loader} />
+        ) : null
+      }
+      ListEmptyComponent={
+        isBlogTab && !loading ? (
+          <Text style={styles.emptyText}>No posts found.</Text>
+        ) : null
+      }
+    />
   );
 };
 
@@ -86,7 +131,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingHorizontal: 4,
     paddingVertical: 5,
-    // paddingVertical: 14,
     marginTop: 70,
     marginBottom: 16,
     backgroundColor: '#FFFFFF',
@@ -101,7 +145,6 @@ const styles = StyleSheet.create({
   },
   tab: {
     paddingBottom: 4,
-    // width: '100%',
     height: 40,
     justifyContent: 'center',
   },
@@ -123,6 +166,16 @@ const styles = StyleSheet.create({
   // Content
   tabContent: {
     paddingTop: 4,
+  },
+  loader: {
+    marginVertical: 24,
+  },
+  emptyText: {
+    textAlign: 'center',
+    color: '#999',
+    fontFamily: 'DMSans-Regular',
+    fontSize: 14,
+    marginTop: 24,
   },
 });
 

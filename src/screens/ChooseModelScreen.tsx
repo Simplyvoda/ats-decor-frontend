@@ -14,6 +14,36 @@ import {useNavigation} from '@react-navigation/native';
 import {goBack, navigateTo} from '../utils/navigation';
 import DesignTemplateService from '../services/DesignTemplateService';
 import {IDesignTemplate} from '../../interface/design-template.interface';
+import {images} from '../../assets/constants/images';
+
+// Card shape shared by bundled local models and backend-fetched templates,
+// so both render through the same list/card UI.
+type ModelCardItem = {
+  id: string;
+  title: string;
+  type?: string;
+  thumbnail: any; // require()'d local image, {uri} object, or null
+  modelUrl: string;
+};
+
+// Bundled on-device models — always available even without a backend.
+// Thumbnails rendered via be/scripts/thumbgen (QuickLookThumbnailing).
+const LOCAL_MODELS: ModelCardItem[] = [
+  {
+    id: 'local-stylized-apartment',
+    title: 'Stylized Apartment',
+    type: 'furnished apartment',
+    thumbnail: images.stylized_apartment_thumb,
+    modelUrl: 'bundle://Stylized_One_Unit_Apartment.usdz',
+  },
+  {
+    id: 'local-empty-room',
+    title: 'Empty Room',
+    type: 'empty room',
+    thumbnail: images.empty_room_thumb,
+    modelUrl: 'bundle://empty_room.usdz',
+  },
+];
 
 export default function ChooseModelScreen() {
   const navigation = useNavigation();
@@ -43,17 +73,26 @@ export default function ChooseModelScreen() {
     fetchTemplates();
   }, [fetchTemplates]);
 
-  const handleSelectTemplate = (template: IDesignTemplate) => {
-    navigateTo(navigation, 'ARViewer', {modelUrl: template.model_url});
+  const remoteItems: ModelCardItem[] = templates.map(t => ({
+    id: t.id,
+    title: t.title,
+    type: t.type,
+    thumbnail: t.image_url ? {uri: t.image_url} : null,
+    modelUrl: t.model_url,
+  }));
+  const allItems: ModelCardItem[] = [...LOCAL_MODELS, ...remoteItems];
+
+  const handleSelectTemplate = (item: ModelCardItem) => {
+    navigateTo(navigation, 'ARViewer', {modelUrl: item.modelUrl});
   };
 
-  const renderTemplate = ({item}: {item: IDesignTemplate}) => (
+  const renderTemplate = ({item}: {item: ModelCardItem}) => (
     <TouchableOpacity
       style={styles.card}
       onPress={() => handleSelectTemplate(item)}
       activeOpacity={0.7}>
-      {item.image_url ? (
-        <Image source={{uri: item.image_url}} style={styles.thumbnail} />
+      {item.thumbnail ? (
+        <Image source={item.thumbnail} style={styles.thumbnail} />
       ) : (
         <View style={[styles.thumbnail, styles.thumbnailPlaceholder]}>
           <Text style={styles.placeholderInitial}>{item.title[0]}</Text>
@@ -82,27 +121,24 @@ export default function ChooseModelScreen() {
         <View style={styles.centered}>
           <ActivityIndicator size="large" color="#C4A962" />
         </View>
-      ) : error ? (
-        <View style={styles.centered}>
-          <Text style={styles.errorText}>{error}</Text>
-          <TouchableOpacity style={styles.retryBtn} onPress={fetchTemplates}>
-            <Text style={styles.retryText}>Try again</Text>
-          </TouchableOpacity>
-        </View>
-      ) : templates.length === 0 ? (
-        <View style={styles.centered}>
-          <Text style={styles.emptyText}>
-            No models available yet. Check back soon.
-          </Text>
-        </View>
       ) : (
-        <FlatList
-          data={templates}
-          keyExtractor={item => item.id}
-          renderItem={renderTemplate}
-          numColumns={2}
-          contentContainerStyle={styles.grid}
-        />
+        <>
+          {error ? (
+            <View style={styles.errorBanner}>
+              <Text style={styles.errorText}>{error}</Text>
+              <TouchableOpacity onPress={fetchTemplates}>
+                <Text style={styles.retryText}>Try again</Text>
+              </TouchableOpacity>
+            </View>
+          ) : null}
+          <FlatList
+            data={allItems}
+            keyExtractor={item => item.id}
+            renderItem={renderTemplate}
+            numColumns={2}
+            contentContainerStyle={styles.grid}
+          />
+        </>
       )}
     </SafeAreaView>
   );
@@ -124,15 +160,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 24,
   },
-  errorText: {color: '#b00020', textAlign: 'center', marginBottom: 16},
-  emptyText: {color: '#666', textAlign: 'center'},
-  retryBtn: {
-    backgroundColor: '#C4A962',
-    paddingHorizontal: 20,
+  errorBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#FBEAEA',
+    marginHorizontal: 16,
+    marginBottom: 4,
+    paddingHorizontal: 14,
     paddingVertical: 10,
-    borderRadius: 8,
+    borderRadius: 10,
   },
-  retryText: {color: 'white', fontWeight: '600'},
+  errorText: {color: '#b00020', flex: 1, marginRight: 12},
+  retryText: {color: '#b00020', fontWeight: '700'},
   grid: {paddingHorizontal: 12, paddingTop: 8, paddingBottom: 24},
   card: {flex: 1, margin: 8, alignItems: 'center', maxWidth: '47%'},
   thumbnail: {
