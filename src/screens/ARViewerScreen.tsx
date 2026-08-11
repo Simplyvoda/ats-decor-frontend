@@ -263,6 +263,7 @@ export default function ARViewerScreen() {
 
   const handleSelectItem = (item: FurnitureItem) => {
     loadFurnitureCommand(realityKitRef, item.modelUrl);
+    handleCloseSheet();
   };
 
   const handleSelectCategory = (cat: FurnitureCategory) => {

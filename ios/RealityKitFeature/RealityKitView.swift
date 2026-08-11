@@ -322,7 +322,7 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
                 let localURL = try await self.localFileURL(for: resolvedURL)
                 let item = try await Entity.load(contentsOf: localURL)
                 self.pendingFurniture = item
-                self.showToast("Tap the floor to place")
+                self.showToast("Tap the floor to place", position: .top, duration: 3.5)
                 print("✅ Furniture ready:", resolvedURL.lastPathComponent)
             } catch {
                 print("❌ loadFurniture failed:", error)
@@ -376,9 +376,10 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
             // Nothing pending — try to select a placed piece
             if let furniture = furnitureHit(at: location) {
                 setSelectedFurniture(furniture)
-                showToast("Drag to move · Pinch to resize · Twist to rotate")
-            } else {
+                showToast("Drag to move · Pinch · Rotate · Tap 🗑 to remove", duration: 3.5)
+            } else if selectedFurniture != nil {
                 setSelectedFurniture(nil)
+                showToast("Deselected — tap a piece to select it")
             }
             return
         }
@@ -421,7 +422,7 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
         // Clear pending so next tap doesn't place again
         pendingFurniture = nil
 
-        showToast("Drag to move · Pinch to resize · Twist to rotate")
+        showToast("Drag to move · Pinch · Rotate · Tap 🗑 to remove", duration: 3.5)
         print("🪑 Placed furniture — total:", placedFurniture.count)
     }
 
@@ -540,7 +541,12 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
 
     // MARK: - Toast
 
-    private func showToast(_ message: String) {
+    private enum ToastPosition {
+        case top
+        case bottom
+    }
+
+    private func showToast(_ message: String, position: ToastPosition = .bottom, duration: TimeInterval = 2.0) {
         let label = UILabel()
         label.text = message
         label.textColor = .white
@@ -552,14 +558,20 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
         label.translatesAutoresizingMaskIntoConstraints = false
         addSubview(label)
 
-        NSLayoutConstraint.activate([
-            label.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -80),
+        var constraints = [
             label.centerXAnchor.constraint(equalTo: centerXAnchor),
             label.heightAnchor.constraint(equalToConstant: 40),
             label.widthAnchor.constraint(lessThanOrEqualTo: widthAnchor, constant: -40),
-        ])
+        ]
+        switch position {
+        case .bottom:
+            constraints.append(label.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -80))
+        case .top:
+            constraints.append(label.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: 16))
+        }
+        NSLayoutConstraint.activate(constraints)
 
-        UIView.animate(withDuration: 0.3, delay: 2.0, options: []) {
+        UIView.animate(withDuration: 0.3, delay: duration, options: []) {
             label.alpha = 0
         } completion: { _ in
             label.removeFromSuperview()
