@@ -1,5 +1,10 @@
 import api from '../config/api';
-import {BlogPostsResponse} from '../../interface/blog.interface';
+import {
+  BlogCommentResponse,
+  BlogCommentsResponse,
+  BlogLikeResponse,
+  BlogPostsResponse,
+} from '../../interface/blog.interface';
 
 const BlogService = {
   async getPosts(params: {
@@ -16,6 +21,40 @@ const BlogService = {
         sort: params.sort ?? 'DESC',
       },
     });
+    return res.data;
+  },
+
+  async getComments(
+    postId: string,
+    params: {page?: number; limit?: number} = {},
+  ): Promise<BlogCommentsResponse> {
+    const res = await api.get<BlogCommentsResponse>(
+      `/blog-posts/${postId}/comments`,
+      {params: {page: params.page ?? 1, limit: params.limit ?? 20}},
+    );
+    return res.data;
+  },
+
+  async postComment(postId: string, body: string): Promise<BlogCommentResponse> {
+    const res = await api.post<BlogCommentResponse>(
+      `/blog-posts/${postId}/comments`,
+      {body},
+    );
+    return res.data;
+  },
+
+  async getLikeStatus(postId: string): Promise<BlogLikeResponse> {
+    const res = await api.get<BlogLikeResponse>(`/blog-posts/${postId}/likes`);
+    return res.data;
+  },
+
+  async like(postId: string): Promise<BlogLikeResponse> {
+    const res = await api.post<BlogLikeResponse>(`/blog-posts/${postId}/like`);
+    return res.data;
+  },
+
+  async unlike(postId: string): Promise<BlogLikeResponse> {
+    const res = await api.delete<BlogLikeResponse>(`/blog-posts/${postId}/like`);
     return res.data;
   },
 };
