@@ -410,9 +410,13 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
         arView.scene.addAnchor(anchor)
 
         // Now compute world-space bounds to snap the bottom flush with the floor.
+        // Adjust relative to the current position (not an absolute assignment) —
+        // models can carry a nonzero baked-in local Y from their own USDZ root
+        // transform, and overwriting it here would discard that offset instead
+        // of correcting for it, leaving the piece floating or sunken.
         let worldBounds = placed.visualBounds(relativeTo: nil)
         if worldBounds.extents.y > 0.001 {
-            placed.position.y = hitPosition.y - worldBounds.min.y
+            placed.position.y += hitPosition.y - worldBounds.min.y
         }
 
         placed.generateCollisionShapes(recursive: true)

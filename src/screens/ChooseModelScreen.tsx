@@ -56,6 +56,7 @@ export default function ChooseModelScreen() {
     try {
       setIsLoading(true);
       setError(null);
+      // we needed the templates seeded to the DB not localised
       const res = await DesignTemplateService.getTemplates();
       setTemplates(res.data);
     } catch (err: any) {
@@ -94,7 +95,7 @@ export default function ChooseModelScreen() {
       {item.thumbnail ? (
         <Image source={item.thumbnail} style={styles.thumbnail} />
       ) : (
-        <View style={[styles.thumbnail, styles.thumbnailPlaceholder]}>
+        <View style={styles.thumbnail}>
           <Text style={styles.placeholderInitial}>{item.title[0]}</Text>
         </View>
       )}
@@ -180,11 +181,7 @@ const styles = StyleSheet.create({
     aspectRatio: 1,
     borderRadius: 14,
     backgroundColor: '#f0f0f0',
-  },
-  thumbnailPlaceholder: {
-    backgroundColor: '#E8E0D0',
-    alignItems: 'center',
-    justifyContent: 'center',
+    resizeMode: 'contain',
   },
   placeholderInitial: {fontSize: 40, fontWeight: '700', color: '#C4A962'},
   title: {marginTop: 8, fontSize: 14, color: '#1a1a1a', textAlign: 'center'},
