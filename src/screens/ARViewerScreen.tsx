@@ -8,6 +8,7 @@ import {
   Image,
   Modal,
   PanResponder,
+  ScrollView,
   StyleSheet,
   Switch,
   Text,
@@ -441,7 +442,9 @@ export default function ARViewerScreen() {
                 No furniture available yet
               </Text>
             ) : (
-              catalogue.map(renderCategoryRow)
+              <ScrollView showsVerticalScrollIndicator={false}>
+                {catalogue.map(renderCategoryRow)}
+              </ScrollView>
             )}
           </>
         )}
