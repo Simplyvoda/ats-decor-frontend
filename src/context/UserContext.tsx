@@ -1,6 +1,8 @@
 import React, {createContext, useContext, useEffect, useState} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {ISignInResponse} from '../../interface/auth_user.interface';
+import UserService from '../services/UserService';
+import {onUnauthorized} from '../utils/authEvents';
 
 interface IUser {
   id: string;
@@ -34,7 +36,14 @@ export const UserProvider = ({children}: {children: React.ReactNode}) => {
           if (!parsed.first_name || !parsed.last_name) {
             await AsyncStorage.multiRemove(['user', 'token', 'session']);
           } else {
-            setUser(parsed);
+            // The cached record only proves a session existed at some point —
+            // confirm the token itself is still accepted before trusting it.
+            try {
+              await UserService.getProfile();
+              setUser(parsed);
+            } catch {
+              await AsyncStorage.multiRemove(['user', 'token', 'session']);
+            }
           }
         }
       } catch (err) {
@@ -45,6 +54,15 @@ export const UserProvider = ({children}: {children: React.ReactNode}) => {
     };
 
     restoreUser();
+  }, []);
+
+  // A 401 from any API call means the backend no longer accepts this
+  // token — drop straight to the unauthenticated screens.
+  useEffect(() => {
+    return onUnauthorized(() => {
+      setUser(null);
+      AsyncStorage.multiRemove(['user', 'token', 'session']);
+    });
   }, []);
 
   const signInUser = async (data: ISignInResponse) => {
