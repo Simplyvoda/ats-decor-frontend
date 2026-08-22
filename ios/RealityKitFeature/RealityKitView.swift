@@ -28,6 +28,9 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
     // Fired with {selected: Bool} whenever furniture selection changes
     @objc var onFurnitureSelectionChanged: RCTDirectEventBlock?
 
+    // Fired with {layout} (a JSON-encoded array) after exportFurnitureLayout(), or {error} on failure
+    @objc var onFurnitureLayoutExported: RCTDirectEventBlock?
+
     private var yaw: Float = 0
     private var pitch: Float = 0
     private var cameraRadius: Float = 5.0
@@ -41,7 +44,12 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
     private var savedCamTransform: Transform?
 
     private var pendingFurniture: Entity?
+    private var pendingFurnitureURL: String?
     private var placedFurniture: [Entity] = []
+    // Entities carry no data of their own about where they were loaded from,
+    // so the source URL of each placed piece is tracked here by identity —
+    // needed to export/restore a design's furniture layout.
+    private var furnitureURLs: [ObjectIdentifier: String] = [:]
     private var selectedFurniture: Entity?
     private var draggingFurniture: Entity?
 
@@ -264,6 +272,7 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
             selected.removeFromParent()
         }
         placedFurniture.removeAll { $0 === selected }
+        furnitureURLs.removeValue(forKey: ObjectIdentifier(selected))
         setSelectedFurniture(nil)
         showToast("Removed")
         print("🗑️ Furniture removed — remaining:", placedFurniture.count)
@@ -354,11 +363,88 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
                 let localURL = try await self.localFileURL(for: resolvedURL)
                 let item = try await Entity.load(contentsOf: localURL)
                 self.pendingFurniture = item
+                self.pendingFurnitureURL = urlString
                 self.showToast("Tap the floor to place", position: .top, duration: 3.5)
                 print("✅ Furniture ready:", resolvedURL.lastPathComponent)
             } catch {
                 print("❌ loadFurniture failed:", error)
                 self.showToast("Couldn't load this model")
+            }
+        }
+    }
+
+    // MARK: - Furniture Layout Persistence
+    //
+    // A placed piece only exists as a live RealityKit entity in this view —
+    // nothing about it is saved anywhere by default. These two functions are
+    // the save/restore pair that let React Native persist "what's placed,
+    // where" as plain JSON and hand it back later to reconstruct the scene.
+
+    // Encodes every placed piece as {modelUrl, position, rotation, scale} and
+    // reports the JSON-encoded array back via onFurnitureLayoutExported.
+    func exportFurnitureLayout() {
+        let items: [[String: Any]] = placedFurniture.compactMap { entity -> [String: Any]? in
+            guard let url = furnitureURLs[ObjectIdentifier(entity)] else { return nil }
+            let pos = entity.position(relativeTo: nil)
+            let rot = entity.transform.rotation.vector
+            let scale = entity.scale
+            return [
+                "modelUrl": url,
+                "position": [pos.x, pos.y, pos.z],
+                "rotation": [rot.x, rot.y, rot.z, rot.w],
+                "scale": [scale.x, scale.y, scale.z],
+            ]
+        }
+
+        guard let data = try? JSONSerialization.data(withJSONObject: items),
+              let json = String(data: data, encoding: .utf8) else {
+            onFurnitureLayoutExported?(["error": "Could not encode furniture layout"])
+            return
+        }
+        onFurnitureLayoutExported?(["layout": json])
+    }
+
+    // Re-places one piece from a layout item previously produced by
+    // exportFurnitureLayout — called once per item by React Native. Skips
+    // the tap-to-place flow entirely: the exact saved position/rotation/scale
+    // are applied directly, and the piece is anchored to that world position
+    // outright rather than a floor raycast, since it's already known-correct.
+    func placeFurnitureFromLayout(_ itemJson: String) {
+        guard
+            let data = itemJson.data(using: .utf8),
+            let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+            let urlString = obj["modelUrl"] as? String,
+            let posArr = obj["position"] as? [Double], posArr.count == 3,
+            let rotArr = obj["rotation"] as? [Double], rotArr.count == 4,
+            let scaleArr = obj["scale"] as? [Double], scaleArr.count == 3,
+            let resolvedURL = resolveURL(urlString)
+        else {
+            print("❌ Could not parse furniture layout item:", itemJson)
+            return
+        }
+
+        Task { @MainActor in
+            do {
+                let localURL = try await self.localFileURL(for: resolvedURL)
+                let item = try await Entity.load(contentsOf: localURL)
+                let placed = item.clone(recursive: true)
+
+                placed.transform.rotation = simd_quatf(
+                    vector: SIMD4<Float>(Float(rotArr[0]), Float(rotArr[1]), Float(rotArr[2]), Float(rotArr[3]))
+                )
+                placed.scale = SIMD3<Float>(Float(scaleArr[0]), Float(scaleArr[1]), Float(scaleArr[2]))
+
+                let worldPosition = SIMD3<Float>(Float(posArr[0]), Float(posArr[1]), Float(posArr[2]))
+                let anchor = AnchorEntity(world: worldPosition)
+                anchor.addChild(placed)
+                self.arView.scene.addAnchor(anchor)
+
+                placed.generateCollisionShapes(recursive: true)
+                self.placedFurniture.append(placed)
+                self.furnitureURLs[ObjectIdentifier(placed)] = urlString
+                print("✅ Restored furniture:", resolvedURL.lastPathComponent)
+            } catch {
+                print("❌ placeFurnitureFromLayout failed:", error)
             }
         }
     }
@@ -466,10 +552,14 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
 
         placed.generateCollisionShapes(recursive: true)
         placedFurniture.append(placed)
+        if let url = pendingFurnitureURL {
+            furnitureURLs[ObjectIdentifier(placed)] = url
+        }
         setSelectedFurniture(placed)
 
         // Clear pending so next tap doesn't place again
         pendingFurniture = nil
+        pendingFurnitureURL = nil
 
         showToast("Drag to move · Pinch · Rotate · Tap 🗑 to remove", duration: 3.5)
         print("🪑 Placed furniture — total:", placedFurniture.count)

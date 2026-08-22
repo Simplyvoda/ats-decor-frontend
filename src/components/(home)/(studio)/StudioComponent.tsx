@@ -92,6 +92,8 @@ const StudioComponent = () => {
               onPress={() =>
                 (navigation as any).navigate('ARViewer', {
                   modelUrl: design.file_url,
+                  designId: design.id,
+                  furnitureLayout: design.furniture_layout,
                 })
               }
               activeOpacity={0.7}>

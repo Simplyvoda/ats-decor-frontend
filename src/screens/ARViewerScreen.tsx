@@ -22,7 +22,9 @@ import {Dropdown} from 'react-native-element-dropdown';
 import Toast from 'react-native-toast-message';
 import RealityKitNativeView, {
   captureSnapshotCommand,
+  exportFurnitureLayoutCommand,
   loadFurnitureCommand,
+  placeFurnitureFromLayoutCommand,
   removeSelectedFurnitureCommand,
   resetCameraCommand,
   toggleTopViewCommand,
@@ -31,6 +33,7 @@ import DesignService from '../services/DesignService';
 import FurnitureService from '../services/FurnitureService';
 import NoteService from '../services/NoteService';
 import {IFurniture} from '../../interface/furniture.interface';
+import {IPlacedFurniture} from '../../interface/design.interface';
 import {images} from '../../assets/constants/images';
 
 const STYLE_PRESETS = [
@@ -153,8 +156,25 @@ export default function ARViewerScreen() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Reopening a saved design: replay its furniture layout piece by piece.
+  // Self-contained on the native side (each piece is anchored to its saved
+  // world position directly), so this doesn't need to wait for the room model.
+  useEffect(() => {
+    const layout = route.params?.furnitureLayout as
+      | IPlacedFurniture[]
+      | undefined;
+    layout?.forEach(item => {
+      placeFurnitureFromLayoutCommand(realityKitRef, JSON.stringify(item));
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const snapshotCallback = useRef<
     ((result: {path?: string; error?: string}) => void) | null
+  >(null);
+  const layoutCallback = useRef<
+    ((result: {layout?: string; error?: string}) => void) | null
   >(null);
 
   const handleSnapshotReady = (e: {
@@ -162,6 +182,13 @@ export default function ARViewerScreen() {
   }) => {
     snapshotCallback.current?.(e.nativeEvent);
     snapshotCallback.current = null;
+  };
+
+  const handleFurnitureLayoutExported = (e: {
+    nativeEvent: {layout?: string; error?: string};
+  }) => {
+    layoutCallback.current?.(e.nativeEvent);
+    layoutCallback.current = null;
   };
 
   const addPubTag = () => {
@@ -185,6 +212,14 @@ export default function ARViewerScreen() {
         return;
       }
       try {
+        const layoutResult = await new Promise<{
+          layout?: string;
+          error?: string;
+        }>(resolve => {
+          layoutCallback.current = resolve;
+          exportFurnitureLayoutCommand(realityKitRef);
+        });
+
         const res = await DesignService.publish({
           name: pubName.trim(),
           style: pubStyle ?? undefined,
@@ -192,16 +227,13 @@ export default function ARViewerScreen() {
           isPublic: pubIsPublic,
           thumbnailPath: path,
           modelUrl,
+          furnitureLayout: layoutResult.layout,
         });
         setCurrentDesignId(res.data.id);
         Toast.show({
           type: 'success',
           text1: pubIsPublic ? 'Published to Explore' : 'Design saved',
         });
-        setShowPublishModal(false);
-        setPubName('');
-        setPubStyle(null);
-        setPubTags([]);
 
         // Attach any note jotted before this design had an id
         const draft = await NoteService.getDraftNote();
@@ -214,6 +246,13 @@ export default function ARViewerScreen() {
             await NoteService.clearDraftNote();
           }
         }
+
+        // Saving ends the editing session — drop ScanScreen/ChooseModel/ARViewer
+        // from the stack so the user lands on Home with no way back into this session.
+        (navigation as any).reset({
+          index: 0,
+          routes: [{name: 'HomeTabs'}],
+        });
       } catch (err: any) {
         Toast.show({
           type: 'error',
@@ -316,6 +355,7 @@ export default function ARViewerScreen() {
         ref={realityKitRef}
         modelUrl={modelUrl}
         onSnapshotReady={handleSnapshotReady}
+        onFurnitureLayoutExported={handleFurnitureLayoutExported}
         onFurnitureSelectionChanged={e =>
           setFurnitureSelected(e.nativeEvent.selected)
         }

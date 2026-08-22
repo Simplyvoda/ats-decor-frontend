@@ -12,6 +12,11 @@ interface RealityKitViewProps {
   onFurnitureSelectionChanged?: (e: {
     nativeEvent: {selected: boolean};
   }) => void;
+  // Fired after exportFurnitureLayoutCommand with {layout} (a JSON-encoded
+  // array of placed pieces) or {error}
+  onFurnitureLayoutExported?: (e: {
+    nativeEvent: {layout?: string; error?: string};
+  }) => void;
 }
 
 const RealityKitNativeView = requireNativeComponent<RealityKitViewProps>('RealityKitView');
@@ -63,6 +68,31 @@ export const removeSelectedFurnitureCommand = (ref: React.RefObject<any>) => {
     UIManager.getViewManagerConfig('RealityKitView').Commands
       .removeSelectedFurniture,
     [],
+  );
+};
+
+// Ask the native view to encode every placed furniture piece as JSON;
+// result arrives via onFurnitureLayoutExported.
+export const exportFurnitureLayoutCommand = (ref: React.RefObject<any>) => {
+  UIManager.dispatchViewManagerCommand(
+    findNodeHandle(ref.current),
+    UIManager.getViewManagerConfig('RealityKitView').Commands
+      .exportFurnitureLayout,
+    [],
+  );
+};
+
+// Re-place one furniture piece from a layout item previously produced by
+// exportFurnitureLayoutCommand — call once per item to restore a design.
+export const placeFurnitureFromLayoutCommand = (
+  ref: React.RefObject<any>,
+  itemJson: string,
+) => {
+  UIManager.dispatchViewManagerCommand(
+    findNodeHandle(ref.current),
+    UIManager.getViewManagerConfig('RealityKitView').Commands
+      .placeFurnitureFromLayout,
+    [itemJson],
   );
 };
 

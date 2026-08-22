@@ -37,6 +37,9 @@ const DesignService = {
     if (payload.tags?.length) {
       formData.append('tags', JSON.stringify(payload.tags));
     }
+    if (payload.furnitureLayout) {
+      formData.append('furniture_layout', payload.furnitureLayout);
+    }
 
     const thumbUri = payload.thumbnailPath.startsWith('file://')
       ? payload.thumbnailPath

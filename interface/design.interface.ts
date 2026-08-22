@@ -3,6 +3,15 @@ export interface IDesignTag {
   name: string;
 }
 
+// One placed furniture piece, as produced by the native AR view's
+// exportFurnitureLayout() and consumed by placeFurnitureFromLayoutCommand().
+export interface IPlacedFurniture {
+  modelUrl: string;
+  position: [number, number, number];
+  rotation: [number, number, number, number];
+  scale: [number, number, number];
+}
+
 export interface IDesign {
   id: string;
   name: string;
@@ -12,6 +21,7 @@ export interface IDesign {
   is_public: boolean;
   thumbnail_url: string | null;
   style: string | null;
+  furniture_layout: IPlacedFurniture[] | null;
   views_count: number;
   likes_count: number;
   tags?: IDesignTag[];
@@ -53,4 +63,5 @@ export interface IPublishDesignPayload {
   isPublic: boolean;
   thumbnailPath: string; // local file path from the native snapshot
   modelUrl: string; // file:// uploads the USDZ; bundle:///https passes through
+  furnitureLayout?: string; // JSON-encoded IPlacedFurniture[], from exportFurnitureLayoutCommand
 }

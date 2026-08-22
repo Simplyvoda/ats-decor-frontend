@@ -98,6 +98,7 @@ export default function ExploreScreen() {
     navigateTo(navigation, 'ARViewer', {
       modelUrl: design.file_url,
       designId: design.id,
+      furnitureLayout: design.furniture_layout,
     });
   };
 
