@@ -563,9 +563,12 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
 
     private func applyOrbit() {
         guard let cam = camera, let pivot = cameraPivot else { return }
-        let x = cameraRadius * cos(pitch) * sin(yaw)
-        let z = cameraRadius * cos(pitch) * cos(yaw)
-        cam.position = [x, cam.position.y, z]
+        // cam is a child of pivot, so its position here is local, not world.
+        // Keep that local offset fixed (only its distance from the pivot —
+        // cameraRadius — changes, e.g. from pinch-zoom) and let the pivot's
+        // rotation do the actual orbiting. Rotating yaw/pitch here AND
+        // baking them into this offset would apply both angles twice.
+        cam.position = SIMD3<Float>(0, initialCamPosition.y, cameraRadius)
         pivot.orientation =
             simd_quatf(angle: yaw, axis: [0, 1, 0]) *
             simd_quatf(angle: pitch, axis: [1, 0, 0])
