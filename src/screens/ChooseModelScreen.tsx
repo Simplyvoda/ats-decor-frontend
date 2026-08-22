@@ -182,6 +182,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     backgroundColor: '#f0f0f0',
     resizeMode: 'cover',
+    overflow: 'hidden',
   },
   placeholderInitial: {fontSize: 40, fontWeight: '700', color: '#C4A962'},
   title: {marginTop: 8, fontSize: 14, color: '#1a1a1a', textAlign: 'center'},
