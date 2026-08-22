@@ -186,8 +186,14 @@ const styles = StyleSheet.create({
   grid: {paddingHorizontal: GRID_PADDING, paddingTop: 8, paddingBottom: 24},
   card: {width: CARD_WIDTH, margin: CARD_MARGIN, alignItems: 'center'},
   thumbnail: {
+    // Explicit height, not aspectRatio — for a require()'d local image,
+    // Fabric can let the asset's own intrinsic pixel size (e.g. 512x512)
+    // override an aspectRatio-derived height, which is what was actually
+    // causing the two bundled thumbnails to render oversized. A literal
+    // height leaves no ambiguity, matching the furniture grid's ITEM_SIZE
+    // pattern (width + height, never aspectRatio) in ARViewerScreen.
     width: CARD_WIDTH,
-    aspectRatio: 1,
+    height: CARD_WIDTH,
     borderRadius: 14,
     backgroundColor: '#f0f0f0',
     resizeMode: 'cover',

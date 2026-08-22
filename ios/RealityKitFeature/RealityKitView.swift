@@ -442,9 +442,14 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
         // models can carry a nonzero baked-in local Y from their own USDZ root
         // transform, and overwriting it here would discard that offset instead
         // of correcting for it, leaving the piece floating or sunken.
+        // Checking min.y (not extents.y) for finiteness — a flat piece (rug,
+        // mat) has near-zero extents.y but is not degenerate, and skipping
+        // the snap for it leaves it buried in the floor mesh, invisible.
         let worldBounds = placed.visualBounds(relativeTo: nil)
-        if worldBounds.extents.y > 0.001 {
-            placed.position.y += hitPosition.y - worldBounds.min.y
+        if worldBounds.min.y.isFinite {
+            // Tiny lift so a near-flat mesh doesn't sit exactly coplanar with
+            // the floor, which z-fights and can render as invisible.
+            placed.position.y += hitPosition.y - worldBounds.min.y + 0.001
         }
 
         placed.generateCollisionShapes(recursive: true)
@@ -540,12 +545,15 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
         // and get camera zoom back).
         if let selected = selectedFurniture {
             selected.scale *= Float(gesture.scale)
-            // Keep the bottom on the floor while resizing
+            // Keep the bottom on the floor while resizing.
+            // See the matching note in handleTap: check min.y for finiteness,
+            // not extents.y — a flat piece has near-zero thickness but valid
+            // bounds, and skipping it here undoes the same fix on every pinch.
             if let anchor = selected.parent {
                 let floorWorldY = anchor.position(relativeTo: nil).y
                 let worldBounds = selected.visualBounds(relativeTo: nil)
-                if worldBounds.extents.y > 0.001 {
-                    selected.position.y += floorWorldY - worldBounds.min.y
+                if worldBounds.min.y.isFinite {
+                    selected.position.y += floorWorldY - worldBounds.min.y + 0.001
                 }
             }
             return
