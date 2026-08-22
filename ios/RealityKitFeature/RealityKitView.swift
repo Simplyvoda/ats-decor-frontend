@@ -201,6 +201,19 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
         return nil
     }
 
+    // How far above the floor to lift a piece so its bottom doesn't sit
+    // exactly coplanar with the floor mesh (which z-fights and can render
+    // as invisible/buried). Flat pieces — rugs, mats — need a deliberately
+    // bigger lift than everything else: their thickness relative to their
+    // own footprint is tiny, so a fixed millimeter-scale epsilon that's
+    // plenty for a chair or table's floor contact isn't reliably enough
+    // for something that's essentially a decal lying on the ground.
+    private func floorLift(for worldBounds: BoundingBox) -> Float {
+        let footprint = max(worldBounds.extents.x, worldBounds.extents.z)
+        let isFlat = footprint > 0 && worldBounds.extents.y < footprint * 0.03
+        return isFlat ? 0.01 : 0.001
+    }
+
     // Which placed furniture piece (if any) is under this screen point?
     // Uses .all (not .nearest) — the room mesh is often the closest hit
     // along the ray at a piece's edges, which would otherwise mask the
@@ -447,9 +460,7 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
         // the snap for it leaves it buried in the floor mesh, invisible.
         let worldBounds = placed.visualBounds(relativeTo: nil)
         if worldBounds.min.y.isFinite {
-            // Tiny lift so a near-flat mesh doesn't sit exactly coplanar with
-            // the floor, which z-fights and can render as invisible.
-            placed.position.y += hitPosition.y - worldBounds.min.y + 0.001
+            placed.position.y += hitPosition.y - worldBounds.min.y + floorLift(for: worldBounds)
         }
 
         placed.generateCollisionShapes(recursive: true)
@@ -553,7 +564,7 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
                 let floorWorldY = anchor.position(relativeTo: nil).y
                 let worldBounds = selected.visualBounds(relativeTo: nil)
                 if worldBounds.min.y.isFinite {
-                    selected.position.y += floorWorldY - worldBounds.min.y + 0.001
+                    selected.position.y += floorWorldY - worldBounds.min.y + floorLift(for: worldBounds)
                 }
             }
             return
