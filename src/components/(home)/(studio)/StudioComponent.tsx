@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Image,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -98,7 +99,15 @@ const StudioComponent = () => {
               }
               activeOpacity={0.7}>
               <View style={styles.designIcon}>
-                <Text style={styles.designIconText}>3D</Text>
+                {design.thumbnail_url ? (
+                  <Image
+                    source={{uri: design.thumbnail_url}}
+                    style={styles.designThumbnail}
+                    resizeMode="cover"
+                  />
+                ) : (
+                  <Text style={styles.designIconText}>3D</Text>
+                )}
               </View>
               <View style={styles.designInfo}>
                 <Text style={styles.designTitle} numberOfLines={1}>
@@ -196,6 +205,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#f3f4f6',
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  designThumbnail: {
+    width: '100%',
+    height: '100%',
   },
   designIconText: {
     fontSize: 18,
