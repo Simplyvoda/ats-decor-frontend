@@ -2,6 +2,7 @@ import {ChevronLeft} from 'lucide-react-native';
 import React, {useCallback, useEffect, useState} from 'react';
 import {
   ActivityIndicator,
+  Dimensions,
   FlatList,
   Image,
   StyleSheet,
@@ -15,6 +16,14 @@ import {goBack, navigateTo} from '../utils/navigation';
 import DesignTemplateService from '../services/DesignTemplateService';
 import {IDesignTemplate} from '../../interface/design-template.interface';
 import {images} from '../../assets/constants/images';
+
+// Explicit pixel size (not a % width) so the Image has a size to resolve
+// against inside the FlatList's numColumns grid — matches the furniture
+// grid's ITEM_SIZE pattern in ARViewerScreen.
+const GRID_PADDING = 12;
+const CARD_MARGIN = 8;
+const CARD_WIDTH =
+  (Dimensions.get('window').width - GRID_PADDING * 2 - CARD_MARGIN * 2 * 2) / 2;
 
 // Card shape shared by bundled local models and backend-fetched templates,
 // so both render through the same list/card UI.
@@ -174,10 +183,10 @@ const styles = StyleSheet.create({
   },
   errorText: {color: '#b00020', flex: 1, marginRight: 12},
   retryText: {color: '#b00020', fontWeight: '700'},
-  grid: {paddingHorizontal: 12, paddingTop: 8, paddingBottom: 24},
-  card: {flex: 1, margin: 8, alignItems: 'center', maxWidth: '47%'},
+  grid: {paddingHorizontal: GRID_PADDING, paddingTop: 8, paddingBottom: 24},
+  card: {width: CARD_WIDTH, margin: CARD_MARGIN, alignItems: 'center'},
   thumbnail: {
-    width: '100%',
+    width: CARD_WIDTH,
     aspectRatio: 1,
     borderRadius: 14,
     backgroundColor: '#f0f0f0',
