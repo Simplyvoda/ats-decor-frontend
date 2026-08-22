@@ -234,13 +234,6 @@ class RoomplanView: UIView, RoomCaptureSessionDelegate {
     }
   }
 
-  // func stopScanning() {
-  //   DispatchQueue.main.async {
-  //     self.cleanup()
-  //   }
-  // }
-
-// former function was too aggressive
   func stopScanning() {
     DispatchQueue.main.async { [weak self] in
       guard let self = self else { return }

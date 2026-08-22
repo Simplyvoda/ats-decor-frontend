@@ -24,14 +24,24 @@ class RealityKitViewController: UIViewController {
     }
 }
 
+// NOTE ON THIS FILE'S NAME: despite being named RealityKitViewController.swift,
+// this file also contains RealityKitModule's full implementation (the
+// NativeModule exposed to JS by RealityKitModule.m) — not just the
+// dev-only UIViewController above. The normal Swift/RN convention is one
+// exported class per file, named to match (e.g. a separate
+// RealityKitModule.swift for this class) — that split just hasn't been
+// done here. Kept as-is rather than restructured; documented here so a
+// reader looking for RealityKitModule's implementation under that
+// filename knows where to actually find it.
 @objc(RealityKitModule)
 class RealityKitModule: NSObject, UIDocumentPickerDelegate {
 
-    // ─────────────────────────────────────────────
-    // DEV HELPER: comment this block out in production.
-    // Opens a file picker so you can load a saved .usdz from Files.app
-    // without having to scan a room every session.
+    // DEV HELPER, gated at compile time (not just by a comment telling
+    // humans to remember to delete it): opens a file picker so you can
+    // load a saved .usdz from Files.app without scanning a room every
+    // session. Compiled out of Release builds entirely.
     @objc func openARView(_ urlString: NSString) {
+        #if DEBUG
         DispatchQueue.main.async {
             guard let rootVC = UIApplication.shared.connectedScenes
                 .compactMap({ ($0 as? UIWindowScene)?.keyWindow })
@@ -43,8 +53,10 @@ class RealityKitModule: NSObject, UIDocumentPickerDelegate {
             picker.delegate = self
             rootVC.present(picker, animated: true)
         }
+        #else
+        NSLog("⚠️ RealityKitModule.openARView is a DEBUG-only dev tool — no-op in this build.")
+        #endif
     }
-    // ─────────────────────────────────────────────
 
     // Returns the file:// URL of the last saved room scan (Documents/savedRoom.usdz).
     // Used by the dev button in ScanScreen to jump straight to ARViewerScreen.
