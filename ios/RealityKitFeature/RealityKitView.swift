@@ -3,6 +3,20 @@ import RealityKit
 import CryptoKit
 import React
 
+// A second finger landing mid-drag would otherwise sit invisible to this
+// recognizer (maximumNumberOfTouches just stops it tracking further
+// touches, it doesn't yield them) — pinch/rotate/two-finger-pan would
+// never get a look at that second touch since pan already claimed the
+// sequence. Explicitly failing/cancelling as soon as a second touch
+// arrives releases it immediately, letting those recognizers pick it up.
+private final class SingleTouchPanGestureRecognizer: UIPanGestureRecognizer {
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent) {
+        super.touchesBegan(touches, with: event)
+        guard numberOfTouches > 1 else { return }
+        state = (state == .began || state == .changed) ? .cancelled : .failed
+    }
+}
+
 @objc(RealityKitView)
 class RealityKitView: UIView, UIGestureRecognizerDelegate {
 
@@ -30,12 +44,6 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
     private var placedFurniture: [Entity] = []
     private var selectedFurniture: Entity?
     private var draggingFurniture: Entity?
-
-    // Kept so the delegate can arbitrate between them (see shouldRequireFailureOf)
-    private var panGesture: UIPanGestureRecognizer!
-    private var twoFingerPanGesture: UIPanGestureRecognizer!
-    private var pinchGesture: UIPinchGestureRecognizer!
-    private var rotationGesture: UIRotationGestureRecognizer!
 
     // Prop set by React Native
     @objc var modelUrl: NSString? {
@@ -359,11 +367,10 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
 
     private func setupGestures() {
         // One finger: drag furniture (when starting on it) or orbit the camera
-        let pan = UIPanGestureRecognizer(target: self, action: #selector(handlePan(_:)))
+        let pan = SingleTouchPanGestureRecognizer(target: self, action: #selector(handlePan(_:)))
         pan.maximumNumberOfTouches = 1
         pan.delegate = self
         arView.addGestureRecognizer(pan)
-        panGesture = pan
 
         // Two fingers: move the camera through the room (room-to-room)
         let move = UIPanGestureRecognizer(target: self, action: #selector(handleTwoFingerPan(_:)))
@@ -371,12 +378,10 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
         move.maximumNumberOfTouches = 2
         move.delegate = self
         arView.addGestureRecognizer(move)
-        twoFingerPanGesture = move
 
         let pinch = UIPinchGestureRecognizer(target: self, action: #selector(handlePinch(_:)))
         pinch.delegate = self
         arView.addGestureRecognizer(pinch)
-        pinchGesture = pinch
 
         let tap = UITapGestureRecognizer(target: self, action: #selector(handleTap(_:)))
         arView.addGestureRecognizer(tap)
@@ -384,7 +389,6 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
         let rotation = UIRotationGestureRecognizer(target: self, action: #selector(handleRotation(_:)))
         rotation.delegate = self
         arView.addGestureRecognizer(rotation)
-        rotationGesture = rotation
     }
 
     // Let the two-finger gestures (pinch / rotate / move) work together
@@ -396,18 +400,6 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
             ($0 is UIPanGestureRecognizer && ($0 as! UIPanGestureRecognizer).minimumNumberOfTouches == 2)
         }
         return twoFinger(g) && twoFinger(other)
-    }
-
-    // Two fingers never land in the exact same instant — the first one
-    // touching down would otherwise let the 1-finger pan claim the whole
-    // gesture before pinch/rotate/two-finger-pan get a chance to see the
-    // second touch. Give those a beat to fail first before pan commits.
-    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer,
-                           shouldRequireFailureOf otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-        guard gestureRecognizer === panGesture else { return false }
-        return otherGestureRecognizer === pinchGesture ||
-               otherGestureRecognizer === rotationGesture ||
-               otherGestureRecognizer === twoFingerPanGesture
     }
 
     @objc private func handleTap(_ gesture: UITapGestureRecognizer) {
@@ -422,6 +414,15 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
                 setSelectedFurniture(nil)
                 showToast("Deselected — tap a piece to select it")
             }
+            return
+        }
+
+        // Top view is a straight-down look — there's no way to judge floor
+        // contact from it (that's the whole reason floating pieces went
+        // unnoticed there before). Keep the pending piece selected so
+        // switching back to room view and tapping still places it.
+        if isTopView {
+            showToast("Switch to room view to place furniture")
             return
         }
 
