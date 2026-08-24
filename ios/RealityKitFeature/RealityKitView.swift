@@ -35,7 +35,6 @@
 import UIKit
 import RealityKit
 import CryptoKit
-import Combine
 import React
 
 // A second finger landing mid-drag would otherwise sit invisible to this
@@ -733,10 +732,19 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
 
         let placed = pending.clone(recursive: true)
 
+        // Measure the model in its OWN local space, before it enters the
+        // scene. This is the load-bearing decision of the whole placement
+        // flow: local bounds of a loaded entity are computed synchronously
+        // and reliably, while world-space bounds queried right after
+        // addAnchor proved stale no matter how the read was deferred
+        // (dispatch-async and even next-SceneEvents.Update both produced a
+        // wrong height — while this same local measurement, already used
+        // below for sizing, has always come out right on screen).
+        let localBounds = placed.visualBounds(relativeTo: placed)
+
         // Default size relative to the room (~15% of its larger side), so it
         // looks right no matter what units the scan or the model use.
         // User can pinch to fine-tune afterwards.
-        let localBounds = placed.visualBounds(relativeTo: placed)
         let currentWidth = localBounds.extents.x
         if currentWidth > 0.001 {
             let roomSide = roomBounds.map { max($0.extents.x, $0.extents.z) } ?? 4.0
@@ -745,58 +753,36 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
             placed.scale = SIMD3<Float>(repeating: s)
         }
 
-        // Add to scene at the floor hit point first (no y offset yet).
         let anchor = AnchorEntity(world: hitPosition)
         anchor.addChild(placed)
         arView.scene.addAnchor(anchor)
 
+        // Deterministic floor snap — pure arithmetic, no post-insertion
+        // bounds query. In anchor space the model's lowest point sits at
+        // position.y + scale.y * localMin.y (rotation is identity at
+        // placement), so solving for "bottom lands at anchor + lift":
+        // Apple's USDZ convention is base-at-y=0 precisely so apps never
+        // need runtime bounds for grounding; our assets don't follow it,
+        // and this reconstructs the same guarantee from local geometry.
+        // The absolute assignment is deliberate — any Y offset baked into
+        // the model's root transform is exactly what we're overriding.
+        if localBounds.min.y.isFinite {
+            let lift = floorLift(isFlat: pendingFurnitureIsFlat)
+            placed.position.y = lift - placed.scale.y * localBounds.min.y
+            NSLog("🧭 floor-snap (deterministic): hitY=%.4f localMinY=%.4f scaleY=%.4f isFlat=%@ lift=%.4f posY=%.4f",
+                  hitPosition.y, localBounds.min.y, placed.scale.y,
+                  String(pendingFurnitureIsFlat), lift, placed.position.y)
+        } else {
+            NSLog("⚠️ floor-snap skipped: localBounds.min.y not finite")
+        }
+
+        placed.generateCollisionShapes(recursive: true)
         placedFurniture.append(placed)
         if let url = pendingFurnitureURL {
             furnitureURLs[ObjectIdentifier(placed)] = url
         }
         furnitureIsFlat[ObjectIdentifier(placed)] = pendingFurnitureIsFlat
         setSelectedFurniture(placed)
-
-        let isFlat = pendingFurnitureIsFlat
-
-        // Snap the bottom flush with the floor — deferred to the next
-        // actually-rendered frame, not just the next run-loop turn.
-        // DispatchQueue.main.async only guarantees "runs before the next
-        // event-loop iteration" — RealityKit can still not have refreshed
-        // its internal bounds cache by then, since a queued block can run
-        // before the next real screen redraw happens. Subscribing to
-        // SceneEvents.Update (fires once per actual rendered frame) is the
-        // real fix: it guarantees at least one render pass has completed —
-        // confirmed by testing, where the piece stayed sunk after the
-        // main.async version but became correct after the first pinch
-        // (pinch's correction runs across multiple real frames, so it
-        // eventually catches up; a single dispatch-async doesn't).
-        var subscription: Cancellable?
-        subscription = arView.scene.subscribe(to: SceneEvents.Update.self) { [weak self] _ in
-            subscription?.cancel()
-            guard let self = self else { return }
-
-            // Adjust relative to the current position (not an absolute
-            // assignment) — models can carry a nonzero baked-in local Y from
-            // their own USDZ root transform, and overwriting it here would
-            // discard that offset instead of correcting for it, leaving the
-            // piece floating or sunken.
-            // Checking min.y (not extents.y) for finiteness — a flat piece
-            // (rug, mat) has near-zero extents.y but is not degenerate, and
-            // skipping the snap for it leaves it buried in the floor mesh.
-            let worldBounds = placed.visualBounds(relativeTo: nil)
-            if worldBounds.min.y.isFinite {
-                let lift = self.floorLift(isFlat: isFlat)
-                let delta = hitPosition.y - worldBounds.min.y + lift
-                placed.position.y += delta
-                NSLog("🧭 floor-snap (post-frame): hitY=%.4f boundsMinY=%.4f isFlat=%@ lift=%.4f delta=%.4f",
-                      hitPosition.y, worldBounds.min.y, String(isFlat), lift, delta)
-            } else {
-                NSLog("⚠️ floor-snap skipped: worldBounds.min.y not finite")
-            }
-
-            placed.generateCollisionShapes(recursive: true)
-        }
 
         // Clear pending so next tap doesn't place again
         pendingFurniture = nil
