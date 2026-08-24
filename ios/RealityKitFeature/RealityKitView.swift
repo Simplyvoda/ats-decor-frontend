@@ -737,26 +737,48 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
         anchor.addChild(placed)
         arView.scene.addAnchor(anchor)
 
-        // Now compute world-space bounds to snap the bottom flush with the floor.
-        // Adjust relative to the current position (not an absolute assignment) —
-        // models can carry a nonzero baked-in local Y from their own USDZ root
-        // transform, and overwriting it here would discard that offset instead
-        // of correcting for it, leaving the piece floating or sunken.
-        // Checking min.y (not extents.y) for finiteness — a flat piece (rug,
-        // mat) has near-zero extents.y but is not degenerate, and skipping
-        // the snap for it leaves it buried in the floor mesh, invisible.
-        let worldBounds = placed.visualBounds(relativeTo: nil)
-        if worldBounds.min.y.isFinite {
-            placed.position.y += hitPosition.y - worldBounds.min.y + floorLift(isFlat: pendingFurnitureIsFlat)
-        }
-
-        placed.generateCollisionShapes(recursive: true)
         placedFurniture.append(placed)
         if let url = pendingFurnitureURL {
             furnitureURLs[ObjectIdentifier(placed)] = url
         }
         furnitureIsFlat[ObjectIdentifier(placed)] = pendingFurnitureIsFlat
         setSelectedFurniture(placed)
+
+        let isFlat = pendingFurnitureIsFlat
+
+        // Snap the bottom flush with the floor — deferred to the next run
+        // loop tick, not read synchronously here. RealityKit's visualBounds
+        // is documented as unreliable in the same tick an entity is added to
+        // the scene (bounds aren't guaranteed accurate until after a render
+        // pass); reading it immediately, as this used to do, meant the
+        // correction below could be computed from a stale/wrong bounding
+        // box — which would explain why raising the offset constant alone
+        // never fixed a still-invisible rug: the base correction term, not
+        // just the small epsilon added to it, could already be wrong.
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+
+            // Adjust relative to the current position (not an absolute
+            // assignment) — models can carry a nonzero baked-in local Y from
+            // their own USDZ root transform, and overwriting it here would
+            // discard that offset instead of correcting for it, leaving the
+            // piece floating or sunken.
+            // Checking min.y (not extents.y) for finiteness — a flat piece
+            // (rug, mat) has near-zero extents.y but is not degenerate, and
+            // skipping the snap for it leaves it buried in the floor mesh.
+            let worldBounds = placed.visualBounds(relativeTo: nil)
+            if worldBounds.min.y.isFinite {
+                let lift = self.floorLift(isFlat: isFlat)
+                let delta = hitPosition.y - worldBounds.min.y + lift
+                placed.position.y += delta
+                NSLog("🧭 floor-snap: hitY=%.4f boundsMinY=%.4f isFlat=%@ lift=%.4f delta=%.4f",
+                      hitPosition.y, worldBounds.min.y, String(isFlat), lift, delta)
+            } else {
+                NSLog("⚠️ floor-snap skipped: worldBounds.min.y not finite")
+            }
+
+            placed.generateCollisionShapes(recursive: true)
+        }
 
         // Clear pending so next tap doesn't place again
         pendingFurniture = nil
