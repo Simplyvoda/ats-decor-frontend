@@ -174,6 +174,8 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
 
                 // Room is shifted by -center, so the floor plane lands here in world space
                 self.floorY = bounds.min.y - bounds.center.y
+                NSLog("🏠 room bounds: min.y=%.4f max.y=%.4f center.y=%.4f → floorY=%.4f",
+                      bounds.min.y, bounds.max.y, bounds.center.y, self.floorY ?? .nan)
 
                 // Generate collision shapes so raycasting hits the floor
                 entity.generateCollisionShapes(recursive: true)
