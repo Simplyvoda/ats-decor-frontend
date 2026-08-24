@@ -277,15 +277,10 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
     private func floorLift(for worldBounds: BoundingBox) -> Float {
         let footprint = max(worldBounds.extents.x, worldBounds.extents.z)
         let isFlat = footprint > 0 && worldBounds.extents.y < footprint * 0.03
-        guard isFlat else { return 0.001 }
-
-        // Flat pieces (rugs, mats) kept dipping below the floor even at 3cm —
-        // RoomPlan scan meshes aren't perfectly flat, so a fixed small offset
-        // gets swallowed by the scan's own unevenness across a rug's footprint.
-        // Scale with the piece's size (1% of its largest side) with a much
-        // higher floor than before, so both small mats and room-sized rugs
-        // clear the noise reliably.
-        return max(0.08, footprint * 0.01)
+        // 6cm for flat pieces — 1cm, then 3cm, both proved not enough in
+        // practice: scan meshes have uneven floors, so a rug kept dipping
+        // below the surface across most of its area and was barely visible.
+        return isFlat ? 0.06 : 0.001
     }
 
     // Which placed furniture piece (if any) is under this screen point?
