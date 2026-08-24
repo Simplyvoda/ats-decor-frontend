@@ -61,6 +61,11 @@ type FurnitureItem = {
   name: string;
   thumbnail: any;
   modelUrl: string;
+  // Rugs/mats need a bigger floor-snap offset than furniture with real height
+  // (see floorLift in RealityKitView.swift) — sourced from category rather
+  // than inferred from the model's own bounds, which proved unreliable for
+  // some assets (thin decorative borders etc. throw off a geometry guess).
+  isFlat: boolean;
 };
 
 type FurnitureCategory = {
@@ -81,6 +86,7 @@ const DEV_CATALOGUE: FurnitureCategory[] = __DEV__
             name: 'Test Sofa',
             thumbnail: images.scan_room_icon,
             modelUrl: 'bundle://test_chair.usdz',
+            isFlat: false,
           },
         ],
       },
@@ -98,6 +104,7 @@ const buildCatalogue = (items: IFurniture[]): FurnitureCategory[] => {
         ? {uri: f.thumbnail_url}
         : images.scan_room_icon,
       modelUrl: f.model_url,
+      isFlat: /rug/i.test(f.category),
     };
     const list = byCategory.get(f.category) ?? [];
     list.push(entry);
@@ -336,7 +343,7 @@ export default function ARViewerScreen() {
   ).current;
 
   const handleSelectItem = (item: FurnitureItem) => {
-    loadFurnitureCommand(realityKitRef, item.modelUrl);
+    loadFurnitureCommand(realityKitRef, item.modelUrl, item.isFlat);
     handleCloseSheet();
   };
 

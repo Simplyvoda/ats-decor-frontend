@@ -89,11 +89,16 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
 
     private var pendingFurniture: Entity?
     private var pendingFurnitureURL: String?
+    private var pendingFurnitureIsFlat = false
     private var placedFurniture: [Entity] = []
     // Entities carry no data of their own about where they were loaded from,
     // so the source URL of each placed piece is tracked here by identity —
     // needed to export/restore a design's furniture layout.
     private var furnitureURLs: [ObjectIdentifier: String] = [:]
+    // Whether each placed piece is a "flat" item (rug/mat) that needs the
+    // bigger floor-snap offset — sourced from JS (furniture category), not
+    // inferred from the model's own bounds. See loadFurniture(isFlat:).
+    private var furnitureIsFlat: [ObjectIdentifier: Bool] = [:]
     private var selectedFurniture: Entity?
     private var draggingFurniture: Entity?
 
@@ -274,13 +279,17 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
     // own footprint is tiny, so a fixed millimeter-scale epsilon that's
     // plenty for a chair or table's floor contact isn't reliably enough
     // for something that's essentially a decal lying on the ground.
-    private func floorLift(for worldBounds: BoundingBox) -> Float {
-        let footprint = max(worldBounds.extents.x, worldBounds.extents.z)
-        let isFlat = footprint > 0 && worldBounds.extents.y < footprint * 0.03
-        // 6cm for flat pieces — 1cm, then 3cm, both proved not enough in
-        // practice: scan meshes have uneven floors, so a rug kept dipping
-        // below the surface across most of its area and was barely visible.
-        return isFlat ? 0.06 : 0.001
+    //
+    // isFlat is passed in explicitly (from JS, ultimately from furniture
+    // category) rather than inferred from the model's own bounds. An
+    // earlier version tried the bounds-based guess
+    // (extents.y < footprint * 0.03) and it silently never classified at
+    // least one real rug asset as flat, so no matter how large the "flat"
+    // offset was set, that piece kept getting the tiny non-flat one —
+    // looking unfixed across three different constants. Category is ground
+    // truth; a bounding box is not.
+    private func floorLift(isFlat: Bool) -> Float {
+        isFlat ? 0.06 : 0.001
     }
 
     // Which placed furniture piece (if any) is under this screen point?
@@ -326,6 +335,7 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
         }
         placedFurniture.removeAll { $0 === selected }
         furnitureURLs.removeValue(forKey: ObjectIdentifier(selected))
+        furnitureIsFlat.removeValue(forKey: ObjectIdentifier(selected))
         setSelectedFurniture(nil)
         showToast("Removed")
         print("🗑️ Furniture removed — remaining:", placedFurniture.count)
@@ -533,7 +543,7 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
 
     // MARK: - Furniture
 
-    func loadFurniture(urlString: String) {
+    func loadFurniture(urlString: String, isFlat: Bool) {
         guard let resolvedURL = resolveURL(urlString) else {
             print("❌ Could not resolve furniture URL:", urlString)
             DispatchQueue.main.async { self.showToast("Model not available yet") }
@@ -546,6 +556,7 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
                 let item = try await Entity.load(contentsOf: localURL)
                 self.pendingFurniture = item
                 self.pendingFurnitureURL = urlString
+                self.pendingFurnitureIsFlat = isFlat
                 self.showToast("Tap the floor to place", position: .top, duration: 3.5)
                 print("✅ Furniture ready:", resolvedURL.lastPathComponent)
             } catch {
@@ -570,11 +581,13 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
             let pos = entity.position(relativeTo: nil)
             let rot = entity.transform.rotation.vector
             let scale = entity.scale
+            let isFlat = furnitureIsFlat[ObjectIdentifier(entity)] ?? false
             return [
                 "modelUrl": url,
                 "position": [pos.x, pos.y, pos.z],
                 "rotation": [rot.x, rot.y, rot.z, rot.w],
                 "scale": [scale.x, scale.y, scale.z],
+                "isFlat": isFlat,
             ]
         }
 
@@ -604,6 +617,10 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
             print("❌ Could not parse furniture layout item:", itemJson)
             return
         }
+        // Optional, not required: designs saved before this field existed
+        // have no isFlat key at all — default to false (the old behavior)
+        // rather than failing the whole restore over a missing key.
+        let isFlat = obj["isFlat"] as? Bool ?? false
 
         Task { @MainActor in
             do {
@@ -624,6 +641,7 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
                 placed.generateCollisionShapes(recursive: true)
                 self.placedFurniture.append(placed)
                 self.furnitureURLs[ObjectIdentifier(placed)] = urlString
+                self.furnitureIsFlat[ObjectIdentifier(placed)] = isFlat
                 print("✅ Restored furniture:", resolvedURL.lastPathComponent)
             } catch {
                 print("❌ placeFurnitureFromLayout failed:", error)
@@ -729,7 +747,7 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
         // the snap for it leaves it buried in the floor mesh, invisible.
         let worldBounds = placed.visualBounds(relativeTo: nil)
         if worldBounds.min.y.isFinite {
-            placed.position.y += hitPosition.y - worldBounds.min.y + floorLift(for: worldBounds)
+            placed.position.y += hitPosition.y - worldBounds.min.y + floorLift(isFlat: pendingFurnitureIsFlat)
         }
 
         placed.generateCollisionShapes(recursive: true)
@@ -737,11 +755,13 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
         if let url = pendingFurnitureURL {
             furnitureURLs[ObjectIdentifier(placed)] = url
         }
+        furnitureIsFlat[ObjectIdentifier(placed)] = pendingFurnitureIsFlat
         setSelectedFurniture(placed)
 
         // Clear pending so next tap doesn't place again
         pendingFurniture = nil
         pendingFurnitureURL = nil
+        pendingFurnitureIsFlat = false
 
         showToast("Drag to move · Pinch · Rotate · Tap 🗑 to remove", duration: 3.5)
         print("🪑 Placed furniture — total:", placedFurniture.count)
@@ -837,7 +857,8 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
                 let floorWorldY = anchor.position(relativeTo: nil).y
                 let worldBounds = selected.visualBounds(relativeTo: nil)
                 if worldBounds.min.y.isFinite {
-                    selected.position.y += floorWorldY - worldBounds.min.y + floorLift(for: worldBounds)
+                    let isFlat = furnitureIsFlat[ObjectIdentifier(selected)] ?? false
+                    selected.position.y += floorWorldY - worldBounds.min.y + floorLift(isFlat: isFlat)
                 }
             }
             return

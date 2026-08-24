@@ -49,10 +49,10 @@ class RealityKitViewManager: RCTViewManager {
     // whole job of these methods: translate "JS said do X to view #42" into
     // a plain Swift method call on the right RealityKitView.
 
-    @objc func loadFurniture(_ reactTag: NSNumber, urlString: NSString) {
+    @objc func loadFurniture(_ reactTag: NSNumber, urlString: NSString, isFlat: Bool) {
         bridge.uiManager.addUIBlock { _, viewRegistry in
             guard let view = viewRegistry?[reactTag] as? RealityKitView else { return }
-            view.loadFurniture(urlString: urlString as String)
+            view.loadFurniture(urlString: urlString as String, isFlat: isFlat)
         }
     }
 

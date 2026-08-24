@@ -42,11 +42,18 @@ const RealityKitNativeView = requireNativeComponent<RealityKitViewProps>('Realit
 //   "bundle://chair.usdz"        → resolves from the app bundle (bundled test assets)
 //   "https://..."                → remote download
 //   "file:///..."                → local file path
-export const loadFurnitureCommand = (ref: React.RefObject<any>, urlString: string) => {
+// isFlat: true for rugs/mats — tells native to apply the bigger floor-snap
+// offset directly, rather than trying to infer it from the model's own
+// bounds (unreliable — see the comment on floorLift in RealityKitView.swift).
+export const loadFurnitureCommand = (
+  ref: React.RefObject<any>,
+  urlString: string,
+  isFlat: boolean,
+) => {
   UIManager.dispatchViewManagerCommand(
     findNodeHandle(ref.current),
     UIManager.getViewManagerConfig('RealityKitView').Commands.loadFurniture,
-    [urlString],
+    [urlString, isFlat],
   );
 };
 
