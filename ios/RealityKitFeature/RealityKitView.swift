@@ -35,6 +35,7 @@
 import UIKit
 import RealityKit
 import CryptoKit
+import Combine
 import React
 
 // A second finger landing mid-drag would otherwise sit invisible to this
@@ -758,16 +759,21 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
 
         let isFlat = pendingFurnitureIsFlat
 
-        // Snap the bottom flush with the floor — deferred to the next run
-        // loop tick, not read synchronously here. RealityKit's visualBounds
-        // is documented as unreliable in the same tick an entity is added to
-        // the scene (bounds aren't guaranteed accurate until after a render
-        // pass); reading it immediately, as this used to do, meant the
-        // correction below could be computed from a stale/wrong bounding
-        // box — which would explain why raising the offset constant alone
-        // never fixed a still-invisible rug: the base correction term, not
-        // just the small epsilon added to it, could already be wrong.
-        DispatchQueue.main.async { [weak self] in
+        // Snap the bottom flush with the floor — deferred to the next
+        // actually-rendered frame, not just the next run-loop turn.
+        // DispatchQueue.main.async only guarantees "runs before the next
+        // event-loop iteration" — RealityKit can still not have refreshed
+        // its internal bounds cache by then, since a queued block can run
+        // before the next real screen redraw happens. Subscribing to
+        // SceneEvents.Update (fires once per actual rendered frame) is the
+        // real fix: it guarantees at least one render pass has completed —
+        // confirmed by testing, where the piece stayed sunk after the
+        // main.async version but became correct after the first pinch
+        // (pinch's correction runs across multiple real frames, so it
+        // eventually catches up; a single dispatch-async doesn't).
+        var subscription: Cancellable?
+        subscription = arView.scene.subscribe(to: SceneEvents.Update.self) { [weak self] _ in
+            subscription?.cancel()
             guard let self = self else { return }
 
             // Adjust relative to the current position (not an absolute
@@ -783,7 +789,7 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
                 let lift = self.floorLift(isFlat: isFlat)
                 let delta = hitPosition.y - worldBounds.min.y + lift
                 placed.position.y += delta
-                NSLog("🧭 floor-snap: hitY=%.4f boundsMinY=%.4f isFlat=%@ lift=%.4f delta=%.4f",
+                NSLog("🧭 floor-snap (post-frame): hitY=%.4f boundsMinY=%.4f isFlat=%@ lift=%.4f delta=%.4f",
                       hitPosition.y, worldBounds.min.y, String(isFlat), lift, delta)
             } else {
                 NSLog("⚠️ floor-snap skipped: worldBounds.min.y not finite")
