@@ -43,14 +43,10 @@ class RealityKitModule: NSObject, UIDocumentPickerDelegate {
 }
 ```
 
-:::caution Live gotcha: a misleadingly-named file
-This class lives inside `fe/ios/RealityKitFeature/RealityKitViewController.swift` — a file that, based on its name, you'd expect to contain only a `UIViewController` subclass. It actually contains **two unrelated things**: a small dev-only `RealityKitViewController` (a thin `UIViewController` wrapping `RealityKitView` for a document-picker test flow — not used by the production RN navigation, which goes through `ARViewerScreen` instead) *and* the entire `RealityKitModule` implementation shown above.
+:::note Found and fixed: a misleadingly-named file
+This class used to live inside `fe/ios/RealityKitFeature/RealityKitViewController.swift` — a file that, based on its name, you'd expect to contain only a `UIViewController` subclass, but which actually held **two unrelated things**: a small dev-only `RealityKitViewController` (a thin `UIViewController` wrapping `RealityKitView` for the document-picker test flow — not used by the production RN navigation, which goes through `ARViewerScreen` instead) *and* the entire `RealityKitModule` implementation shown above. So going looking for `RealityKitModule`'s Swift implementation by filename found nothing.
 
-The file itself now carries a comment explaining this directly, since it was left as a documented, deliberate choice rather than restructured:
-
-> Despite being named `RealityKitViewController.swift`, this file also contains `RealityKitModule`'s full implementation (the NativeModule exposed to JS by `RealityKitModule.m`) — not just the dev-only `UIViewController` above. The normal Swift/RN convention is one exported class per file, named to match (e.g. a separate `RealityKitModule.swift` for this class) — that split just hasn't been done here.
-
-If you go looking for `RealityKitModule`'s Swift implementation by filename, you won't find a `RealityKitModule.swift` — this is where it actually is.
+**Fix**: the file was split per the normal Swift/RN convention — one exported class per file, named to match. `RealityKitModule` now lives in its own `RealityKitModule.swift` (alongside its `RealityKitModule.m` export shim), and `RealityKitViewController.swift` contains only the dev-only view controller its name promises.
 :::
 
 ## `getSavedRoomUrl`'s actual behavior

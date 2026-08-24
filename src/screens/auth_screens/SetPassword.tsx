@@ -1,7 +1,7 @@
-import {LockKeyhole} from 'lucide-react-native';
+import {Eye, EyeOff, LockKeyhole} from 'lucide-react-native';
 import React, {useState} from 'react';
 import {Controller, useForm} from 'react-hook-form';
-import {Text, TextInput, View} from 'react-native';
+import {Text, TextInput, TouchableOpacity, View} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
@@ -25,6 +25,8 @@ const SetPassword = () => {
   const accessToken = route.params?.accessToken;
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const {
     control,
     handleSubmit,
@@ -94,15 +96,24 @@ const SetPassword = () => {
                   className={`flex flex-row items-center border ${errors.password ? 'border-red-600' : 'border-[#ccc]'} bg-white mb-1.5 rounded-md px-2 py-3`}>
                   <LockKeyhole color="#9ca3af" size={18} />
                   <TextInput
-                    className="w-full ml-2"
+                    className="flex-1 ml-2"
                     autoCapitalize="none"
                     placeholderTextColor="#9ca3af"
                     placeholder="New password"
-                    secureTextEntry
+                    secureTextEntry={!showPassword}
                     value={value}
                     onBlur={onBlur}
                     onChangeText={onChange}
                   />
+                  <TouchableOpacity
+                    onPress={() => setShowPassword(s => !s)}
+                    hitSlop={{top: 8, bottom: 8, left: 8, right: 8}}>
+                    {showPassword ? (
+                      <EyeOff color="#9ca3af" size={18} />
+                    ) : (
+                      <Eye color="#9ca3af" size={18} />
+                    )}
+                  </TouchableOpacity>
                 </View>
               )}
             />
@@ -124,15 +135,24 @@ const SetPassword = () => {
                   className={`flex flex-row items-center border ${errors.confirmPassword ? 'border-red-600' : 'border-[#ccc]'} bg-white mb-1.5 rounded-md px-2 py-3`}>
                   <LockKeyhole color="#9ca3af" size={18} />
                   <TextInput
-                    className="w-full ml-2"
+                    className="flex-1 ml-2"
                     autoCapitalize="none"
                     placeholderTextColor="#9ca3af"
                     placeholder="Confirm new password"
-                    secureTextEntry
+                    secureTextEntry={!showConfirmPassword}
                     value={value}
                     onBlur={onBlur}
                     onChangeText={onChange}
                   />
+                  <TouchableOpacity
+                    onPress={() => setShowConfirmPassword(s => !s)}
+                    hitSlop={{top: 8, bottom: 8, left: 8, right: 8}}>
+                    {showConfirmPassword ? (
+                      <EyeOff color="#9ca3af" size={18} />
+                    ) : (
+                      <Eye color="#9ca3af" size={18} />
+                    )}
+                  </TouchableOpacity>
                 </View>
               )}
             />

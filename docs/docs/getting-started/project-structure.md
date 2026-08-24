@@ -52,21 +52,24 @@ The Swift/Objective-C source for the two native bridges lives in `fe/ios/`, not 
 ```
 fe/ios/
 ├── RealityKitFeature/
-│   ├── RealityKitView.swift            # The furniture-placement/AR viewer (~636 lines)
+│   ├── RealityKitView.swift            # The furniture-placement/AR viewer
 │   ├── RealityKitViewManager.swift/.m    # Its RCTViewManager
-│   ├── RealityKitModule.m                 # Plain NativeModule export shim
-│   └── RealityKitViewController.swift      # Contains RealityKitModule's Swift implementation
-│                                              # (misleadingly named — see Native Bridge → Native Modules)
-├── RoomplanViewManager.swift              # Room-scanning manager + view class (one file)
-├── RoomplanViewManager.m                    # Its RCTViewManager export shim
+│   ├── RealityKitModule.swift/.m          # Plain NativeModule + its export shim
+│   └── RealityKitViewController.swift      # Dev-only VC for the document-picker test flow
+├── RoomPlanFeature/
+│   ├── RoomplanViewManager.swift          # Room-scanning manager + view class (one file)
+│   └── RoomplanViewManager.m                # Its RCTViewManager export shim
+├── BundledModels/                          # .usdz assets shipped in the app bundle
+│                                              # (Xcode groups flatten into the bundle root,
+│                                              #  so bundle:// URLs don't include the folder)
 ├── fe/AppDelegate.swift                      # App bootstrap
-├── fe/fe-Bridging-Header.h                    # Deliberately empty — see Native Bridge → Registration
+├── fe-Bridging-Header.h                       # Deliberately empty — see Native Bridge → Registration
 └── Podfile
 ```
 
 The JS-side wrappers for these live alongside the RN screens, in `fe/src/components/RoomScanner/`:
 
 - `RealityKitView.native.tsx` — `requireNativeComponent` wrapper + command dispatchers for `RealityKitView`
-- `RoomPlanView.native.js` — the equivalent thin wrapper for `RoomplanView`
+- `RoomPlanView.native.tsx` — the equivalent typed wrapper for `RoomplanView`
 
 The full mechanics of how these two sides talk to each other are in [Native Bridge Deep-Dive](/docs/native-bridge/overview-and-mental-model).

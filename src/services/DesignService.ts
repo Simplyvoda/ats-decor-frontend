@@ -77,6 +77,14 @@ const DesignService = {
     await api.post(`/designs/${id}/view`);
   },
 
+  // Publish to / remove from Explore without touching anything else
+  async setVisibility(id: string, isPublic: boolean): Promise<IDesignResponse> {
+    const res = await api.patch(`/designs/${id}/visibility`, {
+      is_public: isPublic,
+    });
+    return res.data;
+  },
+
   async deleteDesign(id: string): Promise<void> {
     await api.delete(`/designs/${id}`);
   },

@@ -2,18 +2,21 @@ import React, {useRef, useState} from 'react';
 import {
   ActivityIndicator,
   NativeModules,
-  NativeSyntheticEvent,
   StyleSheet,
   Text,
   TouchableOpacity,
-  UIManager,
   View,
-  findNodeHandle,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {useNavigation} from '@react-navigation/native';
 import {Check, ChevronLeft, RotateCcw} from 'lucide-react-native';
-import RoomPlanView from '../components/RoomScanner/RoomPlanView.native';
+import Toast from 'react-native-toast-message';
+import RoomPlanView, {
+  abortScanningCommand,
+  resetScanningCommand,
+  startScanningCommand,
+  stopScanningCommand,
+} from '../components/RoomScanner/RoomPlanView.native';
 import {goBack} from '../utils/navigation';
 
 const {RealityKitModule} = NativeModules;
@@ -25,28 +28,23 @@ export default function ScannerScreen() {
   const [scanning, setScanning] = useState(false);
   const [processing, setProcessing] = useState(false);
 
-  const dispatchCommand = (commandName: string) => {
-    const nodeHandle = findNodeHandle(ref.current);
-    if (nodeHandle == null) {
+  const onExportComplete = (e: {
+    nativeEvent: {json?: string; fileUrl?: string; error?: string};
+  }) => {
+    const {fileUrl, error} = e.nativeEvent;
+    setProcessing(false);
+
+    // No fileUrl means the native export failed — navigating to the viewer
+    // with nothing to load would just show a broken screen.
+    if (error || !fileUrl) {
+      setScanning(false);
+      Toast.show({
+        type: 'error',
+        text1: 'Scan processing failed',
+        text2: error ?? 'Please try scanning again',
+      });
       return;
     }
-    UIManager.dispatchViewManagerCommand(
-      nodeHandle,
-      UIManager.getViewManagerConfig('RoomplanView').Commands[commandName],
-      [],
-    );
-  };
-
-  const onScanFinished = (e: NativeSyntheticEvent<{roomJson: string}>) => {
-    console.log('Scan JSON:', e.nativeEvent.roomJson);
-  };
-
-  const onExportComplete = (
-    e: NativeSyntheticEvent<{json: string; usdzBase64: string; fileUrl: string}>,
-  ) => {
-    const {fileUrl} = e.nativeEvent;
-    console.log('Export complete, fileUrl:', fileUrl);
-    setProcessing(false);
 
     // Saving happens in ARViewer (⋮ → Save design) so the design gets a
     // real snapshot thumbnail instead of a blind background upload here.
@@ -54,22 +52,24 @@ export default function ScannerScreen() {
   };
 
   const startScan = () => {
-    dispatchCommand('startScanning');
+    startScanningCommand(ref);
     setScanning(true);
   };
 
   const resetScan = () => {
-    dispatchCommand('resetScanning');
+    resetScanningCommand(ref);
   };
 
   const finishScan = () => {
     setProcessing(true);
-    dispatchCommand('stopScanning');
+    stopScanningCommand(ref);
   };
 
   const onBackPress = () => {
     if (scanning) {
-      dispatchCommand('abortScanning');
+      // Abort (not stop): ends the session with no export, so leaving
+      // mid-scan never triggers onExportComplete.
+      abortScanningCommand(ref);
     }
     goBack(navigation);
   };
@@ -88,7 +88,6 @@ export default function ScannerScreen() {
       <RoomPlanView
         ref={ref}
         style={StyleSheet.absoluteFill}
-        onScanFinished={onScanFinished}
         onExportComplete={onExportComplete}
       />
 
@@ -138,10 +137,16 @@ export default function ScannerScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Dev-only affordance, preserved from the old UI */}
-        {/* <TouchableOpacity onPress={loadSavedRoomDev} hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
-          <Text style={styles.devLink}>[Dev] Load saved room</Text>
-        </TouchableOpacity> */}
+        {/* Dev-only: skip scanning by loading the last saved room. __DEV__ is
+            the JS twin of the native #if DEBUG — stripped from release
+            bundles by the bundler, not by someone remembering to delete it. */}
+        {__DEV__ && (
+          <TouchableOpacity
+            onPress={loadSavedRoomDev}
+            hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
+            <Text style={styles.devLink}>[Dev] Load saved room</Text>
+          </TouchableOpacity>
+        )}
       </SafeAreaView>
 
       {processing && (

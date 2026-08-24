@@ -1,4 +1,11 @@
-import {ChevronLeft, LockKeyhole, Mail, User} from 'lucide-react-native';
+import {
+  ChevronLeft,
+  Eye,
+  EyeOff,
+  LockKeyhole,
+  Mail,
+  User,
+} from 'lucide-react-native';
 import React, {useState} from 'react';
 import {Controller, useForm} from 'react-hook-form';
 import {
@@ -7,6 +14,7 @@ import {
   ScrollView,
   Text,
   TextInput,
+  TouchableOpacity,
   View,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
@@ -48,6 +56,8 @@ const SignUp = () => {
   const navigation = useNavigation();
   const {signInUser} = useUserContext();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isAppleSubmitting, setIsAppleSubmitting] = useState(false);
 
   const onApplePress = async () => {
@@ -94,7 +104,7 @@ const SignUp = () => {
   const onSubmit = async (data: FormData) => {
     try {
       setIsSubmitting(true);
-      const res: any = await AuthService.signUp({
+      await AuthService.signUp({
         first_name: data.first_name,
         last_name: data.last_name,
         email: data.email,
@@ -251,15 +261,24 @@ const SignUp = () => {
                     className={`flex flex-row items-center border ${errors.password ? 'border-red-600' : 'border-[#ccc]'} bg-white mb-1.5 rounded-md px-2 py-3`}>
                     <LockKeyhole color="#9ca3af" size={18} />
                     <TextInput
-                      className="w-full ml-2"
+                      className="flex-1 ml-2"
                       autoCapitalize="none"
                       placeholderTextColor="#9ca3af"
                       placeholder="Password"
-                      secureTextEntry
+                      secureTextEntry={!showPassword}
                       value={value}
                       onBlur={onBlur}
                       onChangeText={onChange}
                     />
+                    <TouchableOpacity
+                      onPress={() => setShowPassword(s => !s)}
+                      hitSlop={{top: 8, bottom: 8, left: 8, right: 8}}>
+                      {showPassword ? (
+                        <EyeOff color="#9ca3af" size={18} />
+                      ) : (
+                        <Eye color="#9ca3af" size={18} />
+                      )}
+                    </TouchableOpacity>
                   </View>
                 )}
               />
@@ -282,15 +301,24 @@ const SignUp = () => {
                     className={`flex flex-row items-center border ${errors.first_name ? 'border-red-600' : 'border-[#ccc]'} bg-white mb-1.5 rounded-md px-2 py-3`}>
                     <LockKeyhole color="#9ca3af" size={18} />
                     <TextInput
-                      className="w-full ml-2"
+                      className="flex-1 ml-2"
                       autoCapitalize="none"
                       placeholderTextColor="#9ca3af"
                       placeholder="Confirm Password"
-                      secureTextEntry
+                      secureTextEntry={!showConfirmPassword}
                       value={value}
                       onBlur={onBlur}
                       onChangeText={onChange}
                     />
+                    <TouchableOpacity
+                      onPress={() => setShowConfirmPassword(s => !s)}
+                      hitSlop={{top: 8, bottom: 8, left: 8, right: 8}}>
+                      {showConfirmPassword ? (
+                        <EyeOff color="#9ca3af" size={18} />
+                      ) : (
+                        <Eye color="#9ca3af" size={18} />
+                      )}
+                    </TouchableOpacity>
                   </View>
                 )}
               />

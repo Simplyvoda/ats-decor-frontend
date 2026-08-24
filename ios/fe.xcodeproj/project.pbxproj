@@ -18,17 +18,15 @@
 		A016CC112FDA328B00C215B3 /* RealityKitViewManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A016CC0E2FDA328B00C215B3 /* RealityKitViewManager.swift */; };
 		A016CC122FDA328B00C215B3 /* RealityKitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A016CC0F2FDA328B00C215B3 /* RealityKitView.swift */; };
 		A016CC142FDA3B1B00C215B3 /* test_chair.usdz in Resources */ = {isa = PBXBuildFile; fileRef = A016CC132FDA3B1B00C215B3 /* test_chair.usdz */; };
-		A02821022EC87DB800F31026 /* Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = A02821012EC87DB800F31026 /* Dummy.swift */; };
 		A02821042EC8915800F31026 /* ARKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A02821032EC8915800F31026 /* ARKit.framework */; };
 		A02821062EC8916500F31026 /* RealityKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A02821052EC8916500F31026 /* RealityKit.framework */; };
 		A02821102EC89D9800F31026 /* RoomplanViewManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A028210F2EC89D9800F31026 /* RoomplanViewManager.swift */; };
 		A02821652EC8AB0200F31026 /* RoomplanViewManager.m in Sources */ = {isa = PBXBuildFile; fileRef = A02821642EC8AB0200F31026 /* RoomplanViewManager.m */; };
 		A0679A322F33B975002EF03A /* RealityKitModule.m in Sources */ = {isa = PBXBuildFile; fileRef = A0679A302F33B975002EF03A /* RealityKitModule.m */; };
 		A0679A332F33B975002EF03A /* RealityKitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0679A312F33B975002EF03A /* RealityKitViewController.swift */; };
+		A0FEA7042F00000000000004 /* RealityKitModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0FEA7032F00000000000003 /* RealityKitModule.swift */; };
 		A090A67B300BC46900C746E3 /* empty_room.usdz in Resources */ = {isa = PBXBuildFile; fileRef = A090A679300BC46900C746E3 /* empty_room.usdz */; };
 		A090A67C300BC46900C746E3 /* Stylized_One_Unit_Apartment.usdz in Resources */ = {isa = PBXBuildFile; fileRef = A090A67A300BC46900C746E3 /* Stylized_One_Unit_Apartment.usdz */; };
-		A0D618392FF648670005B6BC /* Polycam_Room_plan.usdz in Resources */ = {isa = PBXBuildFile; fileRef = A0D618382FF648670005B6BC /* Polycam_Room_plan.usdz */; };
-		A0D6183B2FFFA3CB0005B6BC /* room_apartment_2.usdz in Resources */ = {isa = PBXBuildFile; fileRef = A0D6183A2FFFA3CB0005B6BC /* room_apartment_2.usdz */; };
 		CEA2952313CD45C0B7E58240 /* Colors.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5C452F58C2DC42B2BD956E2D /* Colors.xcassets */; };
 		F2DBCCAAE06C42F3BBAD6361 /* BootSplash.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E8317B5416F649B5BC4CD939 /* BootSplash.storyboard */; };
 /* End PBXBuildFile section */
@@ -47,13 +45,13 @@
 		A016CC0E2FDA328B00C215B3 /* RealityKitViewManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RealityKitViewManager.swift; sourceTree = "<group>"; };
 		A016CC0F2FDA328B00C215B3 /* RealityKitView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RealityKitView.swift; sourceTree = "<group>"; };
 		A016CC132FDA3B1B00C215B3 /* test_chair.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = test_chair.usdz; sourceTree = "<group>"; };
-		A02821012EC87DB800F31026 /* Dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Dummy.swift; sourceTree = "<group>"; };
 		A02821032EC8915800F31026 /* ARKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ARKit.framework; path = System/Library/Frameworks/ARKit.framework; sourceTree = SDKROOT; };
 		A02821052EC8916500F31026 /* RealityKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = RealityKit.framework; path = System/Library/Frameworks/RealityKit.framework; sourceTree = SDKROOT; };
 		A028210F2EC89D9800F31026 /* RoomplanViewManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomplanViewManager.swift; sourceTree = "<group>"; };
 		A02821642EC8AB0200F31026 /* RoomplanViewManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RoomplanViewManager.m; sourceTree = "<group>"; };
 		A0679A302F33B975002EF03A /* RealityKitModule.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RealityKitModule.m; sourceTree = "<group>"; };
 		A0679A312F33B975002EF03A /* RealityKitViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RealityKitViewController.swift; sourceTree = "<group>"; };
+		A0FEA7032F00000000000003 /* RealityKitModule.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RealityKitModule.swift; sourceTree = "<group>"; };
 		A090A679300BC46900C746E3 /* empty_room.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = empty_room.usdz; sourceTree = "<group>"; };
 		A090A67A300BC46900C746E3 /* Stylized_One_Unit_Apartment.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = Stylized_One_Unit_Apartment.usdz; sourceTree = "<group>"; };
 		A0A43A723025661300D60071 /* fe.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = fe.entitlements; path = fe/fe.entitlements; sourceTree = "<group>"; };
@@ -126,16 +124,10 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
-				A090A679300BC46900C746E3 /* empty_room.usdz */,
-				A090A67A300BC46900C746E3 /* Stylized_One_Unit_Apartment.usdz */,
-				A0D6183A2FFFA3CB0005B6BC /* room_apartment_2.usdz */,
-				A0D618382FF648670005B6BC /* Polycam_Room_plan.usdz */,
-				A016CC132FDA3B1B00C215B3 /* test_chair.usdz */,
 				A0679A2F2F33B975002EF03A /* RealityKitFeature */,
+				A0FEA7012F00000000000001 /* RoomPlanFeature */,
+				A0FEA7022F00000000000002 /* BundledModels */,
 				A0A60AD22EC8E4380095C3EB /* fe-Bridging-Header.h */,
-				A02821642EC8AB0200F31026 /* RoomplanViewManager.m */,
-				A028210F2EC89D9800F31026 /* RoomplanViewManager.swift */,
-				A02821012EC87DB800F31026 /* Dummy.swift */,
 				13B07FAE1A68108700A75B9A /* fe */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				83CBBA001A601CBA00E9B192 /* Products */,
@@ -164,8 +156,30 @@
 				A016CC0E2FDA328B00C215B3 /* RealityKitViewManager.swift */,
 				A0679A302F33B975002EF03A /* RealityKitModule.m */,
 				A0679A312F33B975002EF03A /* RealityKitViewController.swift */,
+				A0FEA7032F00000000000003 /* RealityKitModule.swift */,
 			);
 			path = RealityKitFeature;
+			sourceTree = "<group>";
+		};
+		A0FEA7012F00000000000001 /* RoomPlanFeature */ = {
+			isa = PBXGroup;
+			children = (
+				A028210F2EC89D9800F31026 /* RoomplanViewManager.swift */,
+				A02821642EC8AB0200F31026 /* RoomplanViewManager.m */,
+			);
+			path = RoomPlanFeature;
+			sourceTree = "<group>";
+		};
+		A0FEA7022F00000000000002 /* BundledModels */ = {
+			isa = PBXGroup;
+			children = (
+				A090A679300BC46900C746E3 /* empty_room.usdz */,
+				A090A67A300BC46900C746E3 /* Stylized_One_Unit_Apartment.usdz */,
+				A016CC132FDA3B1B00C215B3 /* test_chair.usdz */,
+				A0D6183A2FFFA3CB0005B6BC /* room_apartment_2.usdz */,
+				A0D618382FF648670005B6BC /* Polycam_Room_plan.usdz */,
+			);
+			path = BundledModels;
 			sourceTree = "<group>";
 		};
 		BBD78D7AC51CEA395F1C20DB /* Pods */ = {
@@ -242,9 +256,7 @@
 				A016CC142FDA3B1B00C215B3 /* test_chair.usdz in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				51DC9810477F8FC2683D429F /* PrivacyInfo.xcprivacy in Resources */,
-				A0D618392FF648670005B6BC /* Polycam_Room_plan.usdz in Resources */,
 				F2DBCCAAE06C42F3BBAD6361 /* BootSplash.storyboard in Resources */,
-				A0D6183B2FFFA3CB0005B6BC /* room_apartment_2.usdz in Resources */,
 				CEA2952313CD45C0B7E58240 /* Colors.xcassets in Resources */,
 				58027BFBC61B45D0A14FE933 /* CormorantGaramond-Medium.ttf in Resources */,
 				566E3793A2904823BDFA927B /* DMSans-Medium.ttf in Resources */,
@@ -342,7 +354,7 @@
 				A02821102EC89D9800F31026 /* RoomplanViewManager.swift in Sources */,
 				A016CC122FDA328B00C215B3 /* RealityKitView.swift in Sources */,
 				A0679A332F33B975002EF03A /* RealityKitViewController.swift in Sources */,
-				A02821022EC87DB800F31026 /* Dummy.swift in Sources */,
+				A0FEA7042F00000000000004 /* RealityKitModule.swift in Sources */,
 				A02821652EC8AB0200F31026 /* RoomplanViewManager.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

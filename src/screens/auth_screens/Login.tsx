@@ -1,7 +1,14 @@
-import {ChevronLeft, LockKeyhole, Mail} from 'lucide-react-native';
+import {ChevronLeft, Eye, EyeOff, LockKeyhole, Mail} from 'lucide-react-native';
 import React, {useState} from 'react';
 import {Controller, useForm} from 'react-hook-form';
-import {Pressable, ScrollView, Text, TextInput, View} from 'react-native';
+import {
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import PrimaryButton from '../../components/molecules/PrimaryButton';
 import {goBack, navigateTo} from '../../utils/navigation';
@@ -24,6 +31,7 @@ const Login = () => {
   const { signInUser } = useUserContext();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const {
     control,
     reset,
@@ -135,15 +143,24 @@ const Login = () => {
                     className={`flex flex-row items-center border ${errors.password ? 'border-red-600' : 'border-[#ccc]'} bg-white mb-1.5 rounded-md px-2 py-3`}>
                     <LockKeyhole color="#9ca3af" size={18} />
                     <TextInput
-                      className="w-full ml-2"
+                      className="flex-1 ml-2"
                       autoCapitalize="none"
                       placeholderTextColor="#9ca3af"
                       placeholder="Password"
-                      secureTextEntry
+                      secureTextEntry={!showPassword}
                       value={value}
                       onBlur={onBlur}
                       onChangeText={onChange}
                     />
+                    <TouchableOpacity
+                      onPress={() => setShowPassword(s => !s)}
+                      hitSlop={{top: 8, bottom: 8, left: 8, right: 8}}>
+                      {showPassword ? (
+                        <EyeOff color="#9ca3af" size={18} />
+                      ) : (
+                        <Eye color="#9ca3af" size={18} />
+                      )}
+                    </TouchableOpacity>
                   </View>
                 )}
               />

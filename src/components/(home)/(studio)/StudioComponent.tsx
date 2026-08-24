@@ -94,6 +94,7 @@ const StudioComponent = () => {
                 (navigation as any).navigate('ARViewer', {
                   modelUrl: design.file_url,
                   designId: design.id,
+                  designName: design.name,
                   furnitureLayout: design.furniture_layout,
                 })
               }

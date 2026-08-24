@@ -1,3 +1,37 @@
+//
+//  RealityKitView.swift
+//
+//  The 3D design viewer: loads a scanned/template room model, lets the user
+//  orbit a virtual camera through it, and place/move/scale/rotate furniture.
+//
+//  ── WHERE THIS SITS IN THE BRIDGE ────────────────────────────────────────
+//  This class is pure UIKit/RealityKit — it knows almost nothing about React
+//  Native. The bridge touches it in exactly three places:
+//
+//    props    JS sets modelUrl → RN applies it via KVC (setValue:forKey:),
+//             which triggers the var's didSet → loadRoom() runs.
+//    commands JS calls e.g. loadFurnitureCommand() → UIManager dispatch →
+//             RealityKitViewManager resolves the reactTag to this instance →
+//             plain Swift method call (loadFurniture, captureSnapshot, …).
+//    events   The @objc RCTDirectEventBlock vars below are callback slots
+//             RN injects when JS passes the matching prop; calling one IS
+//             sending the event to JS as e.nativeEvent.
+//
+//  Registration lives in RealityKitViewManager.swift/.m — see the comments
+//  there for how the runtime string-matching works.
+//
+//  ── SCENE STRUCTURE ──────────────────────────────────────────────────────
+//  • The room model is loaded, then shifted so its center sits at the world
+//    origin — all camera/furniture math assumes this.
+//  • Camera rig: a pivot Entity at the origin with a PerspectiveCamera as
+//    its child. Orbiting = rotating the pivot; zooming = changing the
+//    camera's local distance (cameraRadius). See applyOrbit().
+//  • cameraMode is .nonAR: this is a virtual 3D scene renderer, NOT a live
+//    camera/AR passthrough — which is also why it works in the simulator.
+//  • Each placed furniture piece hangs under its own AnchorEntity at the
+//    floor point where it was placed.
+//
+
 import UIKit
 import RealityKit
 import CryptoKit
@@ -22,6 +56,13 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
 
     private var arView: ARView!
 
+    // ── Event slots (native → JS) ─────────────────────────────────────────
+    // These are NOT ordinary closures we assign ourselves: React Native
+    // injects each block when JS passes the matching prop (declared in
+    // RealityKitViewManager.m). Calling one IS emitting the event; the
+    // dictionary arrives in JS as e.nativeEvent. If JS didn't pass the
+    // prop, the var stays nil — hence the optional-chaining calls.
+
     // Fired with {path} after captureSnapshot(), or {error} on failure
     @objc var onSnapshotReady: RCTDirectEventBlock?
 
@@ -30,6 +71,9 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
 
     // Fired with {layout} (a JSON-encoded array) after exportFurnitureLayout(), or {error} on failure
     @objc var onFurnitureLayoutExported: RCTDirectEventBlock?
+
+    // Fired with {path} after exportDesignPdf(), or {error} on failure
+    @objc var onDesignPdfExported: RCTDirectEventBlock?
 
     private var yaw: Float = 0
     private var pitch: Float = 0
@@ -53,7 +97,11 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
     private var selectedFurniture: Entity?
     private var draggingFurniture: Entity?
 
-    // Prop set by React Native
+    // ── Prop (JS → native) ────────────────────────────────────────────────
+    // RN doesn't call a setter method for props — it applies them via
+    // Key-Value Coding (setValue:forKey:"modelUrl"), which Swift routes
+    // through this stored property. didSet is therefore the ONLY hook we
+    // get, making it the de facto "prop changed" handler.
     @objc var modelUrl: NSString? {
         didSet {
             guard let urlStr = modelUrl as String?, let url = resolveURL(urlStr) else { return }
@@ -77,6 +125,8 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
         setup()
     }
 
+    // Required by UIView, but this view is only ever created in code (by the
+    // manager's view() factory), never from a storyboard/nib.
     required init?(coder: NSCoder) { fatalError() }
 
     private func setup() {
@@ -227,7 +277,10 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
     private func floorLift(for worldBounds: BoundingBox) -> Float {
         let footprint = max(worldBounds.extents.x, worldBounds.extents.z)
         let isFlat = footprint > 0 && worldBounds.extents.y < footprint * 0.03
-        return isFlat ? 0.01 : 0.001
+        // 3cm for flat pieces — 1cm proved not enough in practice: scan meshes
+        // have uneven floors, so a rug still dipped below the surface across
+        // most of its area and was barely visible until enlarged.
+        return isFlat ? 0.03 : 0.001
     }
 
     // Which placed furniture piece (if any) is under this screen point?
@@ -298,6 +351,135 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
             } catch {
                 self.onSnapshotReady?(["error": error.localizedDescription])
             }
+        }
+    }
+
+    // MARK: - PDF Export
+
+    // Captures the design as a one-page PDF: room view on top, top-down view
+    // below, PlaDomus logo bottom-left. Moves the camera programmatically for
+    // each shot and restores the exact prior state afterwards, so the user's
+    // viewpoint is untouched. Result path arrives via onDesignPdfExported.
+    func exportDesignPdf(name: String) {
+        guard let cam = camera, let pivot = cameraPivot else {
+            onDesignPdfExported?(["error": "Scene not ready"])
+            return
+        }
+
+        // Snapshot the full camera state so it can be restored exactly
+        let savedCam = cam.transform
+        let savedPivotOrientation = pivot.orientation
+        let savedPivotPosition = pivot.position
+        let restore = {
+            cam.transform = savedCam
+            pivot.orientation = savedPivotOrientation
+            pivot.position = savedPivotPosition
+        }
+
+        // Shot 1 — room view. If the user is currently in top view, temporarily
+        // recreate the room-view camera they'd get from toggling back.
+        if isTopView, let saved = savedCamTransform {
+            cam.transform = saved
+            pivot.orientation =
+                simd_quatf(angle: yaw, axis: [0, 1, 0]) *
+                simd_quatf(angle: pitch, axis: [1, 0, 0])
+        }
+
+        // Camera moves need a beat before snapshotting — RealityKit renders
+        // continuously, but grabbing the very next frame can race the move.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in
+            guard let self = self else { return }
+            self.arView.snapshot(saveToHDR: false) { roomImage in
+                // Shot 2 — top-down view (same camera math as toggleTopView)
+                pivot.orientation = simd_quatf(angle: 0, axis: [0, 1, 0])
+                let extent = self.roomBounds.map { max($0.extents.x, $0.extents.z) } ?? 5.0
+                let height = (self.roomBounds?.extents.y ?? 2.0) * 0.5 + extent * 1.1
+                cam.position = [0, height, 0]
+                cam.look(at: .zero, from: cam.position, upVector: [0, 0, -1], relativeTo: pivot)
+
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                    self.arView.snapshot(saveToHDR: false) { topImage in
+                        restore()
+
+                        guard let roomImage = roomImage, let topImage = topImage else {
+                            self.onDesignPdfExported?(["error": "Could not capture the scene"])
+                            return
+                        }
+                        self.composeDesignPdf(name: name, roomView: roomImage, topView: topImage)
+                    }
+                }
+            }
+        }
+    }
+
+    private func composeDesignPdf(name: String, roomView: UIImage, topView: UIImage) {
+        let pageRect = CGRect(x: 0, y: 0, width: 595.2, height: 841.8) // A4 portrait
+        let margin: CGFloat = 40
+        let contentWidth = pageRect.width - margin * 2
+
+        let renderer = UIGraphicsPDFRenderer(bounds: pageRect)
+        let data = renderer.pdfData { ctx in
+            ctx.beginPage()
+
+            let titleAttrs: [NSAttributedString.Key: Any] = [
+                .font: UIFont.systemFont(ofSize: 24, weight: .semibold),
+                .foregroundColor: UIColor.black,
+            ]
+            let labelAttrs: [NSAttributedString.Key: Any] = [
+                .font: UIFont.systemFont(ofSize: 13, weight: .medium),
+                .foregroundColor: UIColor.darkGray,
+            ]
+
+            (name as NSString).draw(at: CGPoint(x: margin, y: margin), withAttributes: titleAttrs)
+
+            var y: CGFloat = margin + 44
+
+            func drawSection(_ image: UIImage, label: String) {
+                (label as NSString).draw(at: CGPoint(x: margin, y: y), withAttributes: labelAttrs)
+                y += 20
+                let maxHeight: CGFloat = 280
+                let scale = min(contentWidth / image.size.width, maxHeight / image.size.height)
+                let w = image.size.width * scale
+                let h = image.size.height * scale
+                // Center horizontally — device snapshots are tall portrait shots
+                image.draw(in: CGRect(x: margin + (contentWidth - w) / 2, y: y, width: w, height: h))
+                y += h + 24
+            }
+
+            drawSection(roomView, label: "Room view")
+            drawSection(topView, label: "Top view")
+
+            // Brand mark, bottom-left. The image lives in the app's asset
+            // catalog (PladomusLogo.imageset); fall back to a wordmark so a
+            // missing asset can never silently drop the branding.
+            let logoHeight: CGFloat = 36
+            if let logo = UIImage(named: "PladomusLogo") {
+                let logoWidth = logo.size.width * (logoHeight / logo.size.height)
+                logo.draw(in: CGRect(
+                    x: margin,
+                    y: pageRect.height - margin - logoHeight,
+                    width: logoWidth,
+                    height: logoHeight
+                ))
+            } else {
+                let fallbackAttrs: [NSAttributedString.Key: Any] = [
+                    .font: UIFont.systemFont(ofSize: 16, weight: .semibold),
+                    .foregroundColor: UIColor(red: 0.77, green: 0.65, blue: 0.39, alpha: 1),
+                ]
+                ("PlaDomus" as NSString).draw(
+                    at: CGPoint(x: margin, y: pageRect.height - margin - 20),
+                    withAttributes: fallbackAttrs
+                )
+            }
+        }
+
+        let filename = "design_export_\(Int(Date().timeIntervalSince1970 * 1000)).pdf"
+        let fileURL = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(filename)
+        do {
+            try data.write(to: fileURL)
+            onDesignPdfExported?(["path": fileURL.path])
+        } catch {
+            onDesignPdfExported?(["error": error.localizedDescription])
         }
     }
 

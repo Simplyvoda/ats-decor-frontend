@@ -1,6 +1,29 @@
 //
 //  RoomplanViewManager.swift
 //
+//  ── HOW THIS FILE CONNECTS TO JAVASCRIPT ─────────────────────────────────
+//  This file holds BOTH halves of the RoomPlan native component:
+//
+//    • RoomplanViewManager (an RCTViewManager) — the factory React Native
+//      talks to. RN finds it because RoomplanViewManager.m declares
+//      RCT_EXTERN_MODULE(RoomplanViewManager, RCTViewManager), which looks
+//      the class up BY NAME STRING at runtime via the Objective-C runtime —
+//      there is no compile-time link between the .m file and this class.
+//      The @objc(RoomplanViewManager) attribute below is what publishes the
+//      class under that exact name; if the two strings ever drift apart,
+//      nothing errors — the component just silently stops existing.
+//
+//    • RoomplanView (a UIView) — the actual view instance RN mounts. On the
+//      JS side, requireNativeComponent('RoomplanView') works because RN
+//      strips the "Manager" suffix from the manager's name to derive the
+//      component name: RoomplanViewManager → "RoomplanView".
+//
+//  Data crosses the bridge in three ways:
+//    commands  JS → native   dispatchViewManagerCommand → @objc methods here
+//    props     JS → native   (none on this component — commands only)
+//    events    native → JS   RCTBubblingEventBlock properties on the view;
+//                            calling the block IS sending the event
+//  ─────────────────────────────────────────────────────────────────────────
 
 import Foundation
 import UIKit
@@ -10,11 +33,15 @@ import React
 @objc(RoomplanViewManager)
 class RoomplanViewManager: RCTViewManager {
 
-  // 🚨 MUST be true for RoomPlan / ARKit on iOS 17
+  // RN normally initializes view managers on a background queue. Returning
+  // true forces main-queue setup, which RoomPlan/ARKit need — their session
+  // and view objects must be created on the main thread.
   override static func requiresMainQueueSetup() -> Bool {
     return true
   }
 
+  // Called by RN every time it needs to mount a <RoomPlanView /> — one call
+  // per mounted component instance, not once globally.
   override func view() -> UIView! {
     if #available(iOS 16.0, *) {
       return RoomplanView()
@@ -27,6 +54,11 @@ class RoomplanViewManager: RCTViewManager {
     }
   }
 
+  // This dict is what JS reads as
+  // UIManager.getViewManagerConfig('RoomplanView').Commands — the command
+  // "ids" JS passes to dispatchViewManagerCommand. On the classic bridge
+  // these can simply be the method-name strings themselves; RN resolves the
+  // value back to a selector on this manager at dispatch time.
   override func constantsToExport() -> [AnyHashable : Any]! {
     return [
       "Commands": [
@@ -38,42 +70,38 @@ class RoomplanViewManager: RCTViewManager {
     ]
   }
 
+  // ── Commands ─────────────────────────────────────────────────────────────
+  // Each command arrives here on the MANAGER with a reactTag — an integer id
+  // for the specific mounted view instance. addUIBlock schedules the closure
+  // on the UI thread after any pending view-hierarchy updates settle, and
+  // hands us the registry to translate tag → live RoomplanView instance.
+  // That indirection is the whole reason these methods exist: the manager is
+  // a singleton, the views are per-mount, and the tag is how JS addresses one.
+
   @objc func startScanning(_ reactTag: NSNumber) {
     bridge.uiManager.addUIBlock { _, viewRegistry in
-      guard
-        let view = viewRegistry?[reactTag] as? RoomplanView
-      else { return }
-
+      guard let view = viewRegistry?[reactTag] as? RoomplanView else { return }
       view.startScanning()
     }
   }
 
   @objc func stopScanning(_ reactTag: NSNumber) {
     bridge.uiManager.addUIBlock { _, viewRegistry in
-      guard
-        let view = viewRegistry?[reactTag] as? RoomplanView
-      else { return }
-
+      guard let view = viewRegistry?[reactTag] as? RoomplanView else { return }
       view.stopScanning()
     }
   }
 
   @objc func resetScanning(_ reactTag: NSNumber) {
     bridge.uiManager.addUIBlock { _, viewRegistry in
-      guard
-        let view = viewRegistry?[reactTag] as? RoomplanView
-      else { return }
-
+      guard let view = viewRegistry?[reactTag] as? RoomplanView else { return }
       view.resetScanning()
     }
   }
 
   @objc func abortScanning(_ reactTag: NSNumber) {
     bridge.uiManager.addUIBlock { _, viewRegistry in
-      guard
-        let view = viewRegistry?[reactTag] as? RoomplanView
-      else { return }
-
+      guard let view = viewRegistry?[reactTag] as? RoomplanView else { return }
       view.abortScanning()
     }
   }
@@ -88,24 +116,29 @@ class RoomplanView: UIView, RoomCaptureSessionDelegate {
   private var didStartSession = false
   private var isCleaningUp = false
 
-
-  // ✅ ADD THESE EVENT CALLBACK PROPERTIES
-  @objc var onScanFinished: RCTBubblingEventBlock?
+  // Event slot, native → JS. This is NOT an ordinary Swift closure we
+  // assign ourselves: React Native injects the block when the JS side
+  // passes an onExportComplete prop (the .m file's RCT_EXPORT_VIEW_PROPERTY
+  // line is what wires it up). Calling the block IS emitting the event —
+  // the dictionary argument arrives in JS as e.nativeEvent.
   @objc var onExportComplete: RCTBubblingEventBlock?
-
-  var latestRoomModelURL: URL?
-
 
   override init(frame: CGRect) {
     super.init(frame: frame)
     backgroundColor = .black
   }
 
+  // Required by UIView's designated-initializer rules, but this view is only
+  // ever created in code (by the manager's view() method), never from a
+  // storyboard/nib — so decoding is deliberately unsupported.
   required init?(coder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
   }
 
-  // ✅ Create RoomCaptureView ONLY when attached to window
+  // Create the RoomCaptureView only once we're actually attached to a
+  // window: RoomPlan needs a live view hierarchy, and RN mounts/unmounts
+  // this view as the screen navigates. Detaching (window == nil) tears
+  // everything down so the camera/session never outlives the screen.
   override func didMoveToWindow() {
     super.didMoveToWindow()
 
@@ -114,17 +147,16 @@ class RoomplanView: UIView, RoomCaptureSessionDelegate {
       return
     }
 
+    // Set the flag before the async hop so a rapid second didMoveToWindow
+    // can't queue a duplicate creation. (createCaptureView sets it again —
+    // redundant on this path, but needed when resetScanning() calls it
+    // directly after clearing the flag.)
     guard !didCreateView else { return }
     didCreateView = true
 
     DispatchQueue.main.async { [weak self] in
       self?.createCaptureView()
     }
-  }
-
-  // ✅ Layout must be valid before scanning
-  override func layoutSubviews() {
-    super.layoutSubviews()
   }
 
   // Synchronous — caller must already be on main thread. Extracted so
@@ -234,6 +266,10 @@ class RoomplanView: UIView, RoomCaptureSessionDelegate {
     }
   }
 
+  // The "done" path: stopping WITH the delegate still attached means
+  // captureSession(_:didEndWith:) fires next, which processes and exports
+  // the scan. Compare abortScanning above, which nils the delegate first
+  // precisely so that callback never runs.
   func stopScanning() {
     DispatchQueue.main.async { [weak self] in
       guard let self = self else { return }
@@ -243,12 +279,13 @@ class RoomplanView: UIView, RoomCaptureSessionDelegate {
       }
 
       NSLog("🛑 Stopping RoomPlan session")
-      
-      // ✅ Just stop the session, keep the view!
+
+      // Just stop the session; the view stays so the frozen preview remains
+      // visible while the export processes.
       self.roomCaptureView?.captureSession.stop()
       self.didStartSession = false
     }
-}
+  }
 
   // MARK: - Cleanup (CRITICAL)
 
@@ -281,76 +318,63 @@ class RoomplanView: UIView, RoomCaptureSessionDelegate {
 
   // MARK: - RoomCaptureSessionDelegate
 
-  func captureSession(_ session: RoomCaptureSession, didUpdate room: CapturedRoom) {
-    // no-op
-  }
-
+  // Fires after stopScanning() (the delegate is nil'd on the abort/reset
+  // paths, so those never reach here). Turns the session's raw capture data
+  // into a .usdz the AR viewer can load, then reports the file URL to JS.
   func captureSession(_ session: RoomCaptureSession, didEndWith data: CapturedRoomData, error: Error?) {
-    // convert CapturedRoomData to a format that Reality kit can understand
-    // Reality kit will be used to create the walking through a room bit
     NSLog("📦 RoomPlan session ended")
 
-    // dispatch queue runs thing in the background
-    Task (priority: .userInitiated) {@MainActor in
-    do{
+    // RoomBuilder is async; run the processing in a Task pinned to the main
+    // actor since it ends by touching the event block (bridge callbacks
+    // should be invoked from the main thread for view events).
+    Task(priority: .userInitiated) { @MainActor in
+      do {
         NSLog("📦 Starting room builder process")
-        // The .beautifyObjects option smooths/cleans up the 3D mesh
+        // .beautifyObjects smooths/cleans the reconstructed 3D mesh
         let roomBuilder = RoomBuilder(options: [.beautifyObjects])
         let capturedRoom: CapturedRoom = try await roomBuilder.capturedRoom(from: data)
-     
 
-        // This gives you the app’s temporary folder inside its private sandbox.
+        // Metadata JSON is transient → temp dir. The model itself goes to
+        // Documents/savedRoom.usdz — a FIXED name, so each new scan
+        // overwrites the previous one. That's deliberate: the app treats
+        // "the last scan" as the working file (see RealityKitModule's
+        // getSavedRoomUrl, which reads this exact path), and saving a scan
+        // permanently means uploading it as a design, not keeping it here.
         let tmpDir = FileManager.default.temporaryDirectory
         let timestamp = Int(Date().timeIntervalSince1970)
         let metadataURL = tmpDir.appendingPathComponent("room_meta_\(timestamp).json")
-        // let modelURL = tmpDir.appendingPathComponent("room_\(timestamp).usdz")
-
         let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         let modelURL = documents.appendingPathComponent("savedRoom.usdz")
 
-
-        // Use export API on capturedRoom (throws)
-        
         if #available(iOS 17.0, *) {
-            // iOS 17+: rich export with metadata mapping & modelProvider
-            try capturedRoom.export(to: modelURL, metadataURL: metadataURL, modelProvider: nil, exportOptions: CapturedRoom.USDExportOptions())
+          // iOS 17+: export with the richer metadata-mapping API
+          try capturedRoom.export(to: modelURL, metadataURL: metadataURL, modelProvider: nil, exportOptions: CapturedRoom.USDExportOptions())
         } else {
-            // iOS 16 fallback: export USDZ using the older API
-            try capturedRoom.export(to: modelURL, exportOptions: CapturedRoom.USDExportOptions())
+          // iOS 16 fallback: model-only export
+          try capturedRoom.export(to: modelURL, exportOptions: CapturedRoom.USDExportOptions())
         }
 
-        // saving exported usdz
-        self.latestRoomModelURL = modelURL
-
-
-        // read meta data and json
         let metaData = try Data(contentsOf: metadataURL)
         let metaString = String(data: metaData, encoding: .utf8) ?? "{}"
 
-        // read usdz and base 64 encode
-        let modelData = try Data(contentsOf: modelURL)
-        let base64Usdz = modelData.base64EncodedString()
+        // Only the file URL and (small) metadata JSON cross the bridge.
+        // The model itself stays on disk — JS passes the URL around and
+        // uploads it as a file when saving, so shipping megabytes of model
+        // bytes through the bridge would be pure overhead.
+        self.onExportComplete?(["json": metaString, "fileUrl": modelURL.absoluteString])
 
-        // We only need Base64 if:
-        // ✔ You upload to cloud
-        // ✔ You store in JS state
-        // ✔ You send to backend
-        self.onScanFinished?(["roomJson": metaString])
-        // onExportComplete with both json + usdz base64
-        self.onExportComplete?(["json": metaString, "usdzBase64": base64Usdz, "fileUrl": modelURL.absoluteString])
-
-        // ✅ Clean up immediately after sending
         Task.detached(priority: .utility) {
-            try? FileManager.default.removeItem(at: metadataURL)
-            // try? FileManager.default.removeItem(at: modelURL)
-            NSLog("🧹 Temp files cleaned")
+          // The metadata file was already read into memory; the model file
+          // must stay — the AR viewer is about to load it from this URL.
+          try? FileManager.default.removeItem(at: metadataURL)
+          NSLog("🧹 Temp files cleaned")
         }
-    
-        }catch{
-        NSLog("❌ RoomPlan processing/export failed: \(error)");
-        self.onScanFinished?(["roomJson": ""])
-        self.onExportComplete?(["json": "", "usdzBase64": ""])
-        }
-        }
+      } catch {
+        NSLog("❌ RoomPlan processing/export failed: \(error)")
+        // No fileUrl key on failure — JS checks for its absence and shows
+        // an error instead of navigating to the viewer with nothing to load.
+        self.onExportComplete?(["error": error.localizedDescription])
+      }
+    }
   }
 }

@@ -1,6 +1,18 @@
 import React from 'react';
 import { UIManager, findNodeHandle, requireNativeComponent } from 'react-native';
 
+// The JS half of the RealityKit bridge.
+//
+// 'RealityKitView' (used in requireNativeComponent and every command below)
+// is a runtime lookup key, not an import: RN derives it natively by
+// stripping "Manager" from the Swift manager's exported name
+// (RealityKitViewManager → "RealityKitView").
+//
+// This interface is HAND-WRITTEN — nothing verifies it against the native
+// declarations in ios/RealityKitFeature/RealityKitViewManager.m. If the two
+// drift (a renamed prop, a changed event payload), there's no error; the
+// value just silently never arrives. When touching either side, keep all
+// three in sync: the .m declarations, the Swift @objc vars, and this type.
 interface RealityKitViewProps {
   modelUrl: string;
   style?: object;
@@ -16,6 +28,10 @@ interface RealityKitViewProps {
   // array of placed pieces) or {error}
   onFurnitureLayoutExported?: (e: {
     nativeEvent: {layout?: string; error?: string};
+  }) => void;
+  // Fired after exportDesignPdfCommand with {path} to the PDF or {error}
+  onDesignPdfExported?: (e: {
+    nativeEvent: {path?: string; error?: string};
   }) => void;
 }
 
@@ -93,6 +109,19 @@ export const placeFurnitureFromLayoutCommand = (
     UIManager.getViewManagerConfig('RealityKitView').Commands
       .placeFurnitureFromLayout,
     [itemJson],
+  );
+};
+
+// Export the current design as a one-page PDF (room view + top view, with
+// the PlaDomus logo); result path arrives via onDesignPdfExported.
+export const exportDesignPdfCommand = (
+  ref: React.RefObject<any>,
+  name: string,
+) => {
+  UIManager.dispatchViewManagerCommand(
+    findNodeHandle(ref.current),
+    UIManager.getViewManagerConfig('RealityKitView').Commands.exportDesignPdf,
+    [name],
   );
 };
 

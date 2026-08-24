@@ -1,4 +1,4 @@
-import {ChevronLeft, Eye, Globe, MoreVertical, NotebookPen, RotateCcw, Save, Trash2, X} from 'lucide-react-native';
+import {ChevronLeft, Eye, FileDown, Globe, MoreVertical, NotebookPen, RotateCcw, Save, Trash2, X} from 'lucide-react-native';
 import React, {useEffect, useRef, useState} from 'react';
 import {
   ActivityIndicator,
@@ -9,6 +9,7 @@ import {
   Modal,
   PanResponder,
   ScrollView,
+  Share,
   StyleSheet,
   Switch,
   Text,
@@ -22,6 +23,7 @@ import {Dropdown} from 'react-native-element-dropdown';
 import Toast from 'react-native-toast-message';
 import RealityKitNativeView, {
   captureSnapshotCommand,
+  exportDesignPdfCommand,
   exportFurnitureLayoutCommand,
   loadFurnitureCommand,
   placeFurnitureFromLayoutCommand,
@@ -191,6 +193,38 @@ export default function ARViewerScreen() {
     layoutCallback.current = null;
   };
 
+  // ── PDF export ──
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handlePdfExported = async (e: {
+    nativeEvent: {path?: string; error?: string};
+  }) => {
+    const {path, error} = e.nativeEvent;
+    setIsExporting(false);
+    if (error || !path) {
+      Toast.show({type: 'error', text1: 'Export failed', text2: error});
+      return;
+    }
+    try {
+      await Share.share({url: `file://${path}`});
+    } catch {
+      // User dismissed the share sheet — nothing to do
+    }
+  };
+
+  const handleExportPdf = () => {
+    setShowToolsMenu(false);
+    if (isExporting) {
+      return;
+    }
+    setIsExporting(true);
+    Toast.show({type: 'info', text1: 'Preparing PDF…'});
+    exportDesignPdfCommand(
+      realityKitRef,
+      route.params?.designName ?? 'PlaDomus Design',
+    );
+  };
+
   const addPubTag = () => {
     const t = pubTagInput.trim().toLowerCase();
     if (t && !pubTags.includes(t)) {
@@ -356,6 +390,7 @@ export default function ARViewerScreen() {
         modelUrl={modelUrl}
         onSnapshotReady={handleSnapshotReady}
         onFurnitureLayoutExported={handleFurnitureLayoutExported}
+        onDesignPdfExported={handlePdfExported}
         onFurnitureSelectionChanged={e =>
           setFurnitureSelected(e.nativeEvent.selected)
         }
@@ -411,6 +446,14 @@ export default function ARViewerScreen() {
                   }}>
                   <Save color="#C4A962" size={18} />
                   <Text style={styles.toolsMenuText}>Save design</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.toolsMenuItem}
+                  onPress={handleExportPdf}>
+                  <FileDown color="#C4A962" size={18} />
+                  <Text style={styles.toolsMenuText}>
+                    {isExporting ? 'Exporting…' : 'Export PDF'}
+                  </Text>
                 </TouchableOpacity>
               </View>
             )}

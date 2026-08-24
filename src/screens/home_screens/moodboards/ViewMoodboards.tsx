@@ -67,6 +67,7 @@ const ViewMoodboards = () => {
     navigateTo(navigation, 'ARViewer', {
       modelUrl: item.design.file_url,
       designId: item.design_id,
+      designName: item.design.name,
       furnitureLayout: item.design.furniture_layout,
     });
   };

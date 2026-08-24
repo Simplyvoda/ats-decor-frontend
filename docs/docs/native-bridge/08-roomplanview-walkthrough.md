@@ -8,7 +8,7 @@ sidebar_position: 8
 
 ## Structure
 
-Unusually, one file holds both the manager and the view class: `fe/ios/RoomplanViewManager.swift` (364 lines).
+Unusually, one file holds both the manager and the view class: `fe/ios/RoomPlanFeature/RoomplanViewManager.swift`.
 
 ```swift
 @objc(RoomplanViewManager)
@@ -40,13 +40,12 @@ class RoomplanViewManager: RCTViewManager {
 @available(iOS 16.0, *)
 @objc(RoomplanView)
 class RoomplanView: UIView, RoomCaptureSessionDelegate {
-    @objc var onScanFinished: RCTBubblingEventBlock?
     @objc var onExportComplete: RCTBubblingEventBlock?
     // ...
 }
 ```
 
-The export shim, `fe/ios/RoomplanViewManager.m`:
+The export shim, `fe/ios/RoomPlanFeature/RoomplanViewManager.m`:
 
 ```objectivec
 @interface RCT_EXTERN_MODULE(RoomplanViewManager, RCTViewManager)
@@ -54,19 +53,24 @@ RCT_EXTERN_METHOD(startScanning:(nonnull NSNumber *)reactTag)
 RCT_EXTERN_METHOD(stopScanning:(nonnull NSNumber *)reactTag)
 RCT_EXTERN_METHOD(resetScanning:(nonnull NSNumber *)reactTag)
 RCT_EXTERN_METHOD(abortScanning:(nonnull NSNumber *)reactTag)
-RCT_EXPORT_VIEW_PROPERTY(onScanFinished, RCTBubblingEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onExportComplete, RCTBubblingEventBlock)
 @end
 ```
 
-The JS wrapper, `fe/src/components/RoomScanner/RoomPlanView.native.js`:
-
-```js
-import {requireNativeComponent} from 'react-native';
-export default requireNativeComponent('RoomplanView');
-```
+The JS wrapper, `fe/src/components/RoomScanner/RoomPlanView.native.tsx`, follows the same pattern as `RealityKitView.native.tsx`: a typed `requireNativeComponent('RoomplanView')` plus exported command helpers (`startScanningCommand`, `stopScanningCommand`, `resetScanningCommand`, `abortScanningCommand`) that wrap the `UIManager.dispatchViewManagerCommand` boilerplate.
 
 This is the legitimate design decision worth understanding, not a bug: `RoomplanViewManager.m` registers a class named `RoomplanViewManager` — per [page 02](/docs/native-bridge/registration-and-runtime-matching), the `Manager` suffix gets automatically stripped, so this alone is sufficient to make `requireNativeComponent('RoomplanView')` resolve correctly, with `RCTBubblingEventBlock` correctly matching what the `RoomplanView` Swift class actually declares.
+
+## Found and fixed #0: a redundant second event and a megabyte-scale bridge payload
+
+An earlier iteration fired **two** events for every finished scan: `onScanFinished` (metadata JSON only) and `onExportComplete` (metadata + the **entire USDZ model, base64-encoded** + file URL). Two problems:
+
+1. **The redundant event**: both fired back-to-back at the same moment; `ScanScreen` only ever `console.log`ged `onScanFinished`. Two events for one outcome is just two contracts to keep in sync.
+2. **The payload**: base64-encoding a multi-megabyte 3D model and shipping it across the RN bridge on every scan — when JS only ever read `fileUrl` and uploaded the model *as a file* from that URL — was pure overhead (bridge messages are serialized; huge payloads stall it).
+
+There was also a subtle **error-path bug**: on export failure the event fired without `fileUrl`, and `ScanScreen` navigated to the AR viewer with `modelUrl: undefined` — a broken screen instead of an error message.
+
+**Fix**: `onScanFinished` was removed entirely (from the Swift class, the `.m` declarations, and the JS side); `onExportComplete` now carries only `{json, fileUrl}` on success or `{error}` on failure, and `ScanScreen` checks for a missing `fileUrl` and shows an error toast instead of navigating.
 
 ## Found and fixed #1: a second, contradicting `.m` file
 
@@ -131,7 +135,7 @@ This is defending against a real async race: `RoomCaptureSessionDelegate` callba
 
 ## The room-export flow, briefly
 
-On `captureSession(_:didEndWith:error:)`, the session's raw `CapturedRoomData` is passed through Apple's `RoomBuilder(options: [.beautifyObjects])` (smooths/cleans the mesh), exported to a `.usdz` at `Documents/savedRoom.usdz` plus a metadata JSON, then both `onScanFinished` (just the metadata) and `onExportComplete` (metadata + base64-encoded USDZ + file URL) fire in sequence — two separate events for what's conceptually one outcome, presumably so JS-side consumers that only need the lightweight metadata don't have to wait for/handle the (much larger) base64 payload.
+On `captureSession(_:didEndWith:error:)`, the session's raw `CapturedRoomData` is passed through Apple's `RoomBuilder(options: [.beautifyObjects])` (smooths/cleans the mesh), exported to a `.usdz` at `Documents/savedRoom.usdz` plus a metadata JSON, then a single `onExportComplete` fires with `{json, fileUrl}`. The model itself never crosses the bridge — JS passes the `file://` URL around and uploads it as a file when the design is saved. Note the fixed filename: each new scan **overwrites** `savedRoom.usdz`; "the last scan" is a working file, and keeping a scan permanently means saving it as a design.
 
 :::caution Since this can't be verified without running the app
 Deleting `RoomplanView.m` was verified by careful reading, not by compiling and running RoomPlan on a device — that's the one part of this cleanup that needs a manual re-test of the full scan flow (start/stop/reset/abort on `ScanScreen`) before being fully trusted.

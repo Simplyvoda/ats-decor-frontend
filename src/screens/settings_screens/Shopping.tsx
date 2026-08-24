@@ -1,12 +1,6 @@
 import React from 'react';
-import {View, Text, ScrollView, TouchableOpacity} from 'react-native';
-import {
-  ArrowLeft,
-  Crown,
-  CreditCard,
-  FileText,
-  ChevronLeft,
-} from 'lucide-react-native';
+import {View, Text, ScrollView} from 'react-native';
+import {Crown, CreditCard, FileText, ChevronLeft} from 'lucide-react-native';
 import {goBack} from '../../utils/navigation';
 import {useNavigation} from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
@@ -15,6 +9,14 @@ import SecondaryButton from '../../components/molecules/SecondaryButton';
 
 const comingSoon = () =>
   Toast.show({type: 'info', text1: 'Payments & subscriptions coming soon'});
+
+// MVP: the first 300 users are on free access — there is no billing, the plan
+// limits below (scans/designs/notes per month) are not enforced anywhere in
+// the app, and several listed features (Pro AI decor assistant, automated
+// shopping list, panoramas & walk-throughs) don't exist yet. Everything
+// subscription-related is kept but hidden behind this flag; flip it back on
+// once billing and real plan enforcement ship.
+const SUBSCRIPTIONS_ENABLED = false;
 
 const ShoppingScreen = () => {
   const navigation = useNavigation();
@@ -34,7 +36,25 @@ const ShoppingScreen = () => {
         </Text>
       </View>
 
+      {/* EARLY ACCESS — shown while subscriptions are off */}
+      {!SUBSCRIPTIONS_ENABLED && (
+        <View className="border border-[#E5DFCE] rounded-2xl p-6 mb-6">
+          <View className="flex-row items-center gap-2 mb-3">
+            <Crown size={18} color="#C4A663" />
+            <Text className="text-lg font-semibold font-cormorant text-[#1A1A1A]">
+              Early Access
+            </Text>
+          </View>
+          <Text className="text-[#444] font-dm-sans text-[14px] leading-6">
+            PlaDomus is completely free for our first 300 users. Subscription
+            plans and payments will arrive in a later release — until then,
+            enjoy full access on us.
+          </Text>
+        </View>
+      )}
+
       {/* SUBSCRIPTION PLANS */}
+      {SUBSCRIPTIONS_ENABLED && (
       <View className="border border-[#E5DFCE] rounded-2xl p-4 mb-6">
         <View className="flex-row items-center gap-2 mb-3">
           <Crown size={18} color="#C4A663" />
@@ -111,8 +131,10 @@ const ShoppingScreen = () => {
           </View>
         </View>
       </View>
+      )}
 
       {/* PAYMENT METHODS */}
+      {SUBSCRIPTIONS_ENABLED && (
       <View className="border border-[#E5DFCE] rounded-2xl p-4 mb-6">
         <View className="flex-row items-center gap-2 mb-3">
           <CreditCard size={18} color="#C4A663" />
@@ -149,8 +171,10 @@ const ShoppingScreen = () => {
 
         <SecondaryButton title="Add a payment method" onPress={comingSoon} />
       </View>
+      )}
 
       {/* PURCHASE HISTORY */}
+      {SUBSCRIPTIONS_ENABLED && (
       <View className="border border-[#E5DFCE] rounded-2xl p-4 mb-8">
         <View className="flex-row items-center gap-2 mb-3">
           <FileText size={18} color="#C4A663" />
@@ -183,6 +207,7 @@ const ShoppingScreen = () => {
           ))}
         </View>
       </View>
+      )}
     </ScrollView>
   );
 };

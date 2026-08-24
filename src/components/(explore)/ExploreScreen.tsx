@@ -1,7 +1,8 @@
-import {Compass, Eye, Heart} from 'lucide-react-native';
+import {Compass, Eye, EyeOff, Heart} from 'lucide-react-native';
 import React, {useCallback, useState} from 'react';
 import {
   ActivityIndicator,
+  Alert,
   FlatList,
   Image,
   RefreshControl,
@@ -88,6 +89,37 @@ export default function ExploreScreen() {
     }
   };
 
+  // Unpublish one of my own designs — the design itself is kept, it just
+  // stops being public. Only offered on cards the backend marked is_mine.
+  const hideFromExplore = (design: IDesign) => {
+    Alert.alert(
+      'Remove from Explore',
+      `"${design.name}" will no longer be visible to other users. The design stays in your studio.`,
+      [
+        {text: 'Cancel', style: 'cancel'},
+        {
+          text: 'Remove',
+          style: 'destructive',
+          onPress: async () => {
+            const previous = designs;
+            setDesigns(prev => prev.filter(d => d.id !== design.id));
+            try {
+              await DesignService.setVisibility(design.id, false);
+              Toast.show({type: 'success', text1: 'Removed from Explore'});
+            } catch (err: any) {
+              setDesigns(previous);
+              Toast.show({
+                type: 'error',
+                text1: 'Could not remove design',
+                text2: err.response?.data?.message || err.message,
+              });
+            }
+          },
+        },
+      ],
+    );
+  };
+
   const openDesign = (design: IDesign) => {
     DesignService.addView(design.id).catch(() => {});
     setDesigns(prev =>
@@ -98,6 +130,7 @@ export default function ExploreScreen() {
     navigateTo(navigation, 'ARViewer', {
       modelUrl: design.file_url,
       designId: design.id,
+      designName: design.name,
       furnitureLayout: design.furniture_layout,
     });
   };
@@ -149,6 +182,14 @@ export default function ExploreScreen() {
               {item.views_count}
             </Text>
           </View>
+          {item.is_mine && (
+            <TouchableOpacity
+              onPress={() => hideFromExplore(item)}
+              hitSlop={6}
+              className="flex-row items-center bg-[#000000B3] rounded-full px-3 py-1.5">
+              <EyeOff size={16} color="white" />
+            </TouchableOpacity>
+          )}
         </View>
       </View>
 

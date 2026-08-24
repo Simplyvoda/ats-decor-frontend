@@ -26,6 +26,7 @@ export interface IDesign {
   likes_count: number;
   tags?: IDesignTag[];
   liked_by_me?: boolean;
+  is_mine?: boolean; // set on the explore feed — enables "remove from Explore"
   createdAt: string;
   updatedAt: string;
 }
