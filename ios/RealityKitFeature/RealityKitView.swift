@@ -254,7 +254,17 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
             relativeTo: nil
         )
         if let hit = results.first(where: { $0.normal.y > 0.7 }) {
-            return hit.position
+            // Take X/Z from the raycast (that's genuinely where the tap
+            // landed), but NOT Y. A mesh raycast samples one triangle of a
+            // scanned floor, which is noisy — RoomPlan/Polycam floors are
+            // rarely perfectly flat, so different taps can return Y values
+            // several centimeters apart even on what looks like one flat
+            // floor. floorY is one stable value for the whole room (from
+            // the room's overall bounds at load time, see loadRoom), so
+            // every placed piece sits at a consistent height regardless of
+            // which triangle happened to be under this particular tap.
+            let y = floorY ?? hit.position.y
+            return SIMD3<Float>(hit.position.x, y, hit.position.z)
         }
 
         if let y = floorY, abs(ray.direction.y) > 0.0001 {
