@@ -15,6 +15,7 @@ interface IUserContext {
   user: IUser | null;
   isLoadingUser: boolean;
   signInUser: (data: ISignInResponse) => Promise<void>;
+  signInFromSession: (accessToken: string, refreshToken: string) => Promise<void>;
   logoutUser: () => Promise<void>;
   updateUser: (partial: Partial<IUser>) => Promise<void>;
 }
@@ -37,10 +38,19 @@ export const UserProvider = ({children}: {children: React.ReactNode}) => {
             await AsyncStorage.multiRemove(['user', 'token', 'session']);
           } else {
             // The cached record only proves a session existed at some point —
-            // confirm the token itself is still accepted before trusting it.
+            // confirm the token itself is still accepted, and refresh the
+            // cache with whatever the server currently has (name/etc. may
+            // have changed since this record was cached).
             try {
-              await UserService.getProfile();
-              setUser(parsed);
+              const profile = await UserService.getProfile();
+              const refreshed: IUser = {
+                ...parsed,
+                first_name: profile.data.first_name,
+                last_name: profile.data.last_name,
+                email: profile.data.email,
+              };
+              await AsyncStorage.setItem('user', JSON.stringify(refreshed));
+              setUser(refreshed);
             } catch {
               await AsyncStorage.multiRemove(['user', 'token', 'session']);
             }
@@ -68,6 +78,10 @@ export const UserProvider = ({children}: {children: React.ReactNode}) => {
   const signInUser = async (data: ISignInResponse) => {
     const usr = data.data.user;
 
+    // user_metadata is a snapshot of the name taken at signup — the /user
+    // backend table (edited via Profile & Preferences) is the source of
+    // truth for the current name, so start from the metadata as a fallback
+    // and overwrite it with the live profile once the token is in place.
     const simplifiedUser: IUser = {
       id: usr.id,
       email: usr.email,
@@ -83,6 +97,48 @@ export const UserProvider = ({children}: {children: React.ReactNode}) => {
     await AsyncStorage.setItem('user', JSON.stringify(simplifiedUser));
     await AsyncStorage.setItem('session', JSON.stringify(data.data.session));
     setUser(simplifiedUser);
+
+    try {
+      const profile = await UserService.getProfile();
+      const refreshed: IUser = {
+        ...simplifiedUser,
+        first_name: profile.data.first_name,
+        last_name: profile.data.last_name,
+        email: profile.data.email,
+      };
+      await AsyncStorage.setItem('user', JSON.stringify(refreshed));
+      setUser(refreshed);
+    } catch {
+      // Profile table is unreachable right after login — keep the
+      // signup-metadata fallback rather than blocking sign-in on it.
+    }
+  };
+
+  // Establishes a session from tokens handed back by a Supabase redirect
+  // (e.g. the signup-confirmation deep link) rather than a signin response —
+  // there's no user payload on the link itself, so fetch the profile once
+  // the token is in place.
+  const signInFromSession = async (accessToken: string, refreshToken: string) => {
+    await AsyncStorage.setItem('token', accessToken);
+    await AsyncStorage.setItem(
+      'session',
+      JSON.stringify({access_token: accessToken, refresh_token: refreshToken}),
+    );
+
+    try {
+      const profile = await UserService.getProfile();
+      const verifiedUser: IUser = {
+        id: profile.data.id,
+        email: profile.data.email,
+        first_name: profile.data.first_name,
+        last_name: profile.data.last_name,
+      };
+      await AsyncStorage.setItem('user', JSON.stringify(verifiedUser));
+      setUser(verifiedUser);
+    } catch (err) {
+      await AsyncStorage.multiRemove(['user', 'token', 'session']);
+      throw err;
+    }
   };
 
   const logoutUser = async () => {
@@ -104,7 +160,14 @@ export const UserProvider = ({children}: {children: React.ReactNode}) => {
 
   return (
     <UserContext.Provider
-      value={{user, isLoadingUser, signInUser, logoutUser, updateUser}}>
+      value={{
+        user,
+        isLoadingUser,
+        signInUser,
+        signInFromSession,
+        logoutUser,
+        updateUser,
+      }}>
       {children}
     </UserContext.Provider>
   );

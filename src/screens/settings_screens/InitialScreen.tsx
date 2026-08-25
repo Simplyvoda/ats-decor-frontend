@@ -127,7 +127,7 @@ const InitialScreen = () => {
           />
           {/* flex with text */}
           <View className="text-white flex flex-col ml-4">
-            <Text className="text-white text-2xl font-cormorant">
+            <Text className="text-white text-md font-cormorant">
               {displayName}
             </Text>
             <Text className="text-white text-sm font-dm-sans">

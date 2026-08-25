@@ -7,14 +7,50 @@ import {
 import AppNavigator from './src/navigation/AppNavigator';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
-import {UserProvider} from './src/context/UserContext';
-import {extractRecoveryToken} from './src/utils/deepLinking';
+import {UserProvider, useUserContext} from './src/context/UserContext';
+import {
+  extractAuthError,
+  extractRecoveryToken,
+  extractVerifiedSession,
+} from './src/utils/deepLinking';
 
-export default function App() {
+// Lives inside UserProvider (not App itself) so it can call
+// signInFromSession when a signup-confirmation link comes in.
+function AppContent() {
   const navigationRef = useNavigationContainerRef();
   const pendingUrlRef = useRef<string | null>(null);
+  const {signInFromSession} = useUserContext();
 
-  const handleDeepLink = (url: string | null) => {
+  const handleDeepLink = async (url: string | null) => {
+    const verified = extractVerifiedSession(url);
+    if (verified) {
+      try {
+        await signInFromSession(verified.accessToken, verified.refreshToken);
+        Toast.show({
+          type: 'success',
+          text1: 'Email confirmed',
+          text2: 'Welcome to All Things Snug!',
+        });
+      } catch (err: any) {
+        Toast.show({
+          type: 'error',
+          text1: 'Could not complete verification',
+          text2: err.response?.data?.message || err.message,
+        });
+      }
+      return;
+    }
+
+    const authError = extractAuthError(url);
+    if (authError) {
+      Toast.show({
+        type: 'error',
+        text1: 'Verification link expired',
+        text2: authError,
+      });
+      return;
+    }
+
     const accessToken = extractRecoveryToken(url);
     if (!accessToken) {
       return;
@@ -38,18 +74,24 @@ export default function App() {
   }, []);
 
   return (
+    <NavigationContainer
+      ref={navigationRef}
+      onReady={() => {
+        if (pendingUrlRef.current) {
+          handleDeepLink(pendingUrlRef.current);
+          pendingUrlRef.current = null;
+        }
+      }}>
+      <AppNavigator />
+    </NavigationContainer>
+  );
+}
+
+export default function App() {
+  return (
     <SafeAreaProvider>
       <UserProvider>
-        <NavigationContainer
-          ref={navigationRef}
-          onReady={() => {
-            if (pendingUrlRef.current) {
-              handleDeepLink(pendingUrlRef.current);
-              pendingUrlRef.current = null;
-            }
-          }}>
-          <AppNavigator />
-        </NavigationContainer>
+        <AppContent />
         <Toast />
       </UserProvider>
     </SafeAreaProvider>

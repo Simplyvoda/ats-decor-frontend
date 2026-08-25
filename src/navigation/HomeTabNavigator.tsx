@@ -50,7 +50,7 @@ function TabHeader() {
           </View>
           <View>
             <Text style={{color: '#6b7280', fontSize: 12}}>Welcome!</Text>
-            <Text style={{color: '#1f2937', fontSize: 16, fontWeight: '600'}}>
+            <Text style={{color: '#1f2937', fontSize: 14, fontWeight: '600'}}>
               {user?.first_name && user?.last_name
                 ? `${user.first_name} ${user.last_name}`
                 : user?.email ?? ''}
