@@ -758,20 +758,39 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
         arView.scene.addAnchor(anchor)
 
         // Deterministic floor snap — pure arithmetic, no post-insertion
-        // bounds query. In anchor space the model's lowest point sits at
-        // position.y + scale.y * localMin.y (rotation is identity at
-        // placement), so solving for "bottom lands at anchor + lift":
-        // Apple's USDZ convention is base-at-y=0 precisely so apps never
-        // need runtime bounds for grounding; our assets don't follow it,
-        // and this reconstructs the same guarantee from local geometry.
-        // The absolute assignment is deliberate — any Y offset baked into
-        // the model's root transform is exactly what we're overriding.
+        // bounds query. Apple's USDZ convention is base-at-y=0 precisely so
+        // apps never need runtime bounds for grounding; our assets don't
+        // follow it, so the base offset is reconstructed from local geometry.
+        //
+        // Crucially, "the bottom" is NOT assumed to be localBounds.min.y:
+        // USDZ roots often carry a baked rotation (e.g. the −90° X that
+        // converts a Z-up-authored asset to Y-up), and under that rotation
+        // the local y axis isn't world-vertical at all — an assumption that
+        // placed one rug asset half its own length below the floor. Instead,
+        // all 8 corners of the local box are pushed through the model's
+        // actual baked rotation and scale (world = position + R·(S·p)), and
+        // the lowest resulting Y is the true bottom, whatever the authoring
+        // convention was. The absolute position.y assignment is deliberate —
+        // any Y offset baked into the root transform is exactly what's
+        // being overridden.
         if localBounds.min.y.isFinite {
             let lift = floorLift(isFlat: pendingFurnitureIsFlat)
-            placed.position.y = lift - placed.scale.y * localBounds.min.y
-            NSLog("🧭 floor-snap (deterministic): hitY=%.4f localMinY=%.4f scaleY=%.4f isFlat=%@ lift=%.4f posY=%.4f",
-                  hitPosition.y, localBounds.min.y, placed.scale.y,
-                  String(pendingFurnitureIsFlat), lift, placed.position.y)
+            let mn = localBounds.min
+            let mx = localBounds.max
+            let corners: [SIMD3<Float>] = [
+                SIMD3(mn.x, mn.y, mn.z), SIMD3(mn.x, mn.y, mx.z),
+                SIMD3(mn.x, mx.y, mn.z), SIMD3(mn.x, mx.y, mx.z),
+                SIMD3(mx.x, mn.y, mn.z), SIMD3(mx.x, mn.y, mx.z),
+                SIMD3(mx.x, mx.y, mn.z), SIMD3(mx.x, mx.y, mx.z),
+            ]
+            let rot = placed.transform.rotation
+            let lowestY = corners.map { rot.act($0 * placed.scale).y }.min() ?? 0
+            placed.position.y = lift - lowestY
+            let rv = rot.vector
+            NSLog("🧭 floor-snap (exact): hitY=%.4f localMinY=%.4f lowestY=%.4f rot=(%.3f,%.3f,%.3f,%.3f) scaleY=%.4f isFlat=%@ posY=%.4f",
+                  hitPosition.y, localBounds.min.y, lowestY,
+                  rv.x, rv.y, rv.z, rv.w, placed.scale.y,
+                  String(pendingFurnitureIsFlat), placed.position.y)
         } else {
             NSLog("⚠️ floor-snap skipped: localBounds.min.y not finite")
         }
