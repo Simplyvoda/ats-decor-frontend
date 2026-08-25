@@ -74,6 +74,12 @@ const SignUp = () => {
 
       const res = await AuthService.appleSignIn({
         identityToken: appleResponse.identityToken,
+        // The library auto-generates a nonce, SHA256-hashes it into the
+        // Apple request, and returns the RAW value here. Supabase needs the
+        // raw nonce to verify the hashed claim inside identityToken —
+        // omitting it fails with "Passed nonce and nonce in id_token
+        // should either both exist or not."
+        nonce: appleResponse.nonce,
         firstName: appleResponse.fullName?.givenName ?? undefined,
         lastName: appleResponse.fullName?.familyName ?? undefined,
       });

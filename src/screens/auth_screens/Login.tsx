@@ -2,6 +2,7 @@ import {ChevronLeft, Eye, EyeOff, LockKeyhole, Mail} from 'lucide-react-native';
 import React, {useState} from 'react';
 import {Controller, useForm} from 'react-hook-form';
 import {
+  Image,
   Pressable,
   ScrollView,
   Text,
@@ -10,9 +11,11 @@ import {
   View,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
+import {appleAuth} from '@invertase/react-native-apple-authentication';
 import PrimaryButton from '../../components/molecules/PrimaryButton';
 import {goBack, navigateTo} from '../../utils/navigation';
 import {useNavigation} from '@react-navigation/native';
+import {images} from '../../../assets/constants/images';
 
 import Toast from 'react-native-toast-message';
 import {
@@ -32,6 +35,7 @@ const Login = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [isAppleSubmitting, setIsAppleSubmitting] = useState(false);
   const {
     control,
     reset,
@@ -73,6 +77,53 @@ const Login = () => {
     } finally {
       setIsSubmitting(false);
       reset();
+    }
+  };
+
+  // Same identity-based flow as SignUp's onApplePress: signInWithIdToken
+  // signs in on any repeat tap and creates the account on first use, so
+  // this isn't a distinct "login" variant — it's the same action, just
+  // also offered here since a returning user reasonably looks for it here.
+  const onApplePress = async () => {
+    try {
+      setIsAppleSubmitting(true);
+      const appleResponse = await appleAuth.performRequest({
+        requestedOperation: appleAuth.Operation.LOGIN,
+        requestedScopes: [appleAuth.Scope.EMAIL, appleAuth.Scope.FULL_NAME],
+      });
+
+      if (!appleResponse.identityToken) {
+        throw new Error('Apple sign-in did not return an identity token');
+      }
+
+      const res = await AuthService.appleSignIn({
+        identityToken: appleResponse.identityToken,
+        // See SignUp.tsx's onApplePress for why this is required.
+        nonce: appleResponse.nonce,
+        firstName: appleResponse.fullName?.givenName ?? undefined,
+        lastName: appleResponse.fullName?.familyName ?? undefined,
+      });
+
+      await signInUser(res);
+      Toast.show({
+        type: 'success',
+        text1: 'Success',
+        text2: 'Signed in with Apple',
+        position: 'bottom',
+      });
+    } catch (err: any) {
+      if (err.code === appleAuth.Error.CANCELED) {
+        return;
+      }
+      console.log('Apple sign-in error:', err.response?.data || err.message);
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: err.response?.data?.message || err.message,
+        position: 'bottom',
+      });
+    } finally {
+      setIsAppleSubmitting(false);
     }
   };
 
@@ -181,6 +232,16 @@ const Login = () => {
             onPress={handleSubmit(onSubmit)}
             isSubmitting={isSubmitting}
           />
+
+          <Pressable
+            onPress={onApplePress}
+            disabled={isAppleSubmitting}
+            className="w-full flex flex-row items-center justify-center bg-white border border-gray-800 rounded-full py-3 space-x-2">
+            <Image source={images.apple_icon} style={{width: 18, height: 18}} />
+            <Text className="text-black font-semibold text-base">
+              {isAppleSubmitting ? 'Signing in…' : 'Continue with Apple'}
+            </Text>
+          </Pressable>
 
           <View className="w-full flex-row justify-center items-center">
             <Text>Don't have an account?</Text>

@@ -5,8 +5,6 @@ const apple_icon = require('../icons/apple_icon.png');
 const placeholder_icon = require('../icons/3d_avatar_1.png');
 const scan_room_icon = require('../images/scan_room_icon.png');
 const choose_model = require('../images/choose_model_icon.png');
-const stylized_apartment_thumb = require('../images/stylized_apartment_thumb.png');
-const empty_room_thumb = require('../images/empty_room_thumb.png');
 
 export const images = {
   ats_logo,
@@ -16,8 +14,6 @@ export const images = {
   placeholder_icon,
   scan_room_icon,
   choose_model,
-  stylized_apartment_thumb,
-  empty_room_thumb,
 };
 
 

@@ -15,6 +15,7 @@ const AuthService = {
 
   async appleSignIn(payload: {
     identityToken: string;
+    nonce?: string; // raw nonce matching the hashed claim inside identityToken
     firstName?: string;
     lastName?: string;
   }): Promise<ISignInResponse> {

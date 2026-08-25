@@ -15,7 +15,6 @@ import {useNavigation} from '@react-navigation/native';
 import {goBack, navigateTo} from '../utils/navigation';
 import DesignTemplateService from '../services/DesignTemplateService';
 import {IDesignTemplate} from '../../interface/design-template.interface';
-import {images} from '../../assets/constants/images';
 
 // Explicit pixel size (not a % width) so the Image has a size to resolve
 // against inside the FlatList's numColumns grid — matches the furniture
@@ -25,34 +24,19 @@ const CARD_MARGIN = 8;
 const CARD_WIDTH =
   (Dimensions.get('window').width - GRID_PADDING * 2 - CARD_MARGIN * 2 * 2) / 2;
 
-// Card shape shared by bundled local models and backend-fetched templates,
-// so both render through the same list/card UI.
+// Remote-only: the catalogue comes entirely from the backend (design
+// templates seeded to the DB), so what appears here is managed in one place.
+// The previously bundled on-device models (Stylized Apartment / Empty Room)
+// were removed from this picker, but their .usdz files stay in the app
+// bundle — designs saved from them reference bundle:// URLs that must keep
+// resolving when reopened.
 type ModelCardItem = {
   id: string;
   title: string;
   type?: string;
-  thumbnail: any; // require()'d local image, {uri} object, or null
+  thumbnail: any; // {uri} object or null
   modelUrl: string;
 };
-
-// Bundled on-device models — always available even without a backend.
-// Thumbnails rendered via be/scripts/thumbgen (QuickLookThumbnailing).
-const LOCAL_MODELS: ModelCardItem[] = [
-  {
-    id: 'local-stylized-apartment',
-    title: 'Stylized Apartment',
-    type: 'furnished apartment',
-    thumbnail: images.stylized_apartment_thumb,
-    modelUrl: 'bundle://Stylized_One_Unit_Apartment.usdz',
-  },
-  {
-    id: 'local-empty-room',
-    title: 'Empty Room',
-    type: 'empty room',
-    thumbnail: images.empty_room_thumb,
-    modelUrl: 'bundle://empty_room.usdz',
-  },
-];
 
 export default function ChooseModelScreen() {
   const navigation = useNavigation();
@@ -83,14 +67,13 @@ export default function ChooseModelScreen() {
     fetchTemplates();
   }, [fetchTemplates]);
 
-  const remoteItems: ModelCardItem[] = templates.map(t => ({
+  const allItems: ModelCardItem[] = templates.map(t => ({
     id: t.id,
     title: t.title,
     type: t.type,
     thumbnail: t.image_url ? {uri: t.image_url} : null,
     modelUrl: t.model_url,
   }));
-  const allItems: ModelCardItem[] = [...LOCAL_MODELS, ...remoteItems];
 
   const handleSelectTemplate = (item: ModelCardItem) => {
     navigateTo(navigation, 'ARViewer', {modelUrl: item.modelUrl});
@@ -147,6 +130,13 @@ export default function ChooseModelScreen() {
             renderItem={renderTemplate}
             numColumns={2}
             contentContainerStyle={styles.grid}
+            ListEmptyComponent={
+              <View style={styles.centered}>
+                <Text style={styles.emptyText}>
+                  No models available yet — check back soon.
+                </Text>
+              </View>
+            }
           />
         </>
       )}
@@ -183,6 +173,7 @@ const styles = StyleSheet.create({
   },
   errorText: {color: '#b00020', flex: 1, marginRight: 12},
   retryText: {color: '#b00020', fontWeight: '700'},
+  emptyText: {color: '#999', fontSize: 14, textAlign: 'center', paddingVertical: 40},
   grid: {paddingHorizontal: GRID_PADDING, paddingTop: 8, paddingBottom: 24},
   card: {width: CARD_WIDTH, margin: CARD_MARGIN, alignItems: 'center'},
   thumbnail: {

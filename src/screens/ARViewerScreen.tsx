@@ -74,24 +74,11 @@ type FurnitureCategory = {
   items: FurnitureItem[];
 };
 
-// Bundled dev asset — always available even without a backend
-const DEV_CATALOGUE: FurnitureCategory[] = __DEV__
-  ? [
-      {
-        id: 'dev-assets',
-        name: '🧪 Test Assets',
-        items: [
-          {
-            id: 'dev-sofa',
-            name: 'Test Sofa',
-            thumbnail: images.scan_room_icon,
-            modelUrl: 'bundle://test_chair.usdz',
-            isFlat: false,
-          },
-        ],
-      },
-    ]
-  : [];
+// No bundled dev assets any more — test_chair.usdz was removed from the app
+// bundle when the catalogue went fully remote (furniture and design
+// templates both stream from R2 now). Kept as an empty list so a bundled
+// test category can be re-added here easily if offline dev work needs one.
+const DEV_CATALOGUE: FurnitureCategory[] = [];
 
 // Group the flat /furniture list into catalogue sections
 const buildCatalogue = (items: IFurniture[]): FurnitureCategory[] => {
