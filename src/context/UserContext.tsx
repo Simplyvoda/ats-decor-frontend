@@ -119,6 +119,12 @@ export const UserProvider = ({children}: {children: React.ReactNode}) => {
   // there's no user payload on the link itself, so fetch the profile once
   // the token is in place.
   const signInFromSession = async (accessToken: string, refreshToken: string) => {
+    console.log(
+      '[signInFromSession] starting, accessToken len=',
+      accessToken?.length,
+      'refreshToken len=',
+      refreshToken?.length,
+    );
     await AsyncStorage.setItem('token', accessToken);
     await AsyncStorage.setItem(
       'session',
@@ -126,7 +132,31 @@ export const UserProvider = ({children}: {children: React.ReactNode}) => {
     );
 
     try {
-      const profile = await UserService.getProfile();
+      let profile;
+      try {
+        console.log('[signInFromSession] calling getProfile (attempt 1)');
+        profile = await UserService.getProfile();
+        console.log('[signInFromSession] getProfile succeeded on attempt 1');
+      } catch (err: any) {
+        console.log('[signInFromSession] getProfile attempt 1 failed:', {
+          message: err?.message,
+          code: err?.code,
+          baseURL: err?.config?.baseURL,
+          url: err?.config?.url,
+          hasResponse: !!err?.response,
+          status: err?.response?.status,
+        });
+        // The very first network call after a cold launch triggered by an
+        // external URL (Mail → Safari → app) can fire before iOS's
+        // networking stack is fully warmed up — one retry clears it.
+        if (err.message !== 'Network Error') {
+          throw err;
+        }
+        console.log('[signInFromSession] retrying getProfile in 1.5s');
+        await new Promise<void>(resolve => setTimeout(resolve, 1500));
+        profile = await UserService.getProfile();
+        console.log('[signInFromSession] getProfile succeeded on retry');
+      }
       const verifiedUser: IUser = {
         id: profile.data.id,
         email: profile.data.email,
@@ -135,7 +165,16 @@ export const UserProvider = ({children}: {children: React.ReactNode}) => {
       };
       await AsyncStorage.setItem('user', JSON.stringify(verifiedUser));
       setUser(verifiedUser);
-    } catch (err) {
+      console.log('[signInFromSession] done, user set:', verifiedUser.email);
+    } catch (err: any) {
+      console.log('[signInFromSession] giving up, clearing storage:', {
+        message: err?.message,
+        code: err?.code,
+        baseURL: err?.config?.baseURL,
+        url: err?.config?.url,
+        hasResponse: !!err?.response,
+        status: err?.response?.status,
+      });
       await AsyncStorage.multiRemove(['user', 'token', 'session']);
       throw err;
     }
