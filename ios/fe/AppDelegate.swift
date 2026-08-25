@@ -32,6 +32,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     return true
   }
+
+  // Forwards atsdecor:// deep links (email confirmation, password reset)
+  // to React Native's Linking module — without this, iOS launches the app
+  // but the URL never reaches the JS `Linking.addEventListener('url', ...)`
+  // listener at all.
+  func application(
+    _ app: UIApplication,
+    open url: URL,
+    options: [UIApplication.OpenURLOptionsKey: Any] = [:]
+  ) -> Bool {
+    return RCTLinkingManager.application(app, open: url, options: options)
+  }
 }
 
 class ReactNativeDelegate: RCTDefaultReactNativeFactoryDelegate {
