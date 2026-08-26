@@ -22,28 +22,16 @@ function AppContent() {
   const {signInFromSession} = useUserContext();
 
   const handleDeepLink = async (url: string | null) => {
-    console.log('[handleDeepLink] received url:', url);
-
     const verified = extractVerifiedSession(url);
-    console.log('[handleDeepLink] extractVerifiedSession ->', verified);
     if (verified) {
       try {
         await signInFromSession(verified.accessToken, verified.refreshToken);
-        console.log('[handleDeepLink] signInFromSession succeeded');
         Toast.show({
           type: 'success',
           text1: 'Email confirmed',
-          text2: 'Welcome to All Things Snug!',
+          text2: 'Welcome to Pladomus!',
         });
       } catch (err: any) {
-        console.log('[handleDeepLink] signInFromSession threw:', {
-          message: err?.message,
-          code: err?.code,
-          baseURL: err?.config?.baseURL,
-          url: err?.config?.url,
-          hasResponse: !!err?.response,
-          status: err?.response?.status,
-        });
         Toast.show({
           type: 'error',
           text1: 'Could not complete verification',
@@ -54,7 +42,6 @@ function AppContent() {
     }
 
     const authError = extractAuthError(url);
-    console.log('[handleDeepLink] extractAuthError ->', authError);
     if (authError) {
       Toast.show({
         type: 'error',
@@ -65,12 +52,7 @@ function AppContent() {
     }
 
     const accessToken = extractRecoveryToken(url);
-    console.log(
-      '[handleDeepLink] extractRecoveryToken ->',
-      accessToken ? '(token present)' : null,
-    );
     if (!accessToken) {
-      console.log('[handleDeepLink] no matcher recognized this url, ignoring');
       return;
     }
     if (navigationRef.isReady()) {
