@@ -20,7 +20,10 @@ if linkage != nil
   use_frameworks! :linkage => linkage.to_sym
 end
 
-source 'https://github.com/CocoaPods/Specs.git'
+# Forces a full git clone of the legacy Specs repo on every build (slow,
+# multi-GB, and a common cause of CI worker timeouts) — commented out so
+# CocoaPods falls back to its fast default CDN source instead.
+# source 'https://github.com/CocoaPods/Specs.git'
 
 $RNFirebaseAsStaticFramework = true
 
