@@ -30,4 +30,21 @@ cd "$CI_PRIMARY_REPOSITORY_PATH"
 npm install
 
 cd ios
-pod install
+
+# CocoaPods' trunk CDN repo isn't cached on Xcode Cloud's ephemeral build
+# machines, so every build re-validates it from scratch against
+# raw.githubusercontent.com — a step that occasionally times out
+# (transient GitHub CDN flakiness, not a project issue). Retry a few times
+# with backoff instead of failing the whole build on one bad fetch.
+attempt=1
+max_attempts=5
+until pod install; do
+  if [ "$attempt" -ge "$max_attempts" ]; then
+    echo "pod install failed after $attempt attempts" >&2
+    exit 1
+  fi
+  wait_seconds=$((attempt * 15))
+  echo "pod install failed (attempt $attempt/$max_attempts) — retrying in ${wait_seconds}s..." >&2
+  sleep "$wait_seconds"
+  attempt=$((attempt + 1))
+done
