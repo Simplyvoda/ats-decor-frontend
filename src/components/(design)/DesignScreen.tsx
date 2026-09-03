@@ -3,9 +3,25 @@ import React from 'react';
 import {Text, TouchableOpacity, View} from 'react-native';
 import {navigateTo} from '../../utils/navigation';
 import {useNavigation} from '@react-navigation/native';
+import {isRoomScanSupported} from '../../utils/deviceCapabilities';
+import {Toast} from 'react-native-toast-message/lib/src/Toast';
 
 const DesignScreen = () => {
   const navigation = useNavigation();
+  const scanSupported = isRoomScanSupported();
+
+  const handleScanPress = () => {
+    if (!scanSupported) {
+      Toast.show({
+        type: 'info',
+        text1: 'Room scanning is not supported on this device',
+        text2:
+          'Please use a compatible device (pro models) with iOS 16 or later to scan rooms',
+      });
+      return;
+    }
+    navigateTo(navigation, 'ScanScreen');
+  };
 
   return (
     <View>
@@ -19,8 +35,8 @@ const DesignScreen = () => {
       </View>
       <View className="flex flex-col px-4 gap-5 mt-[-45px]">
         <TouchableOpacity
-          onPress={() => navigateTo(navigation, 'ScanScreen')}
-          className="px-3 py-5 flex flex-row justify-start items-center shadow-slate-600 shadow-sm rounded-[16px] bg-white">
+          onPress={handleScanPress}
+          className={`px-3 py-5 flex flex-row justify-start items-center shadow-slate-600 shadow-sm rounded-[16px] bg-white ${!scanSupported ? 'opacity-50' : ''}`}>
           <View className="bg-[#4169E1] w-[30px] h-[80px] rounded-[14px] flex items-center justify-center">
             <Camera color={'white'} />
           </View>
@@ -29,6 +45,11 @@ const DesignScreen = () => {
             <Text className="font-dm-sans text-md">
               Use your camera to capture your space
             </Text>
+            {!scanSupported && (
+              <Text className="font-dm-sans text-sm text-orange-600">
+                Room scanning is not supported on this device
+              </Text>
+            )}
           </View>
         </TouchableOpacity>
 

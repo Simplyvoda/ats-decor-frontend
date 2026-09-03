@@ -23,6 +23,8 @@
 		A02821652EC8AB0200F31026 /* RoomplanViewManager.m in Sources */ = {isa = PBXBuildFile; fileRef = A02821642EC8AB0200F31026 /* RoomplanViewManager.m */; };
 		A0679A322F33B975002EF03A /* RealityKitModule.m in Sources */ = {isa = PBXBuildFile; fileRef = A0679A302F33B975002EF03A /* RealityKitModule.m */; };
 		A0679A332F33B975002EF03A /* RealityKitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0679A312F33B975002EF03A /* RealityKitViewController.swift */; };
+		A0D530633049A3B4008DB519 /* RoomPlanSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0D530623049A3AE008DB519 /* RoomPlanSupport.swift */; };
+		A0D530673049A5AB008DB519 /* RoomPlanSupport.m in Sources */ = {isa = PBXBuildFile; fileRef = A0D530663049A5AB008DB519 /* RoomPlanSupport.m */; };
 		A0FEA7042F00000000000004 /* RealityKitModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0FEA7032F00000000000003 /* RealityKitModule.swift */; };
 		CEA2952313CD45C0B7E58240 /* Colors.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5C452F58C2DC42B2BD956E2D /* Colors.xcassets */; };
 		F2DBCCAAE06C42F3BBAD6361 /* BootSplash.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E8317B5416F649B5BC4CD939 /* BootSplash.storyboard */; };
@@ -47,9 +49,11 @@
 		A02821642EC8AB0200F31026 /* RoomplanViewManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RoomplanViewManager.m; sourceTree = "<group>"; };
 		A0679A302F33B975002EF03A /* RealityKitModule.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RealityKitModule.m; sourceTree = "<group>"; };
 		A0679A312F33B975002EF03A /* RealityKitViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RealityKitViewController.swift; sourceTree = "<group>"; };
-		A0FEA7032F00000000000003 /* RealityKitModule.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RealityKitModule.swift; sourceTree = "<group>"; };
 		A0A43A723025661300D60071 /* fe.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = fe.entitlements; path = fe/fe.entitlements; sourceTree = "<group>"; };
 		A0A60AD22EC8E4380095C3EB /* fe-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "fe-Bridging-Header.h"; sourceTree = "<group>"; };
+		A0D530623049A3AE008DB519 /* RoomPlanSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomPlanSupport.swift; sourceTree = "<group>"; };
+		A0D530663049A5AB008DB519 /* RoomPlanSupport.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RoomPlanSupport.m; sourceTree = "<group>"; };
+		A0FEA7032F00000000000003 /* RealityKitModule.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RealityKitModule.swift; sourceTree = "<group>"; };
 		B117C1DDF4102B1971873677 /* Pods-fe.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-fe.debug.xcconfig"; path = "Target Support Files/Pods-fe/Pods-fe.debug.xcconfig"; sourceTree = "<group>"; };
 		E1AAB0AC09FFF17147F5A577 /* Pods-fe.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-fe.release.xcconfig"; path = "Target Support Files/Pods-fe/Pods-fe.release.xcconfig"; sourceTree = "<group>"; };
 		E8317B5416F649B5BC4CD939 /* BootSplash.storyboard */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = BootSplash.storyboard; path = fe/BootSplash.storyboard; sourceTree = "<group>"; };
@@ -156,8 +160,10 @@
 		A0FEA7012F00000000000001 /* RoomPlanFeature */ = {
 			isa = PBXGroup;
 			children = (
+				A0D530623049A3AE008DB519 /* RoomPlanSupport.swift */,
 				A028210F2EC89D9800F31026 /* RoomplanViewManager.swift */,
 				A02821642EC8AB0200F31026 /* RoomplanViewManager.m */,
+				A0D530663049A5AB008DB519 /* RoomPlanSupport.m */,
 			);
 			path = RoomPlanFeature;
 			sourceTree = "<group>";
@@ -298,9 +304,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-fe/Pods-fe-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-fe/Pods-fe-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -315,9 +325,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-fe/Pods-fe-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-fe/Pods-fe-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -336,6 +350,8 @@
 				A016CC102FDA328B00C215B3 /* RealityKitViewManager.m in Sources */,
 				A016CC112FDA328B00C215B3 /* RealityKitViewManager.swift in Sources */,
 				A02821102EC89D9800F31026 /* RoomplanViewManager.swift in Sources */,
+				A0D530633049A3B4008DB519 /* RoomPlanSupport.swift in Sources */,
+				A0D530673049A5AB008DB519 /* RoomPlanSupport.m in Sources */,
 				A016CC122FDA328B00C215B3 /* RealityKitView.swift in Sources */,
 				A0679A332F33B975002EF03A /* RealityKitViewController.swift in Sources */,
 				A0FEA7042F00000000000004 /* RealityKitModule.swift in Sources */,
@@ -775,10 +791,7 @@
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
 				);
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_LDFLAGS = "$(inherited)  ";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -850,10 +863,7 @@
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
 				);
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_LDFLAGS = "$(inherited)  ";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
