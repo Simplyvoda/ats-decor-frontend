@@ -16,6 +16,7 @@ if (SENTRY_DSN) {
     tracesSampleRate: 1.0,
     // Skip dev-reload noise — report from release builds only
     enabled: !__DEV__,
+    environment: __DEV__ ? 'development' : 'production',
   });
 }
 
