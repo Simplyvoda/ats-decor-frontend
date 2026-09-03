@@ -419,9 +419,19 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
         // continuously, but grabbing the very next frame can race the move.
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in
             guard let self = self else { return }
-            self.arView.snapshot(saveToHDR: false) { image in
+            self.arView.snapshot(saveToHDR: false) { rawImage in
                 restore()
-                guard let image = image, let data = image.pngData() else {
+                guard let rawImage = rawImage else {
+                    self.onSnapshotReady?(["error": "Snapshot capture failed"])
+                    return
+                }
+                // The raw capture is the full tall phone screen; thumbnail UI
+                // displays it in a square with resizeMode="cover", which was
+                // cropping deep into the floor plan. Since the room is
+                // centered in frame, a centered square crop here keeps it
+                // whole instead of leaving that crop to chance at display time.
+                let image = self.centerCropSquare(rawImage)
+                guard let data = image.pngData() else {
                     self.onSnapshotReady?(["error": "Snapshot capture failed"])
                     return
                 }
@@ -436,6 +446,17 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
                 }
             }
         }
+    }
+
+    // Crops to a centered square using the shorter side — for a portrait
+    // screenshot that means keeping the full width and trimming top/bottom.
+    private func centerCropSquare(_ image: UIImage) -> UIImage {
+        let side = min(image.size.width, image.size.height) * image.scale
+        let originX = (image.size.width * image.scale - side) / 2
+        let originY = (image.size.height * image.scale - side) / 2
+        let cropRect = CGRect(x: originX, y: originY, width: side, height: side)
+        guard let cropped = image.cgImage?.cropping(to: cropRect) else { return image }
+        return UIImage(cgImage: cropped, scale: image.scale, orientation: image.imageOrientation)
     }
 
     // MARK: - PDF Export

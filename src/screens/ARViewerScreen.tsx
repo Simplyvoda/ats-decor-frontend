@@ -517,7 +517,9 @@ export default function ARViewerScreen() {
                       setShowPublishModal(true);
                     }}>
                     <Save color="#C4A962" size={18} />
-                    <Text style={styles.toolsMenuText}>Save design</Text>
+                    <Text style={styles.toolsMenuText}>
+                      {currentDesignId ? 'Update Design' : 'Save design'}
+                    </Text>
                   </TouchableOpacity>
                 )}
                 <TouchableOpacity
@@ -619,7 +621,9 @@ export default function ARViewerScreen() {
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
           <View style={styles.modalCard}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Save design</Text>
+              <Text style={styles.modalTitle}>
+                {currentDesignId ? 'Update Design' : 'Save design'}
+              </Text>
               <TouchableOpacity
                 onPress={() => setShowPublishModal(false)}
                 hitSlop={10}>
@@ -703,13 +707,17 @@ export default function ARViewerScreen() {
                 <Save color="white" size={18} />
               )}
               <Text style={styles.publishBtnText}>
-                {isPublishing
-                  ? pubIsPublic
-                    ? 'Publishing...'
-                    : 'Saving...'
-                  : pubIsPublic
-                    ? 'Publish'
-                    : 'Save'}
+                {currentDesignId
+                  ? isPublishing
+                    ? 'Updating...'
+                    : 'Update Design'
+                  : isPublishing
+                    ? pubIsPublic
+                      ? 'Publishing...'
+                      : 'Saving...'
+                    : pubIsPublic
+                      ? 'Publish'
+                      : 'Save'}
               </Text>
             </TouchableOpacity>
           </View>
