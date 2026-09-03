@@ -34,7 +34,9 @@ export function slugify(text: string) {
 export const portableTextComponents: PortableTextComponents = {
   types: {
     image: ({value}) => {
-      const src = value?.asset ? urlFor(value).width(800).url() : '';
+      const src = value?.asset
+        ? urlFor(value).width(800).auto('format').quality(75).url()
+        : '';
       const alt = value.alt || 'Image';
       const caption = value.caption || '';
 
@@ -47,8 +49,8 @@ export const portableTextComponents: PortableTextComponents = {
                 value.alignment === 'left'
                   ? 'flex-start'
                   : value.alignment === 'right'
-                  ? 'flex-end'
-                  : 'center',
+                    ? 'flex-end'
+                    : 'center',
             },
           ]}>
           <Image
@@ -307,7 +309,7 @@ const styles = StyleSheet.create({
 
   // CTA Button
   ctaButton: {
-    backgroundColor: '#3b82f6',
+    backgroundColor: '#C1A36A',
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,

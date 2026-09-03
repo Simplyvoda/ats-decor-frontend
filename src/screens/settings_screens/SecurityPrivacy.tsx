@@ -18,6 +18,10 @@ import AppSwitch from '../../components/molecules/AppSwitch';
 import AuthService from '../../services/AuthService';
 import UserService from '../../services/UserService';
 import {useUserContext} from '../../context/UserContext';
+import {
+  isStrongPassword,
+  PASSWORD_REQUIREMENTS_MESSAGE,
+} from '../../utils/passwordValidation';
 
 const SecurityPrivacy = () => {
   const navigation = useNavigation();
@@ -47,10 +51,11 @@ const SecurityPrivacy = () => {
       Toast.show({type: 'error', text1: 'Fill in all password fields'});
       return;
     }
-    if (newPassword.length < 6) {
+    if (!isStrongPassword(newPassword)) {
       Toast.show({
         type: 'error',
-        text1: 'New password must be at least 6 characters',
+        text1: 'Password too weak',
+        text2: PASSWORD_REQUIREMENTS_MESSAGE,
       });
       return;
     }
@@ -92,7 +97,10 @@ const SecurityPrivacy = () => {
 
   const handleToggleTwoFactor = (value: boolean) => {
     if (value) {
-      Toast.show({type: 'info', text1: 'Two-factor authentication coming soon'});
+      Toast.show({
+        type: 'info',
+        text1: 'Two-factor authentication coming soon',
+      });
     }
     setTwoFactor(false);
   };
@@ -195,7 +203,10 @@ const SecurityPrivacy = () => {
             <Text className="text-[14px] text-[#333] font-dm-sans">
               Two-factor authentication
             </Text>
-            <AppSwitch value={twoFactor} onValueChange={handleToggleTwoFactor} />
+            <AppSwitch
+              value={twoFactor}
+              onValueChange={handleToggleTwoFactor}
+            />
           </View>
 
           {hasPasswordInput && (

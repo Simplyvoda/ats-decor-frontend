@@ -1,7 +1,15 @@
 import React from 'react';
-import {Image, StyleSheet, Text, TextInput, TouchableOpacity, View} from 'react-native';
+import {
+  Image,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import {ArrowDown, ArrowUp, BookOpen, Search, X} from 'lucide-react-native';
 import {BlogPost} from '../../../../interface/blog.interface';
+import {sanityImageUrl} from '../../../utils/sanityImage';
 
 type BlogHeaderProps = {
   search: string;
@@ -12,7 +20,12 @@ type BlogHeaderProps = {
 
 // Heading + search bar + sort toggle. Rendered once, above the paginated
 // list of posts (see useBlogFeed / InitialScreen).
-export const BlogHeader = ({search, onSearchChange, sort, onToggleSort}: BlogHeaderProps) => (
+export const BlogHeader = ({
+  search,
+  onSearchChange,
+  sort,
+  onToggleSort,
+}: BlogHeaderProps) => (
   <View style={styles.header}>
     <View style={styles.heading}>
       <BookOpen size={22} color="#C1A36A" />
@@ -37,27 +50,43 @@ export const BlogHeader = ({search, onSearchChange, sort, onToggleSort}: BlogHea
         )}
       </View>
 
-      <TouchableOpacity style={styles.sortBtn} onPress={onToggleSort} activeOpacity={0.7}>
+      <TouchableOpacity
+        style={styles.sortBtn}
+        onPress={onToggleSort}
+        activeOpacity={0.7}>
         {sort === 'DESC' ? (
           <ArrowDown size={14} color="#2C2C2C" />
         ) : (
           <ArrowUp size={14} color="#2C2C2C" />
         )}
-        <Text style={styles.sortBtnText}>{sort === 'DESC' ? 'Newest' : 'Oldest'}</Text>
+        <Text style={styles.sortBtnText}>
+          {sort === 'DESC' ? 'Newest' : 'Oldest'}
+        </Text>
       </TouchableOpacity>
     </View>
   </View>
 );
 
 // A single post row — used as the FlatList renderItem in InitialScreen.
-export const BlogPostRow = ({post, onPress}: {post: BlogPost; onPress: () => void}) => (
+export const BlogPostRow = ({
+  post,
+  onPress,
+}: {
+  post: BlogPost;
+  onPress: () => void;
+}) => (
   <TouchableOpacity style={styles.row} activeOpacity={0.75} onPress={onPress}>
     {post.mainImage?.asset?.url ? (
       <Image
         // Sanity asset URLs are content-hashed (a changed image gets a new
         // URL), so it's safe to skip revalidation and paint straight from
-        // cache — avoids the reload flash when this row remounts.
-        source={{uri: post.mainImage.asset.url, cache: 'force-cache'}}
+        // cache — avoids the reload flash when this row remounts. Capping
+        // width server-side avoids downloading a full-res original for an
+        // 100x80 box.
+        source={{
+          uri: sanityImageUrl(post.mainImage.asset.url, 300),
+          cache: 'force-cache',
+        }}
         style={styles.thumbnail}
         resizeMode="cover"
       />

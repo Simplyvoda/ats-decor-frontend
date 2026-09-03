@@ -14,7 +14,14 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import {ChevronLeft, Globe, Heart, MessageCircle, Share2, X} from 'lucide-react-native';
+import {
+  ChevronLeft,
+  Globe,
+  Heart,
+  MessageCircle,
+  Share2,
+  X,
+} from 'lucide-react-native';
 import {useNavigation, useRoute, RouteProp} from '@react-navigation/native';
 import {PortableText} from '@portabletext/react-native';
 import Toast from 'react-native-toast-message';
@@ -25,6 +32,7 @@ import InitialsAvatar from '../../../components/molecules/InitialsAvatar';
 import UserAvatar from '../../../components/molecules/UserAvatar';
 import BlogService from '../../../services/BlogService';
 import {useUserContext} from '../../../context/UserContext';
+import {sanityImageUrl} from '../../../utils/sanityImage';
 
 type BlogPostRouteParams = {
   BlogPost: {post: BlogPost};
@@ -52,7 +60,10 @@ const timeAgo = (isoDate: string) => {
   if (days < 7) {
     return `${days}d ago`;
   }
-  return new Date(isoDate).toLocaleDateString('en-US', {month: 'short', day: 'numeric'});
+  return new Date(isoDate).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+  });
 };
 
 const BlogPostScreen = () => {
@@ -129,7 +140,9 @@ const BlogPostScreen = () => {
     }
     setLoadingMoreComments(true);
     try {
-      const res = await BlogService.getComments(post._id, {page: commentsPage + 1});
+      const res = await BlogService.getComments(post._id, {
+        page: commentsPage + 1,
+      });
       setComments(prev => [...prev, ...res.data]);
       setCommentsPage(res.page);
     } catch {
@@ -196,209 +209,265 @@ const BlogPostScreen = () => {
           <TouchableOpacity onPress={() => goBack(navigation)} hitSlop={8}>
             <ChevronLeft size={22} color="#2C2C2C" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle} numberOfLines={1}>{post.title}</Text>
+          <Text style={styles.headerTitle} numberOfLines={1}>
+            {post.title}
+          </Text>
         </View>
 
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
-        {/* Hero image */}
-        {post.mainImage?.asset?.url ? (
-          <Image
-            // Sanity asset URLs are content-hashed, so it's safe to skip
-            // revalidation and paint straight from cache.
-            source={{uri: post.mainImage.asset.url, cache: 'force-cache'}}
-            style={styles.heroImage}
-            resizeMode="cover"
-          />
-        ) : (
-          <View style={styles.heroImage} />
-        )}
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.content}>
+          {/* Hero image */}
+          {post.mainImage?.asset?.url ? (
+            <Image
+              // Sanity asset URLs are content-hashed, so it's safe to skip
+              // revalidation and paint straight from cache. Capping width
+              // server-side avoids downloading the full-res original.
+              source={{
+                uri: sanityImageUrl(post.mainImage.asset.url, 1200),
+                cache: 'force-cache',
+              }}
+              style={styles.heroImage}
+              resizeMode="cover"
+            />
+          ) : (
+            <View style={styles.heroImage} />
+          )}
 
-        {/* Author + date */}
-        <Text style={styles.postMeta}>
-          {[
-            post.author,
-            new Date(post.datePosted).toLocaleDateString('en-US', {
-              month: 'short',
-              day: 'numeric',
-              year: 'numeric',
-            }),
-          ]
-            .filter(Boolean)
-            .join('  ·  ')}
-        </Text>
+          {/* Author + date */}
+          <Text style={styles.postMeta}>
+            {[
+              post.author,
+              new Date(post.datePosted).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+              }),
+            ]
+              .filter(Boolean)
+              .join('  ·  ')}
+          </Text>
 
-        {/* Body */}
-        <View style={styles.body}>
-          <PortableText
-            value={post.body ?? []}
-            components={portableTextComponents}
-          />
-        </View>
-
-        <View style={styles.divider} />
-
-        {/* Engagement row */}
-        <View style={styles.engagementRow}>
-          <TouchableOpacity style={styles.engagementItem} onPress={handleLike} disabled={isLiking}>
-            <Heart size={20} color="#2C2C2C" fill={liked ? '#2C2C2C' : 'transparent'} />
-            <Text style={styles.engagementCount}>{likeCount}</Text>
-          </TouchableOpacity>
-
-          <View style={styles.engagementItem}>
-            <MessageCircle size={20} color="#2C2C2C" />
-            <Text style={styles.engagementCount}>
-              {commentsTotal +
-                comments.reduce((sum, c) => sum + (c.replies?.length ?? 0), 0)}
-            </Text>
+          {/* Body */}
+          <View style={styles.body}>
+            <PortableText
+              value={post.body ?? []}
+              components={portableTextComponents}
+            />
           </View>
 
-          <TouchableOpacity onPress={handleShare}>
-            <Share2 size={20} color="#2C2C2C" />
-          </TouchableOpacity>
-        </View>
+          <View style={styles.divider} />
 
-        <View style={styles.divider} />
+          {/* Engagement row */}
+          <View style={styles.engagementRow}>
+            <TouchableOpacity
+              style={styles.engagementItem}
+              onPress={handleLike}
+              disabled={isLiking}>
+              <Heart
+                size={20}
+                color="#2C2C2C"
+                fill={liked ? '#2C2C2C' : 'transparent'}
+              />
+              <Text style={styles.engagementCount}>{likeCount}</Text>
+            </TouchableOpacity>
 
-        {/* Author box */}
-        {post.authorBox && (
-          <View style={styles.authorBox}>
-            {post.authorBox.image?.asset?.url ? (
-              <Image source={{uri: post.authorBox.image.asset.url}} style={styles.authorBoxAvatar} />
-            ) : (
-              <InitialsAvatar {...splitName(post.authorBox.name)} size={56} />
-            )}
-            <View style={styles.authorBoxInfo}>
-              <Text style={styles.authorBoxName}>{post.authorBox.name}</Text>
-              {post.authorBox.title ? (
-                <Text style={styles.authorBoxTitle}>{post.authorBox.title}</Text>
-              ) : null}
-              {post.authorBox.bio ? (
-                <Text style={styles.authorBoxBio}>{post.authorBox.bio}</Text>
-              ) : null}
-              {post.authorBox.socialLinks && post.authorBox.socialLinks.length > 0 && (
-                <View style={styles.socialLinksRow}>
-                  {post.authorBox.socialLinks.map((link, i) => (
-                    <TouchableOpacity
-                      key={i}
-                      style={styles.socialLink}
-                      onPress={() => Linking.openURL(link.url).catch(() => {})}>
-                      <Globe size={14} color="#C1A36A" />
-                      <Text style={styles.socialLinkText}>{link.platform}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              )}
-            </View>
-          </View>
-        )}
-
-        {post.authorBox && <View style={styles.divider} />}
-
-        {/* Comments */}
-        {loadingComments ? (
-          <ActivityIndicator color="#C1A36A" style={styles.commentsLoader} />
-        ) : comments.length === 0 ? (
-          <Text style={styles.noComments}>No comments yet — be the first to comment.</Text>
-        ) : (
-          <>
-            {comments.map(c => (
-              <View key={c.id}>
-                <View style={styles.comment}>
-                  {c.author.profilePicture ? (
-                    <Image source={{uri: c.author.profilePicture}} style={styles.commentAvatarImg} />
-                  ) : (
-                    <InitialsAvatar {...splitName(c.author.name)} size={40} />
+            <View style={styles.engagementItem}>
+              <MessageCircle size={20} color="#2C2C2C" />
+              <Text style={styles.engagementCount}>
+                {commentsTotal +
+                  comments.reduce(
+                    (sum, c) => sum + (c.replies?.length ?? 0),
+                    0,
                   )}
-                  <View style={styles.commentBody}>
-                    <View style={styles.commentMeta}>
-                      <Text style={styles.commentAuthor}>{c.author.name}</Text>
-                      <Text style={styles.commentTime}>{timeAgo(c.createdAt)}</Text>
-                    </View>
-                    <Text style={styles.commentText}>{c.body}</Text>
-                    <TouchableOpacity
-                      onPress={() =>
-                        setReplyingTo({id: c.id, authorName: c.author.name})
-                      }>
-                      <Text style={styles.replyAction}>Reply</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
+              </Text>
+            </View>
 
-                {c.replies?.map(reply => (
-                  <View key={reply.id} style={styles.reply}>
-                    {reply.author.profilePicture ? (
+            <TouchableOpacity onPress={handleShare}>
+              <Share2 size={20} color="#2C2C2C" />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.divider} />
+
+          {/* Author box */}
+          {post.authorBox && (
+            <View style={styles.authorBox}>
+              {post.authorBox.image?.asset?.url ? (
+                <Image
+                  source={{uri: post.authorBox.image.asset.url}}
+                  style={styles.authorBoxAvatar}
+                />
+              ) : (
+                <InitialsAvatar {...splitName(post.authorBox.name)} size={56} />
+              )}
+              <View style={styles.authorBoxInfo}>
+                <Text style={styles.authorBoxName}>{post.authorBox.name}</Text>
+                {post.authorBox.title ? (
+                  <Text style={styles.authorBoxTitle}>
+                    {post.authorBox.title}
+                  </Text>
+                ) : null}
+                {post.authorBox.bio ? (
+                  <Text style={styles.authorBoxBio}>{post.authorBox.bio}</Text>
+                ) : null}
+                {post.authorBox.socialLinks &&
+                  post.authorBox.socialLinks.length > 0 && (
+                    <View style={styles.socialLinksRow}>
+                      {post.authorBox.socialLinks.map((link, i) => (
+                        <TouchableOpacity
+                          key={i}
+                          style={styles.socialLink}
+                          onPress={() =>
+                            Linking.openURL(link.url).catch(() => {})
+                          }>
+                          <Globe size={14} color="#C1A36A" />
+                          <Text style={styles.socialLinkText}>
+                            {link.platform}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  )}
+              </View>
+            </View>
+          )}
+
+          {post.authorBox && <View style={styles.divider} />}
+
+          {/* Comments */}
+          {loadingComments ? (
+            <ActivityIndicator color="#C1A36A" style={styles.commentsLoader} />
+          ) : comments.length === 0 ? (
+            <Text style={styles.noComments}>
+              No comments yet — be the first to comment.
+            </Text>
+          ) : (
+            <>
+              {comments.map(c => (
+                <View key={c.id}>
+                  <View style={styles.comment}>
+                    {c.author.profilePicture ? (
                       <Image
-                        source={{uri: reply.author.profilePicture}}
-                        style={styles.replyAvatarImg}
+                        source={{uri: c.author.profilePicture}}
+                        style={styles.commentAvatarImg}
                       />
                     ) : (
-                      <InitialsAvatar {...splitName(reply.author.name)} size={32} />
+                      <InitialsAvatar {...splitName(c.author.name)} size={40} />
                     )}
                     <View style={styles.commentBody}>
                       <View style={styles.commentMeta}>
-                        <Text style={styles.commentAuthor}>{reply.author.name}</Text>
-                        <Text style={styles.commentTime}>{timeAgo(reply.createdAt)}</Text>
+                        <Text style={styles.commentAuthor}>
+                          {c.author.name}
+                        </Text>
+                        <Text style={styles.commentTime}>
+                          {timeAgo(c.createdAt)}
+                        </Text>
                       </View>
-                      <Text style={styles.commentText}>{reply.body}</Text>
+                      <Text style={styles.commentText}>{c.body}</Text>
+                      <TouchableOpacity
+                        onPress={() =>
+                          setReplyingTo({id: c.id, authorName: c.author.name})
+                        }>
+                        <Text style={styles.replyAction}>Reply</Text>
+                      </TouchableOpacity>
                     </View>
                   </View>
-                ))}
-              </View>
-            ))}
 
-            {comments.length < commentsTotal && (
-              <TouchableOpacity onPress={handleLoadMoreComments} disabled={loadingMoreComments}>
-                {loadingMoreComments ? (
-                  <ActivityIndicator color="#C1A36A" style={styles.commentsLoader} />
-                ) : (
-                  <Text style={styles.loadMoreText}>Load more comments</Text>
-                )}
-              </TouchableOpacity>
-            )}
-          </>
-        )}
+                  {c.replies?.map(reply => (
+                    <View key={reply.id} style={styles.reply}>
+                      {reply.author.profilePicture ? (
+                        <Image
+                          source={{uri: reply.author.profilePicture}}
+                          style={styles.replyAvatarImg}
+                        />
+                      ) : (
+                        <InitialsAvatar
+                          {...splitName(reply.author.name)}
+                          size={32}
+                        />
+                      )}
+                      <View style={styles.commentBody}>
+                        <View style={styles.commentMeta}>
+                          <Text style={styles.commentAuthor}>
+                            {reply.author.name}
+                          </Text>
+                          <Text style={styles.commentTime}>
+                            {timeAgo(reply.createdAt)}
+                          </Text>
+                        </View>
+                        <Text style={styles.commentText}>{reply.body}</Text>
+                      </View>
+                    </View>
+                  ))}
+                </View>
+              ))}
 
-        {/* Comment input */}
-        {replyingTo && (
-          <View style={styles.replyingToBanner}>
-            <Text style={styles.replyingToText}>
-              Replying to {replyingTo.authorName}
-            </Text>
-            <TouchableOpacity onPress={() => setReplyingTo(null)} hitSlop={8}>
-              <X size={16} color="#666" />
-            </TouchableOpacity>
-          </View>
-        )}
-        <View style={styles.inputRow}>
-          <UserAvatar
-            profilePicture={user?.profile_picture}
-            firstName={user?.first_name}
-            lastName={user?.last_name}
-            email={user?.email}
-            size={40}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder={replyingTo ? `Reply to ${replyingTo.authorName}...` : 'Add a comment...'}
-            placeholderTextColor="#999"
-            value={comment}
-            onChangeText={setComment}
-            multiline
-          />
-        </View>
-
-        <TouchableOpacity
-          style={[styles.commentBtn, (!comment.trim() || isPosting) && styles.commentBtnDisabled]}
-          activeOpacity={0.85}
-          onPress={handlePostComment}
-          disabled={!comment.trim() || isPosting}>
-          {isPosting ? (
-            <ActivityIndicator size="small" color="#fff" />
-          ) : (
-            <Text style={styles.commentBtnText}>Comment</Text>
+              {comments.length < commentsTotal && (
+                <TouchableOpacity
+                  onPress={handleLoadMoreComments}
+                  disabled={loadingMoreComments}>
+                  {loadingMoreComments ? (
+                    <ActivityIndicator
+                      color="#C1A36A"
+                      style={styles.commentsLoader}
+                    />
+                  ) : (
+                    <Text style={styles.loadMoreText}>Load more comments</Text>
+                  )}
+                </TouchableOpacity>
+              )}
+            </>
           )}
-        </TouchableOpacity>
-      </ScrollView>
+
+          {/* Comment input */}
+          {replyingTo && (
+            <View style={styles.replyingToBanner}>
+              <Text style={styles.replyingToText}>
+                Replying to {replyingTo.authorName}
+              </Text>
+              <TouchableOpacity onPress={() => setReplyingTo(null)} hitSlop={8}>
+                <X size={16} color="#666" />
+              </TouchableOpacity>
+            </View>
+          )}
+          <View style={styles.inputRow}>
+            <UserAvatar
+              profilePicture={user?.profile_picture}
+              firstName={user?.first_name}
+              lastName={user?.last_name}
+              email={user?.email}
+              size={40}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder={
+                replyingTo
+                  ? `Reply to ${replyingTo.authorName}...`
+                  : 'Add a comment...'
+              }
+              placeholderTextColor="#999"
+              value={comment}
+              onChangeText={setComment}
+              multiline
+            />
+          </View>
+
+          <TouchableOpacity
+            style={[
+              styles.commentBtn,
+              (!comment.trim() || isPosting) && styles.commentBtnDisabled,
+            ]}
+            activeOpacity={0.85}
+            onPress={handlePostComment}
+            disabled={!comment.trim() || isPosting}>
+            {isPosting ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Text style={styles.commentBtnText}>Comment</Text>
+            )}
+          </TouchableOpacity>
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

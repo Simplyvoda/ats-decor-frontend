@@ -27,6 +27,8 @@ end
 
 $RNFirebaseAsStaticFramework = true
 
+use_modular_headers!
+
 target 'fe' do
   config = use_native_modules!
 

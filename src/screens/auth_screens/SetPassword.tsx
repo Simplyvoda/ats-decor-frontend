@@ -16,6 +16,10 @@ import Toast from 'react-native-toast-message';
 import PrimaryButton from '../../components/molecules/PrimaryButton';
 import {navigateTo} from '../../utils/navigation';
 import AuthService from '../../services/AuthService';
+import {
+  isStrongPassword,
+  PASSWORD_REQUIREMENTS_MESSAGE,
+} from '../../utils/passwordValidation';
 
 type SetPasswordRouteParams = {
   SetPassword: {accessToken?: string};
@@ -28,8 +32,7 @@ type FormData = {
 
 const SetPassword = () => {
   const navigation = useNavigation();
-  const route =
-    useRoute<RouteProp<SetPasswordRouteParams, 'SetPassword'>>();
+  const route = useRoute<RouteProp<SetPasswordRouteParams, 'SetPassword'>>();
   const accessToken = route.params?.accessToken;
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -81,108 +84,112 @@ const SetPassword = () => {
       <KeyboardAvoidingView
         className="flex-1"
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <ScrollView className="w-full">
-      <View className="relative flex items-center justify-center my-2">
-        <Text className="text-xl font-semibold text-gray-primary">
-          Set New Password
-        </Text>
-      </View>
-
-      <View className="my-5">
-        <Text className="cormorant text-2xl">Choose a new password</Text>
-        <Text className="text-left text-light-gray text-lg">
-          Please enter and confirm your new password below.
-        </Text>
-
-        <View className="flex flex-col gap-5 py-5">
-          <View>
-            <Controller
-              control={control}
-              name="password"
-              rules={{
-                required: 'Password is required',
-                minLength: {value: 6, message: 'Min length is 6'},
-              }}
-              render={({field: {onChange, onBlur, value}}) => (
-                <View
-                  className={`flex flex-row items-center border ${errors.password ? 'border-red-600' : 'border-[#ccc]'} bg-white mb-1.5 rounded-md px-2 py-3`}>
-                  <LockKeyhole color="#9ca3af" size={18} />
-                  <TextInput
-                    className="flex-1 ml-2"
-                    autoCapitalize="none"
-                    placeholderTextColor="#9ca3af"
-                    placeholder="New password"
-                    secureTextEntry={!showPassword}
-                    value={value}
-                    onBlur={onBlur}
-                    onChangeText={onChange}
-                  />
-                  <TouchableOpacity
-                    onPress={() => setShowPassword(s => !s)}
-                    hitSlop={{top: 8, bottom: 8, left: 8, right: 8}}>
-                    {showPassword ? (
-                      <EyeOff color="#9ca3af" size={18} />
-                    ) : (
-                      <Eye color="#9ca3af" size={18} />
-                    )}
-                  </TouchableOpacity>
-                </View>
-              )}
-            />
-            {errors.password && (
-              <Text className="text-red-600">{errors.password.message}</Text>
-            )}
+        <ScrollView className="w-full">
+          <View className="relative flex items-center justify-center my-2">
+            <Text className="text-xl font-semibold text-gray-primary">
+              Set New Password
+            </Text>
           </View>
 
-          <View>
-            <Controller
-              control={control}
-              name="confirmPassword"
-              rules={{
-                required: 'Please confirm your password',
-                validate: value => value === password || 'Passwords do not match',
-              }}
-              render={({field: {onChange, onBlur, value}}) => (
-                <View
-                  className={`flex flex-row items-center border ${errors.confirmPassword ? 'border-red-600' : 'border-[#ccc]'} bg-white mb-1.5 rounded-md px-2 py-3`}>
-                  <LockKeyhole color="#9ca3af" size={18} />
-                  <TextInput
-                    className="flex-1 ml-2"
-                    autoCapitalize="none"
-                    placeholderTextColor="#9ca3af"
-                    placeholder="Confirm new password"
-                    secureTextEntry={!showConfirmPassword}
-                    value={value}
-                    onBlur={onBlur}
-                    onChangeText={onChange}
-                  />
-                  <TouchableOpacity
-                    onPress={() => setShowConfirmPassword(s => !s)}
-                    hitSlop={{top: 8, bottom: 8, left: 8, right: 8}}>
-                    {showConfirmPassword ? (
-                      <EyeOff color="#9ca3af" size={18} />
-                    ) : (
-                      <Eye color="#9ca3af" size={18} />
-                    )}
-                  </TouchableOpacity>
-                </View>
-              )}
-            />
-            {errors.confirmPassword && (
-              <Text className="text-red-600">
-                {errors.confirmPassword.message}
-              </Text>
-            )}
-          </View>
-        </View>
+          <View className="my-5">
+            <Text className="cormorant text-2xl">Choose a new password</Text>
+            <Text className="text-left text-light-gray text-lg">
+              Please enter and confirm your new password below.
+            </Text>
 
-        <PrimaryButton
-          title="Update Password"
-          onPress={handleSubmit(onSubmit)}
-          isSubmitting={isSubmitting}
-        />
-      </View>
-      </ScrollView>
+            <View className="flex flex-col gap-5 py-5">
+              <View>
+                <Controller
+                  control={control}
+                  name="password"
+                  rules={{
+                    required: 'Password is required',
+                    validate: v =>
+                      isStrongPassword(v) || PASSWORD_REQUIREMENTS_MESSAGE,
+                  }}
+                  render={({field: {onChange, onBlur, value}}) => (
+                    <View
+                      className={`flex flex-row items-center border ${errors.password ? 'border-red-600' : 'border-[#ccc]'} bg-white mb-1.5 rounded-md px-2 py-3`}>
+                      <LockKeyhole color="#9ca3af" size={18} />
+                      <TextInput
+                        className="flex-1 ml-2"
+                        autoCapitalize="none"
+                        placeholderTextColor="#9ca3af"
+                        placeholder="New password"
+                        secureTextEntry={!showPassword}
+                        value={value}
+                        onBlur={onBlur}
+                        onChangeText={onChange}
+                      />
+                      <TouchableOpacity
+                        onPress={() => setShowPassword(s => !s)}
+                        hitSlop={{top: 8, bottom: 8, left: 8, right: 8}}>
+                        {showPassword ? (
+                          <EyeOff color="#9ca3af" size={18} />
+                        ) : (
+                          <Eye color="#9ca3af" size={18} />
+                        )}
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                />
+                {errors.password && (
+                  <Text className="text-red-600">
+                    {errors.password.message}
+                  </Text>
+                )}
+              </View>
+
+              <View>
+                <Controller
+                  control={control}
+                  name="confirmPassword"
+                  rules={{
+                    required: 'Please confirm your password',
+                    validate: value =>
+                      value === password || 'Passwords do not match',
+                  }}
+                  render={({field: {onChange, onBlur, value}}) => (
+                    <View
+                      className={`flex flex-row items-center border ${errors.confirmPassword ? 'border-red-600' : 'border-[#ccc]'} bg-white mb-1.5 rounded-md px-2 py-3`}>
+                      <LockKeyhole color="#9ca3af" size={18} />
+                      <TextInput
+                        className="flex-1 ml-2"
+                        autoCapitalize="none"
+                        placeholderTextColor="#9ca3af"
+                        placeholder="Confirm new password"
+                        secureTextEntry={!showConfirmPassword}
+                        value={value}
+                        onBlur={onBlur}
+                        onChangeText={onChange}
+                      />
+                      <TouchableOpacity
+                        onPress={() => setShowConfirmPassword(s => !s)}
+                        hitSlop={{top: 8, bottom: 8, left: 8, right: 8}}>
+                        {showConfirmPassword ? (
+                          <EyeOff color="#9ca3af" size={18} />
+                        ) : (
+                          <Eye color="#9ca3af" size={18} />
+                        )}
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                />
+                {errors.confirmPassword && (
+                  <Text className="text-red-600">
+                    {errors.confirmPassword.message}
+                  </Text>
+                )}
+              </View>
+            </View>
+
+            <PrimaryButton
+              title="Update Password"
+              onPress={handleSubmit(onSubmit)}
+              isSubmitting={isSubmitting}
+            />
+          </View>
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

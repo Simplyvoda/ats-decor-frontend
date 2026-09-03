@@ -36,7 +36,7 @@ const DesignScreen = () => {
       <View className="flex flex-col px-4 gap-5 mt-[-45px]">
         <TouchableOpacity
           onPress={handleScanPress}
-          className={`px-3 py-5 flex flex-row justify-start items-center shadow-slate-600 shadow-sm rounded-[16px] bg-white ${!scanSupported ? 'opacity-50' : ''}`}>
+          className={`px-3 py-5 flex flex-row justify-start items-center shadow-slate-600 shadow-sm rounded-[16px] bg-white ${!scanSupported ? 'opacity-90' : ''}`}>
           <View className="bg-[#4169E1] w-[30px] h-[80px] rounded-[14px] flex items-center justify-center">
             <Camera color={'white'} />
           </View>

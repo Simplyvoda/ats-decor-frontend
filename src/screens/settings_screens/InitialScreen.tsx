@@ -93,7 +93,7 @@ const InitialScreen = () => {
   const displayName =
     user?.first_name && user?.last_name
       ? `${user.first_name} ${user.last_name}`
-      : user?.email ?? 'Guest';
+      : (user?.email ?? 'Guest');
 
   const handleLogout = async () => {
     try {
@@ -161,7 +161,7 @@ const InitialScreen = () => {
                 <Icon color="#C1A36A" size={18} />
               </View>
 
-              <View className="text-white flex flex-col ml-4 space-y-2">
+              <View className="text-white flex-1 flex flex-col ml-4 space-y-2">
                 <Text className="text-[#2C2C2C] text-2xl font-cormorant">
                   {section.title}
                 </Text>
