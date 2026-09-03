@@ -97,25 +97,35 @@ target 'fe' do
 
     # Work around upstream React Native bug: React-jsitooling and
     # React-RuntimeCore both set header_dir "react/runtime", so without
-    # USE_FRAMEWORKS (we link statically) CocoaPods derives the same module
-    # name "react_runtime" for both — each podspec only gives itself a
-    # distinct module_name when USE_FRAMEWORKS is set. Harmless until
-    # something loads both modulemaps in one compile; Sentry's Swift
-    # interop does exactly that (RNSentry.xcconfig lists every pod's
-    # modulemap via -fmodule-map-file), producing "Redefinition of module
-    # 'react_runtime'". Rename each modulemap's module — plain #include
-    # usage elsewhere doesn't depend on the declared module name.
+    # USE_FRAMEWORKS (we link statically) CocoaPods puts both pods' public
+    # headers in the same Headers/Public/react_runtime/ folder and derives
+    # the same module name "react_runtime" for both (each podspec only
+    # gives itself a distinct module_name when USE_FRAMEWORKS is set).
+    # Renaming the module alone isn't enough: both modulemaps also declare
+    # "umbrella header", which makes Clang treat the module as owning the
+    # *entire directory* it lives in — two umbrella modules can't both
+    # claim the same shared directory ("Umbrella for module ... already
+    # covers this directory"). Their umbrella headers already #import
+    # every one of that pod's own headers by name (checked directly), so
+    # directory-wide inference isn't needed — downgrade "umbrella header"
+    # to a plain "header" declaration (and drop the wildcard submodule
+    # line, which requires umbrella inference to mean anything) so each
+    # module only claims its own umbrella header file, not the directory.
     {
       'React-jsitooling' => 'react_jsitooling',
       'React-RuntimeCore' => 'react_runtimecore',
     }.each do |pod_name, new_module_name|
       modulemap_path = File.join(installer.sandbox.root.to_s, 'Target Support Files', pod_name, "#{pod_name}.modulemap")
       if File.exist?(modulemap_path)
-        content = File.read(modulemap_path)
-        patched = content.sub(/^module react_runtime\b/, "module #{new_module_name}")
-        if patched != content
+        patched = <<~MODULEMAP
+          module #{new_module_name} {
+            header "#{pod_name}-umbrella.h"
+            export *
+          }
+        MODULEMAP
+        if File.read(modulemap_path) != patched
           File.write(modulemap_path, patched)
-          Pod::UI.puts "Patched #{pod_name}.modulemap module name to #{new_module_name}".green
+          Pod::UI.puts "Patched #{pod_name}.modulemap to a non-umbrella module '#{new_module_name}'".green
         end
       end
     end
