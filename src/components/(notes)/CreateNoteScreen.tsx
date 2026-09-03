@@ -425,7 +425,9 @@ export default function CreateNoteScreen() {
                 />
               </View>
 
-              {!fromARViewer && (
+              {/* Creating from a specific design's Notes page already implies
+                  the project — nothing to pick, so skip the dropdown. */}
+              {!fromARViewer && !presetProjectId && (
                 <>
                   <View className="flex-row items-center mb-2">
                     <Paperclip size={16} color="#C1A36A" />
