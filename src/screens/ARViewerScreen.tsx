@@ -18,8 +18,10 @@ import {
   Dimensions,
   FlatList,
   Image,
+  KeyboardAvoidingView,
   Modal,
   PanResponder,
+  Platform,
   ScrollView,
   Share,
   StyleSheet,
@@ -151,13 +153,20 @@ export default function ARViewerScreen() {
       });
   }, []);
 
-  // ── Publish design state ──
+  // ── Publish design state ── prefilled from route params when reopening an
+  // already-saved design, so re-saving doesn't reset name/style/tags/visibility.
   const [showPublishModal, setShowPublishModal] = useState(false);
-  const [pubName, setPubName] = useState('');
-  const [pubStyle, setPubStyle] = useState<string | null>(null);
-  const [pubTags, setPubTags] = useState<string[]>([]);
+  const [pubName, setPubName] = useState(route.params?.designName ?? '');
+  const [pubStyle, setPubStyle] = useState<string | null>(
+    route.params?.designStyle ?? null,
+  );
+  const [pubTags, setPubTags] = useState<string[]>(
+    route.params?.designTags ?? [],
+  );
   const [pubTagInput, setPubTagInput] = useState('');
-  const [pubIsPublic, setPubIsPublic] = useState(false);
+  const [pubIsPublic, setPubIsPublic] = useState(
+    route.params?.designIsPublic ?? false,
+  );
   const [isPublishing, setIsPublishing] = useState(false);
 
   // Fresh scans aren't saved automatically — nudge the user once
@@ -291,7 +300,7 @@ export default function ARViewerScreen() {
           exportFurnitureLayoutCommand(realityKitRef);
         });
 
-        const res = await DesignService.publish({
+        const payload = {
           name: pubName.trim(),
           style: pubStyle ?? undefined,
           tags: pubTags,
@@ -299,11 +308,20 @@ export default function ARViewerScreen() {
           thumbnailPath: path,
           modelUrl,
           furnitureLayout: layoutResult.layout,
-        });
+        };
+        // Editing an already-saved design replaces it in place rather than
+        // publishing a duplicate.
+        const res = currentDesignId
+          ? await DesignService.update(currentDesignId, payload)
+          : await DesignService.publish(payload);
         setCurrentDesignId(res.data.id);
         Toast.show({
           type: 'success',
-          text1: pubIsPublic ? 'Published to Explore' : 'Design saved',
+          text1: currentDesignId
+            ? 'Design updated'
+            : pubIsPublic
+              ? 'Published to Explore'
+              : 'Design saved',
         });
 
         // Attach any notes jotted before this design had an id
@@ -596,7 +614,9 @@ export default function ARViewerScreen() {
         transparent
         animationType="fade"
         onRequestClose={() => setShowPublishModal(false)}>
-        <View style={styles.modalBackdrop}>
+        <KeyboardAvoidingView
+          style={styles.modalBackdrop}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
           <View style={styles.modalCard}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Save design</Text>
@@ -693,7 +713,7 @@ export default function ARViewerScreen() {
               </Text>
             </TouchableOpacity>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
     </View>
   );

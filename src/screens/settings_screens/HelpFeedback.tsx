@@ -102,7 +102,7 @@ When you’re ready for more, upgrade to Hobbyist (or higher) to unlock addition
       style={{flex: 1}}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView
-        className="flex-1 bg-offWhite px-5 pt-[70px]"
+        className="flex-1 bg-offWhite px-5 pt-[70px] pb-[30px]"
         showsVerticalScrollIndicator={false}>
         {/* HEADER */}
         <View className="flex-row items-center mb-6">
@@ -251,7 +251,7 @@ When you’re ready for more, upgrade to Hobbyist (or higher) to unlock addition
           </Text>
           <Text className="text-[#444] text-sm mb-1 font-dm-sans">Version 1.1.0</Text>
           <Text className="text-[#444] text-sm mb-3 font-dm-sans">
-            Last Updated: July 3, 2025
+            Last Updated: Sept 3, 2026
           </Text>
           <SecondaryButton
             title="Rate App"

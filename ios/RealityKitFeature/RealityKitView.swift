@@ -877,9 +877,20 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
     }
 
     @objc private func handleRotation(_ gesture: UIRotationGestureRecognizer) {
-        guard let selected = selectedFurniture, gesture.state == .changed else { return }
-        let delta = Float(gesture.rotation)
-        selected.transform.rotation *= simd_quatf(angle: -delta, axis: [0, 1, 0])
+        guard gesture.state == .changed else { return }
+
+        if let selected = selectedFurniture {
+            let delta = Float(gesture.rotation)
+            selected.transform.rotation *= simd_quatf(angle: -delta, axis: [0, 1, 0])
+            gesture.rotation = 0
+            return
+        }
+
+        // Nothing selected — a two-finger twist orbits the camera around the
+        // room instead, same math as the single-finger drag orbit.
+        guard !isTopView, camera != nil, cameraPivot != nil else { return }
+        yaw += Float(gesture.rotation)
+        applyOrbit()
         gesture.rotation = 0
     }
 
