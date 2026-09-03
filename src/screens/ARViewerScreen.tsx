@@ -1,7 +1,19 @@
-import {ChevronLeft, Eye, FileDown, Globe, MoreVertical, NotebookPen, RotateCcw, Save, Trash2, X} from 'lucide-react-native';
+import {
+  ChevronLeft,
+  Eye,
+  FileDown,
+  Globe,
+  MoreVertical,
+  NotebookPen,
+  RotateCcw,
+  Save,
+  Trash2,
+  X,
+} from 'lucide-react-native';
 import React, {useEffect, useRef, useState} from 'react';
 import {
   ActivityIndicator,
+  Alert,
   Animated,
   Dimensions,
   FlatList,
@@ -109,7 +121,12 @@ const buildCatalogue = (items: IFurniture[]): FurnitureCategory[] => {
 export default function ARViewerScreen() {
   const navigation = useNavigation();
   const route = useRoute<any>();
+  const justSavedRef = useRef(false);
   const modelUrl: string = route.params?.modelUrl ?? '';
+  // Explore/Moodboard open designs for browsing, not editing — nothing
+  // here can be changed, so no furniture editing UI and no "unsaved
+  // changes" prompt on the way out.
+  const viewOnly: boolean = route.params?.viewOnly === true;
   // Known when opened from Explore/Moodboard, or set after publishing —
   // notes taken here attach to this design automatically
   const [currentDesignId, setCurrentDesignId] = useState<string | null>(
@@ -121,11 +138,14 @@ export default function ARViewerScreen() {
     useState<FurnitureCategory | null>(null);
   const [showToolsMenu, setShowToolsMenu] = useState(false);
   const [furnitureSelected, setFurnitureSelected] = useState(false);
-  const [catalogue, setCatalogue] = useState<FurnitureCategory[]>(DEV_CATALOGUE);
+  const [catalogue, setCatalogue] =
+    useState<FurnitureCategory[]>(DEV_CATALOGUE);
 
   useEffect(() => {
     FurnitureService.getFurniture()
-      .then(res => setCatalogue([...DEV_CATALOGUE, ...buildCatalogue(res.data)]))
+      .then(res =>
+        setCatalogue([...DEV_CATALOGUE, ...buildCatalogue(res.data)]),
+      )
       .catch(() => {
         // Backend unreachable — dev assets (if any) remain usable
       });
@@ -146,12 +166,35 @@ export default function ARViewerScreen() {
       Toast.show({
         type: 'info',
         text1: 'Scan ready',
-        text2: 'Use ⋮ → Save design to keep it (with a thumbnail)',
+        text2: 'Use ⋮ → Save design to keep it',
         visibilityTime: 5000,
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Warn before leaving with unsaved work
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('beforeRemove', e => {
+      if (viewOnly || justSavedRef.current) {
+        return; // nothing editable here, or already saved — let it leave without asking
+      }
+      e.preventDefault();
+      Alert.alert(
+        'Discard changes?',
+        "Your design hasn't been saved yet. If you leave now, your changes will be lost.",
+        [
+          {text: 'Keep editing', style: 'cancel'},
+          {
+            text: 'Discard',
+            style: 'destructive',
+            onPress: () => navigation.dispatch(e.data.action),
+          },
+        ],
+      );
+    });
+    return unsubscribe;
+  }, [navigation, viewOnly]);
 
   // Reopening a saved design: replay its furniture layout piece by piece.
   // Self-contained on the native side (each piece is anchored to its saved
@@ -277,6 +320,7 @@ export default function ARViewerScreen() {
 
         // Saving ends the editing session — drop ScanScreen/ChooseModel/ARViewer
         // from the stack so the user lands on Home with no way back into this session.
+        justSavedRef.current = true;
         (navigation as any).reset({
           index: 0,
           routes: [{name: 'HomeTabs'}],
@@ -382,6 +426,7 @@ export default function ARViewerScreen() {
       <RealityKitNativeView
         ref={realityKitRef}
         modelUrl={modelUrl}
+        editingEnabled={!viewOnly}
         onSnapshotReady={handleSnapshotReady}
         onFurnitureLayoutExported={handleFurnitureLayoutExported}
         onDesignPdfExported={handlePdfExported}
@@ -424,23 +469,34 @@ export default function ARViewerScreen() {
                   style={styles.toolsMenuItem}
                   onPress={() => {
                     setShowToolsMenu(false);
-                    (navigation as any).navigate('CreateNote', {
-                      projectId: currentDesignId ?? undefined,
-                      fromARViewer: true,
-                    });
+                    if (currentDesignId) {
+                      // Saved design — browse its existing notes first
+                      (navigation as any).navigate('DesignNotes', {
+                        designId: currentDesignId,
+                        designName: route.params?.designName,
+                      });
+                    } else {
+                      // Not saved yet — nothing to list, jump straight to
+                      // creating one (held as a local draft until saved)
+                      (navigation as any).navigate('CreateNote', {
+                        fromARViewer: true,
+                      });
+                    }
                   }}>
                   <NotebookPen color="#C4A962" size={18} />
                   <Text style={styles.toolsMenuText}>Notes</Text>
                 </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.toolsMenuItem}
-                  onPress={() => {
-                    setShowToolsMenu(false);
-                    setShowPublishModal(true);
-                  }}>
-                  <Save color="#C4A962" size={18} />
-                  <Text style={styles.toolsMenuText}>Save design</Text>
-                </TouchableOpacity>
+                {!viewOnly && (
+                  <TouchableOpacity
+                    style={styles.toolsMenuItem}
+                    onPress={() => {
+                      setShowToolsMenu(false);
+                      setShowPublishModal(true);
+                    }}>
+                    <Save color="#C4A962" size={18} />
+                    <Text style={styles.toolsMenuText}>Save design</Text>
+                  </TouchableOpacity>
+                )}
                 <TouchableOpacity
                   style={styles.toolsMenuItem}
                   onPress={handleExportPdf}>
@@ -470,62 +526,64 @@ export default function ARViewerScreen() {
         </View>
       </SafeAreaView>
 
-      {/* ── Bottom sheet ── */}
-      <Animated.View style={[styles.sheet, {height: sheetAnim}]}>
-        {/* Drag handle */}
-        <View style={styles.handleArea} {...panResponder.panHandlers}>
-          <View style={styles.handle} />
-        </View>
+      {/* ── Bottom sheet (furniture browsing/placement — editing only) ── */}
+      {!viewOnly && (
+        <Animated.View style={[styles.sheet, {height: sheetAnim}]}>
+          {/* Drag handle */}
+          <View style={styles.handleArea} {...panResponder.panHandlers}>
+            <View style={styles.handle} />
+          </View>
 
-        {activeCategory ? (
-          // ── Furniture grid ──
-          <>
-            <View style={styles.sheetHeader}>
-              <TouchableOpacity
-                onPress={handleBackFromCategory}
-                hitSlop={{top: 12, bottom: 12, left: 12, right: 12}}>
-                <ChevronLeft color="#333" size={22} />
-              </TouchableOpacity>
-              <Text style={styles.sheetTitle}>{activeCategory.name}</Text>
-              <TouchableOpacity
-                onPress={handleCloseSheet}
-                hitSlop={{top: 12, bottom: 12, left: 12, right: 12}}>
-                <X color="#333" size={22} />
-              </TouchableOpacity>
-            </View>
+          {activeCategory ? (
+            // ── Furniture grid ──
+            <>
+              <View style={styles.sheetHeader}>
+                <TouchableOpacity
+                  onPress={handleBackFromCategory}
+                  hitSlop={{top: 12, bottom: 12, left: 12, right: 12}}>
+                  <ChevronLeft color="#333" size={22} />
+                </TouchableOpacity>
+                <Text style={styles.sheetTitle}>{activeCategory.name}</Text>
+                <TouchableOpacity
+                  onPress={handleCloseSheet}
+                  hitSlop={{top: 12, bottom: 12, left: 12, right: 12}}>
+                  <X color="#333" size={22} />
+                </TouchableOpacity>
+              </View>
 
-            <FlatList
-              data={activeCategory.items}
-              keyExtractor={i => i.id}
-              renderItem={renderFurnitureItem}
-              numColumns={3}
-              contentContainerStyle={styles.furnitureGrid}
-              showsVerticalScrollIndicator={false}
-            />
-          </>
-        ) : (
-          // ── Category list ──
-          <>
-            <View style={styles.sheetHeader}>
-              <Text style={styles.sheetTitle}>Furniture</Text>
-              <TouchableOpacity
-                onPress={handleCloseSheet}
-                hitSlop={{top: 12, bottom: 12, left: 12, right: 12}}>
-                <X color="#333" size={22} />
-              </TouchableOpacity>
-            </View>
-            {catalogue.length === 0 ? (
-              <Text style={styles.emptyCatalogue}>
-                No furniture available yet
-              </Text>
-            ) : (
-              <ScrollView showsVerticalScrollIndicator={false}>
-                {catalogue.map(renderCategoryRow)}
-              </ScrollView>
-            )}
-          </>
-        )}
-      </Animated.View>
+              <FlatList
+                data={activeCategory.items}
+                keyExtractor={i => i.id}
+                renderItem={renderFurnitureItem}
+                numColumns={3}
+                contentContainerStyle={styles.furnitureGrid}
+                showsVerticalScrollIndicator={false}
+              />
+            </>
+          ) : (
+            // ── Category list ──
+            <>
+              <View style={styles.sheetHeader}>
+                <Text style={styles.sheetTitle}>Furniture</Text>
+                <TouchableOpacity
+                  onPress={handleCloseSheet}
+                  hitSlop={{top: 12, bottom: 12, left: 12, right: 12}}>
+                  <X color="#333" size={22} />
+                </TouchableOpacity>
+              </View>
+              {catalogue.length === 0 ? (
+                <Text style={styles.emptyCatalogue}>
+                  No furniture available yet
+                </Text>
+              ) : (
+                <ScrollView showsVerticalScrollIndicator={false}>
+                  {catalogue.map(renderCategoryRow)}
+                </ScrollView>
+              )}
+            </>
+          )}
+        </Animated.View>
+      )}
 
       {/* ── Publish design modal ── */}
       <Modal
@@ -569,9 +627,7 @@ export default function ARViewerScreen() {
                 {pubTags.map(tag => (
                   <TouchableOpacity
                     key={tag}
-                    onPress={() =>
-                      setPubTags(pubTags.filter(t => t !== tag))
-                    }
+                    onPress={() => setPubTags(pubTags.filter(t => t !== tag))}
                     style={styles.tagChip}>
                     <Text style={styles.tagChipText}>{tag}</Text>
                     <X size={12} color="#7A7A7A" />
@@ -627,8 +683,8 @@ export default function ARViewerScreen() {
                     ? 'Publishing...'
                     : 'Saving...'
                   : pubIsPublic
-                  ? 'Publish'
-                  : 'Save'}
+                    ? 'Publish'
+                    : 'Save'}
               </Text>
             </TouchableOpacity>
           </View>
@@ -676,7 +732,12 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 4,
   },
-  toolBtn: {width: 44, height: 40, alignItems: 'center', justifyContent: 'center'},
+  toolBtn: {
+    width: 44,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   toolDivider: {height: 1, backgroundColor: '#f0f0f0', marginHorizontal: 8},
   toolsMenu: {
     backgroundColor: 'white',

@@ -15,6 +15,10 @@ import { UIManager, findNodeHandle, requireNativeComponent } from 'react-native'
 // three in sync: the .m declarations, the Swift @objc vars, and this type.
 interface RealityKitViewProps {
   modelUrl: string;
+  // Gates furniture selection natively (drag/pinch-resize/rotate/delete all
+  // require a selection first) — camera orbit/pan/zoom are unaffected
+  // either way. Defaults true on the native side if omitted.
+  editingEnabled?: boolean;
   style?: object;
   // Fired after captureSnapshotCommand with {path} or {error}
   onSnapshotReady?: (e: {

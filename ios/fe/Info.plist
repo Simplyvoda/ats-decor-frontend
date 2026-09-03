@@ -71,5 +71,7 @@
 	<true/>
 	<key>LSSupportsOpeningDocumentsInPlace</key>
 	<true/>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Used to select a profile picture from your photos.</string>
 </dict>
 </plist>

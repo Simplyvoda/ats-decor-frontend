@@ -40,6 +40,23 @@ const UserService = {
     const res = await api.put('/user', payload);
     return res.data;
   },
+
+  async uploadProfilePicture(
+    fileUri: string,
+    mimeType: string,
+  ): Promise<IUserProfileResponse> {
+    const formData = new FormData();
+    formData.append('file', {
+      uri: fileUri,
+      type: mimeType,
+      name: `profile-picture.${mimeType.split('/')[1] || 'jpg'}`,
+    } as any);
+
+    const res = await api.post('/user/profile-picture', formData, {
+      headers: {'Content-Type': 'multipart/form-data'},
+    });
+    return res.data;
+  },
 };
 
 export default UserService;

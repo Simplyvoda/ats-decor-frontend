@@ -19,7 +19,7 @@ import {
   HelpCircle,
 } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import InitialsAvatar from '../../components/molecules/InitialsAvatar';
+import UserAvatar from '../../components/molecules/UserAvatar';
 import {useUserContext} from '../../context/UserContext';
 import AuthService from '../../services/AuthService';
 
@@ -68,7 +68,6 @@ const InitialScreen = () => {
         'Privacy Settings',
         // 'Data Export', // not implemented on Security & Privacy
         'Account Security',
-        '+1 more',
       ],
       screen: 'SecurityPrivacy',
     },
@@ -76,7 +75,7 @@ const InitialScreen = () => {
       icon: 'HelpCircle',
       title: 'Help & Feedback',
       subtitle: 'Get Support & Share Feedback',
-      tags: ['FAQs', 'Contact Support', 'Send Feedback', '+1 more'],
+      tags: ['FAQs', 'Contact Support', 'Send Feedback'],
       screen: 'HelpFeedback',
     },
   ];
@@ -119,7 +118,8 @@ const InitialScreen = () => {
 
         <View className="flex flex-row justify-start items-center px-2">
           {/* avatar */}
-          <InitialsAvatar
+          <UserAvatar
+            profilePicture={user?.profile_picture}
             firstName={user?.first_name}
             lastName={user?.last_name}
             email={user?.email}

@@ -35,10 +35,14 @@ const BlogService = {
     return res.data;
   },
 
-  async postComment(postId: string, body: string): Promise<BlogCommentResponse> {
+  async postComment(
+    postId: string,
+    body: string,
+    parentId?: string,
+  ): Promise<BlogCommentResponse> {
     const res = await api.post<BlogCommentResponse>(
       `/blog-posts/${postId}/comments`,
-      {body},
+      {body, parent_id: parentId},
     );
     return res.data;
   },

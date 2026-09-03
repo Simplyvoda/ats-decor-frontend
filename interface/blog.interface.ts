@@ -43,9 +43,11 @@ export interface BlogCommentAuthor {
 
 export interface BlogComment {
   id: string;
+  parent_id: string | null;
   body: string;
   createdAt: string;
   author: BlogCommentAuthor;
+  replies?: BlogComment[];
 }
 
 export interface BlogCommentsResponse {

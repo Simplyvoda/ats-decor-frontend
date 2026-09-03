@@ -12,7 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import {ChevronLeft, Globe, Heart, MessageCircle, Share2} from 'lucide-react-native';
+import {ChevronLeft, Globe, Heart, MessageCircle, Share2, X} from 'lucide-react-native';
 import {useNavigation, useRoute, RouteProp} from '@react-navigation/native';
 import {PortableText} from '@portabletext/react-native';
 import Toast from 'react-native-toast-message';
@@ -20,7 +20,9 @@ import {goBack} from '../../../utils/navigation';
 import {BlogComment, BlogPost} from '../../../../interface/blog.interface';
 import {portableTextComponents} from '../../../components/(home)/(blog)/BlogRenderer';
 import InitialsAvatar from '../../../components/molecules/InitialsAvatar';
+import UserAvatar from '../../../components/molecules/UserAvatar';
 import BlogService from '../../../services/BlogService';
+import {useUserContext} from '../../../context/UserContext';
 
 type BlogPostRouteParams = {
   BlogPost: {post: BlogPost};
@@ -55,6 +57,7 @@ const BlogPostScreen = () => {
   const navigation = useNavigation();
   const route = useRoute<RouteProp<BlogPostRouteParams, 'BlogPost'>>();
   const {post} = route.params;
+  const {user} = useUserContext();
 
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
@@ -68,6 +71,10 @@ const BlogPostScreen = () => {
 
   const [comment, setComment] = useState('');
   const [isPosting, setIsPosting] = useState(false);
+  const [replyingTo, setReplyingTo] = useState<{
+    id: string;
+    authorName: string;
+  } | null>(null);
 
   useEffect(() => {
     BlogService.getLikeStatus(post._id)
@@ -137,10 +144,24 @@ const BlogPostScreen = () => {
     }
     setIsPosting(true);
     try {
-      const res = await BlogService.postComment(post._id, body);
-      setComments(prev => [res.data, ...prev]);
-      setCommentsTotal(t => t + 1);
+      const res = await BlogService.postComment(post._id, body, replyingTo?.id);
+      if (replyingTo) {
+        // Top-level pagination total (commentsTotal) is unaffected by a
+        // reply — only the parent's reply list grows.
+        const parentId = replyingTo.id;
+        setComments(prev =>
+          prev.map(c =>
+            c.id === parentId
+              ? {...c, replies: [...(c.replies ?? []), res.data]}
+              : c,
+          ),
+        );
+      } else {
+        setComments(prev => [res.data, ...prev]);
+        setCommentsTotal(t => t + 1);
+      }
       setComment('');
+      setReplyingTo(null);
     } catch (err: any) {
       Toast.show({
         type: 'error',
@@ -218,7 +239,10 @@ const BlogPostScreen = () => {
 
           <View style={styles.engagementItem}>
             <MessageCircle size={20} color="#2C2C2C" />
-            <Text style={styles.engagementCount}>{commentsTotal}</Text>
+            <Text style={styles.engagementCount}>
+              {commentsTotal +
+                comments.reduce((sum, c) => sum + (c.replies?.length ?? 0), 0)}
+            </Text>
           </View>
 
           <TouchableOpacity onPress={handleShare}>
@@ -271,19 +295,47 @@ const BlogPostScreen = () => {
         ) : (
           <>
             {comments.map(c => (
-              <View key={c.id} style={styles.comment}>
-                {c.author.profilePicture ? (
-                  <Image source={{uri: c.author.profilePicture}} style={styles.commentAvatarImg} />
-                ) : (
-                  <InitialsAvatar {...splitName(c.author.name)} size={40} />
-                )}
-                <View style={styles.commentBody}>
-                  <View style={styles.commentMeta}>
-                    <Text style={styles.commentAuthor}>{c.author.name}</Text>
-                    <Text style={styles.commentTime}>{timeAgo(c.createdAt)}</Text>
+              <View key={c.id}>
+                <View style={styles.comment}>
+                  {c.author.profilePicture ? (
+                    <Image source={{uri: c.author.profilePicture}} style={styles.commentAvatarImg} />
+                  ) : (
+                    <InitialsAvatar {...splitName(c.author.name)} size={40} />
+                  )}
+                  <View style={styles.commentBody}>
+                    <View style={styles.commentMeta}>
+                      <Text style={styles.commentAuthor}>{c.author.name}</Text>
+                      <Text style={styles.commentTime}>{timeAgo(c.createdAt)}</Text>
+                    </View>
+                    <Text style={styles.commentText}>{c.body}</Text>
+                    <TouchableOpacity
+                      onPress={() =>
+                        setReplyingTo({id: c.id, authorName: c.author.name})
+                      }>
+                      <Text style={styles.replyAction}>Reply</Text>
+                    </TouchableOpacity>
                   </View>
-                  <Text style={styles.commentText}>{c.body}</Text>
                 </View>
+
+                {c.replies?.map(reply => (
+                  <View key={reply.id} style={styles.reply}>
+                    {reply.author.profilePicture ? (
+                      <Image
+                        source={{uri: reply.author.profilePicture}}
+                        style={styles.replyAvatarImg}
+                      />
+                    ) : (
+                      <InitialsAvatar {...splitName(reply.author.name)} size={32} />
+                    )}
+                    <View style={styles.commentBody}>
+                      <View style={styles.commentMeta}>
+                        <Text style={styles.commentAuthor}>{reply.author.name}</Text>
+                        <Text style={styles.commentTime}>{timeAgo(reply.createdAt)}</Text>
+                      </View>
+                      <Text style={styles.commentText}>{reply.body}</Text>
+                    </View>
+                  </View>
+                ))}
               </View>
             ))}
 
@@ -300,11 +352,27 @@ const BlogPostScreen = () => {
         )}
 
         {/* Comment input */}
+        {replyingTo && (
+          <View style={styles.replyingToBanner}>
+            <Text style={styles.replyingToText}>
+              Replying to {replyingTo.authorName}
+            </Text>
+            <TouchableOpacity onPress={() => setReplyingTo(null)} hitSlop={8}>
+              <X size={16} color="#666" />
+            </TouchableOpacity>
+          </View>
+        )}
         <View style={styles.inputRow}>
-          <InitialsAvatar size={40} />
+          <UserAvatar
+            profilePicture={user?.profile_picture}
+            firstName={user?.first_name}
+            lastName={user?.last_name}
+            email={user?.email}
+            size={40}
+          />
           <TextInput
             style={styles.input}
-            placeholder="Add a comment..."
+            placeholder={replyingTo ? `Reply to ${replyingTo.authorName}...` : 'Add a comment...'}
             placeholderTextColor="#999"
             value={comment}
             onChangeText={setComment}
@@ -496,6 +564,42 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#2C2C2C',
     lineHeight: 20,
+  },
+  replyAction: {
+    fontFamily: 'DMSans-Regular',
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#999',
+    marginTop: 6,
+  },
+  reply: {
+    flexDirection: 'row',
+    gap: 10,
+    paddingLeft: 52,
+    paddingRight: 20,
+    marginBottom: 20,
+  },
+  replyAvatarImg: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    flexShrink: 0,
+  },
+  replyingToBanner: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#2C2C2C0D',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginHorizontal: 20,
+    marginBottom: 8,
+  },
+  replyingToText: {
+    fontFamily: 'DMSans-Regular',
+    fontSize: 13,
+    color: '#666',
   },
   inputRow: {
     flexDirection: 'row',

@@ -114,6 +114,17 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
         }
     }
 
+    // View-only mode (e.g. opening someone else's design from Explore just
+    // to look, not edit). Gating furniture SELECTION is the chokepoint:
+    // pinch-resize/rotate/delete all require selectedFurniture to already
+    // be set, so refusing to select anything makes those a no-op on their
+    // own. Two independent gestures can trigger selection though — a tap
+    // (handleTap) and a single-finger drag starting on a piece (handlePan's
+    // .began case) — both must check this flag. Camera orbit/pan/zoom fall
+    // through unaffected either way, since those are the "nothing selected"
+    // branches already.
+    @objc var editingEnabled: Bool = true
+
     // Resolves "bundle://name.usdz" (app bundle), "https://..." (remote), or "file://..." (local) into a loadable URL.
     private func resolveURL(_ urlString: String) -> URL? {
         if urlString.hasPrefix("bundle://") {
@@ -190,7 +201,7 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
                 print("✅ Room loaded from:", url.lastPathComponent)
             } catch {
                 print("❌ loadRoom failed:", error)
-                self.showToast("Couldn't load this room")
+                self.showToast("Couldn't load room: \(error.localizedDescription)", duration: 5.0)
             }
         }
     }
@@ -702,6 +713,8 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
     }
 
     @objc private func handleTap(_ gesture: UITapGestureRecognizer) {
+        guard editingEnabled else { return }
+
         let location = gesture.location(in: arView)
 
         guard let pending = pendingFurniture else {
@@ -835,8 +848,11 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
         switch gesture.state {
         case .began:
             // Drag only when the finger goes down ON a furniture piece,
-            // so panning elsewhere never flings furniture around.
-            draggingFurniture = furnitureHit(at: location)
+            // so panning elsewhere never flings furniture around. In
+            // view-only mode, skip furniture detection entirely — a
+            // single-finger drag falls straight through to the .changed
+            // camera-orbit branch below, same as pan starting on empty space.
+            draggingFurniture = editingEnabled ? furnitureHit(at: location) : nil
             if let dragging = draggingFurniture {
                 setSelectedFurniture(dragging)
             }

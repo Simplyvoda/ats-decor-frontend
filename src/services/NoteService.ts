@@ -18,6 +18,7 @@ const NoteService = {
     tag?: string;
     page?: number;
     limit?: number;
+    projectId?: string;
   }): Promise<INotesResponse> {
     const res = await api.get('/notes', {
       params: {
@@ -26,6 +27,7 @@ const NoteService = {
         tag: params.tag || undefined,
         page: params.page ?? 1,
         limit: params.limit ?? 50,
+        project_id: params.projectId || undefined,
       },
     });
     return res.data;

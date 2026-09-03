@@ -15,7 +15,7 @@ import DesignScreen from '../components/(design)/DesignScreen';
 import ExploreScreen from '../components/(explore)/ExploreScreen';
 import HomeScreen from '../screens/home_screens/InitialScreen';
 import NotesScreen from '../components/(notes)/NotesScreen';
-import InitialsAvatar from '../components/molecules/InitialsAvatar';
+import UserAvatar from '../components/molecules/UserAvatar';
 import {useUserContext} from '../context/UserContext';
 
 const Tab = createBottomTabNavigator();
@@ -41,7 +41,8 @@ function TabHeader() {
           onPress={() => navigation.navigate('Settings', {screen: 'ProfilePreferences'})}
           hitSlop={{top: 8, bottom: 8, left: 8, right: 8}}>
           <View style={{marginRight: 12}}>
-            <InitialsAvatar
+            <UserAvatar
+              profilePicture={user?.profile_picture}
               firstName={user?.first_name}
               lastName={user?.last_name}
               email={user?.email}

@@ -1,21 +1,22 @@
 import {useNavigation} from '@react-navigation/native';
-import {ChevronLeft, Palette, User} from 'lucide-react-native';
+import {Camera, ChevronLeft, Palette, User} from 'lucide-react-native';
 import React, {useEffect, useState} from 'react';
 import {
   ActivityIndicator,
-  Image,
   ScrollView,
   Text,
   TextInput,
+  TouchableOpacity,
   View,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
-import InitialsAvatar from '../../components/molecules/InitialsAvatar';
+import UserAvatar from '../../components/molecules/UserAvatar';
 import PrimaryButton from '../../components/molecules/PrimaryButton';
 import {goBack} from '../../utils/navigation';
 import UserService from '../../services/UserService';
 import {useUserContext} from '../../context/UserContext';
+import {launchImageLibrary} from 'react-native-image-picker';
 
 const ProfilePreference = () => {
   const navigation = useNavigation();
@@ -30,6 +31,35 @@ const ProfilePreference = () => {
   const [bio, setBio] = useState('');
   const [designStyle, setDesignStyle] = useState('');
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+
+  const handleChangeAvatar = () => {
+    launchImageLibrary({mediaType: 'photo', quality: 0.8}, async response => {
+      if (response.didCancel || response.errorCode) return;
+
+      const asset = response.assets?.[0];
+      if (!asset?.uri) return;
+
+      setIsUploadingAvatar(true);
+      try {
+        const res = await UserService.uploadProfilePicture(
+          asset.uri,
+          asset.type ?? 'image/jpeg',
+        );
+        setProfilePicture(res.data.profile_picture);
+        await updateUser({profile_picture: res.data.profile_picture});
+        Toast.show({type: 'success', text1: 'Profile picture updated'});
+      } catch (err: any) {
+        Toast.show({
+          type: 'error',
+          text1: 'Could not upload photo',
+          text2: err.response?.data?.message || err.message,
+        });
+      } finally {
+        setIsUploadingAvatar(false);
+      }
+    });
+  };
 
   useEffect(() => {
     UserService.getProfile()
@@ -116,21 +146,28 @@ const ProfilePreference = () => {
               </View>
 
               {/* Avatar */}
-              <View className="relative items-center justify-center my-3">
-                {profilePicture ? (
-                  <Image
-                    source={{uri: profilePicture}}
-                    className="w-20 h-20 rounded-full"
-                  />
+              <TouchableOpacity
+                onPress={handleChangeAvatar}
+                disabled={isUploadingAvatar}
+                className="relative items-center justify-center my-3">
+                <UserAvatar
+                  profilePicture={profilePicture}
+                  firstName={firstName}
+                  lastName={lastName}
+                  email={email}
+                  size={80}
+                />
+
+                {isUploadingAvatar ? (
+                  <View className="absolute inset-0 items-center justify-center bg-black/30 rounded-full">
+                    <ActivityIndicator color="#fff" />
+                  </View>
                 ) : (
-                  <InitialsAvatar
-                    firstName={firstName}
-                    lastName={lastName}
-                    email={email}
-                    size={80}
-                  />
+                  <View className="absolute bottom-0 right-[110px] bg-[#C4A663] w-7 h-7 rounded-full items-center justify-center border-2 border-white">
+                    <Camera size={14} color="white" />
+                  </View>
                 )}
-              </View>
+              </TouchableOpacity>
 
               <Text className="text-[14px] font-medium font-dm-sans mb-1 text-[#444]">
                 First Name

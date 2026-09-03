@@ -132,6 +132,7 @@ export default function ExploreScreen() {
       designId: design.id,
       designName: design.name,
       furnitureLayout: design.furniture_layout,
+      viewOnly: true,
     });
   };
 

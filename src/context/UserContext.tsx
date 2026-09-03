@@ -9,6 +9,7 @@ interface IUser {
   email: string;
   first_name?: string;
   last_name?: string;
+  profile_picture?: string | null;
 }
 
 interface IUserContext {
@@ -48,6 +49,7 @@ export const UserProvider = ({children}: {children: React.ReactNode}) => {
                 first_name: profile.data.first_name,
                 last_name: profile.data.last_name,
                 email: profile.data.email,
+                profile_picture: profile.data.profile_picture,
               };
               await AsyncStorage.setItem('user', JSON.stringify(refreshed));
               setUser(refreshed);
@@ -105,6 +107,7 @@ export const UserProvider = ({children}: {children: React.ReactNode}) => {
         first_name: profile.data.first_name,
         last_name: profile.data.last_name,
         email: profile.data.email,
+        profile_picture: profile.data.profile_picture,
       };
       await AsyncStorage.setItem('user', JSON.stringify(refreshed));
       setUser(refreshed);
@@ -144,6 +147,7 @@ export const UserProvider = ({children}: {children: React.ReactNode}) => {
         email: profile.data.email,
         first_name: profile.data.first_name,
         last_name: profile.data.last_name,
+        profile_picture: profile.data.profile_picture,
       };
       await AsyncStorage.setItem('user', JSON.stringify(verifiedUser));
       setUser(verifiedUser);
