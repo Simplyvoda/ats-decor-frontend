@@ -45,3 +45,15 @@ export interface ICreateNotePayload {
   tags?: string[];
   attachments?: string[];
 }
+
+// A note held locally (AsyncStorage) until the design it belongs to is
+// saved and gets a real project id — see NoteService's draft methods.
+export interface IDraftNote {
+  localId: string;
+  title: string;
+  description: string;
+  is_private: boolean;
+  project_id: string | null;
+  tags: string[];
+  createdAt: string;
+}

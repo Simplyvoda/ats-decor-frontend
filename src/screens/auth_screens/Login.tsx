@@ -3,6 +3,8 @@ import React, {useState} from 'react';
 import {Controller, useForm} from 'react-hook-form';
 import {
   Image,
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
   ScrollView,
   Text,
@@ -129,6 +131,9 @@ const Login = () => {
 
   return (
     <SafeAreaView className="h-screen p-6 bg-offWhite">
+      <KeyboardAvoidingView
+        className="flex-1"
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView className="w-full">
         <View className="relative flex items-center justify-center my-2">
           <ChevronLeft
@@ -251,6 +256,7 @@ const Login = () => {
           </View>
         </View>
       </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };

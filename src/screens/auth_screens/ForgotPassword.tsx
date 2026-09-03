@@ -1,7 +1,14 @@
 import {ChevronLeft, Mail} from 'lucide-react-native';
 import React, {useState} from 'react';
 import {Controller, useForm} from 'react-hook-form';
-import {Text, TextInput, View} from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {useNavigation} from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
@@ -43,6 +50,10 @@ const ForgotPassword = () => {
 
   return (
     <SafeAreaView className="h-screen p-6 bg-offWhite">
+      <KeyboardAvoidingView
+        className="flex-1"
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <ScrollView className="w-full">
       <View className="relative flex items-center justify-center my-2">
         <ChevronLeft
           className="absolute left-0 text-gray-primary"
@@ -112,6 +123,8 @@ const ForgotPassword = () => {
           />
         </View>
       )}
+      </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };

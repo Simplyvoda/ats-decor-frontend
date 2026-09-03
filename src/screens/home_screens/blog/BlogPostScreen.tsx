@@ -2,7 +2,9 @@ import React, {useCallback, useEffect, useState} from 'react';
 import {
   ActivityIndicator,
   Image,
+  KeyboardAvoidingView,
   Linking,
+  Platform,
   SafeAreaView,
   ScrollView,
   Share,
@@ -186,19 +188,24 @@ const BlogPostScreen = () => {
 
   return (
     <SafeAreaView style={styles.root}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => goBack(navigation)} hitSlop={8}>
-          <ChevronLeft size={22} color="#2C2C2C" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle} numberOfLines={1}>{post.title}</Text>
-      </View>
+      <KeyboardAvoidingView
+        style={styles.root}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => goBack(navigation)} hitSlop={8}>
+            <ChevronLeft size={22} color="#2C2C2C" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle} numberOfLines={1}>{post.title}</Text>
+        </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         {/* Hero image */}
         {post.mainImage?.asset?.url ? (
           <Image
-            source={{uri: post.mainImage.asset.url}}
+            // Sanity asset URLs are content-hashed, so it's safe to skip
+            // revalidation and paint straight from cache.
+            source={{uri: post.mainImage.asset.url, cache: 'force-cache'}}
             style={styles.heroImage}
             resizeMode="cover"
           />
@@ -392,6 +399,7 @@ const BlogPostScreen = () => {
           )}
         </TouchableOpacity>
       </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };

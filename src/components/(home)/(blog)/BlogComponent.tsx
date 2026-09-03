@@ -53,7 +53,14 @@ export const BlogHeader = ({search, onSearchChange, sort, onToggleSort}: BlogHea
 export const BlogPostRow = ({post, onPress}: {post: BlogPost; onPress: () => void}) => (
   <TouchableOpacity style={styles.row} activeOpacity={0.75} onPress={onPress}>
     {post.mainImage?.asset?.url ? (
-      <Image source={{uri: post.mainImage.asset.url}} style={styles.thumbnail} resizeMode="cover" />
+      <Image
+        // Sanity asset URLs are content-hashed (a changed image gets a new
+        // URL), so it's safe to skip revalidation and paint straight from
+        // cache — avoids the reload flash when this row remounts.
+        source={{uri: post.mainImage.asset.url, cache: 'force-cache'}}
+        style={styles.thumbnail}
+        resizeMode="cover"
+      />
     ) : (
       <View style={styles.thumbnail} />
     )}

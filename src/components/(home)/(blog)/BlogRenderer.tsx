@@ -52,7 +52,9 @@ export const portableTextComponents: PortableTextComponents = {
             },
           ]}>
           <Image
-            source={{uri: src}}
+            // Sanity asset URLs are content-hashed, so it's safe to skip
+            // revalidation and paint straight from cache.
+            source={{uri: src, cache: 'force-cache'}}
             style={styles.image}
             resizeMode="cover"
             accessibilityLabel={alt}

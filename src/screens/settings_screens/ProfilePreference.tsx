@@ -3,6 +3,8 @@ import {Camera, ChevronLeft, Palette, User} from 'lucide-react-native';
 import React, {useEffect, useState} from 'react';
 import {
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
   Text,
   TextInput,
@@ -32,6 +34,19 @@ const ProfilePreference = () => {
   const [designStyle, setDesignStyle] = useState('');
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+
+  const [initialValues, setInitialValues] = useState({
+    firstName: '',
+    lastName: '',
+    bio: '',
+    designStyle: '',
+  });
+
+  const hasChanges =
+    firstName !== initialValues.firstName ||
+    lastName !== initialValues.lastName ||
+    bio !== initialValues.bio ||
+    designStyle !== initialValues.designStyle;
 
   const handleChangeAvatar = () => {
     launchImageLibrary({mediaType: 'photo', quality: 0.8}, async response => {
@@ -71,6 +86,12 @@ const ProfilePreference = () => {
         setBio(p.bio ?? '');
         setDesignStyle(p.design_style ?? '');
         setProfilePicture(p.profile_picture);
+        setInitialValues({
+          firstName: p.first_name ?? '',
+          lastName: p.last_name ?? '',
+          bio: p.bio ?? '',
+          designStyle: p.design_style ?? '',
+        });
       })
       .catch((err: any) => {
         Toast.show({
@@ -100,6 +121,12 @@ const ProfilePreference = () => {
         first_name: firstName.trim(),
         last_name: lastName.trim(),
       });
+      setInitialValues({
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        bio: bio.trim(),
+        designStyle: designStyle.trim(),
+      });
       Toast.show({type: 'success', text1: 'Profile updated'});
     } catch (err: any) {
       Toast.show({
@@ -114,151 +141,159 @@ const ProfilePreference = () => {
 
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: '#FAF9F6'}}>
-      <ScrollView
-        className="flex-1 bg-offWhite px-5 pt-[70px]"
-        contentContainerStyle={{paddingBottom: 24}}
-        showsVerticalScrollIndicator={false}>
-        {/* HEADER */}
-        <View className="flex-row items-center mb-6 gap-3">
-          <ChevronLeft
-            className="text-[#2C2C2C]"
-            size={24}
-            onPress={() => goBack(navigation)}
-          />
-          <Text className="text-[20px] ml-5 font-semibold text-[#1A1A1A] font-cormorant">
-            Profile & Preferences
-          </Text>
-        </View>
-
-        {isLoading ? (
-          <View className="items-center py-16">
-            <ActivityIndicator size="large" color="#C1A36A" />
+      <KeyboardAvoidingView
+        style={{flex: 1}}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}>
+        <ScrollView
+          className="flex-1 bg-offWhite px-5 pt-[70px]"
+          contentContainerStyle={{paddingBottom: 24}}
+          showsVerticalScrollIndicator={false}>
+          {/* HEADER */}
+          <View className="flex-row items-center mb-6 gap-3">
+            <ChevronLeft
+              className="text-[#2C2C2C]"
+              size={24}
+              onPress={() => goBack(navigation)}
+            />
+            <Text className="text-[20px] ml-5 font-semibold text-[#1A1A1A] font-cormorant">
+              Profile & Preferences
+            </Text>
           </View>
-        ) : (
-          <>
-            {/* PROFILE INFO */}
-            <View className="bg-transparent  border-[1px] border-[#2C2C2C33]  rounded-2xl p-4 mb-5">
-              <View className="flex-row items-center gap-2 mb-3">
-                <User size={18} color="#C4A663" />
-                <Text className="text-[20px] font-semibold text-[#1A1A1A] font-cormorant">
-                  Profile Information
-                </Text>
-              </View>
 
-              {/* Avatar */}
-              <TouchableOpacity
-                onPress={handleChangeAvatar}
-                disabled={isUploadingAvatar}
-                className="relative items-center justify-center my-3">
-                <UserAvatar
-                  profilePicture={profilePicture}
-                  firstName={firstName}
-                  lastName={lastName}
-                  email={email}
-                  size={80}
+          {isLoading ? (
+            <View className="items-center py-16">
+              <ActivityIndicator size="large" color="#C1A36A" />
+            </View>
+          ) : (
+            <>
+              {/* PROFILE INFO */}
+              <View className="bg-transparent  border-[1px] border-[#2C2C2C33]  rounded-2xl p-4 mb-5">
+                <View className="flex-row items-center gap-2 mb-3">
+                  <User size={18} color="#C4A663" />
+                  <Text className="text-[20px] font-semibold text-[#1A1A1A] font-cormorant">
+                    Profile Information
+                  </Text>
+                </View>
+
+                {/* Avatar */}
+                <TouchableOpacity
+                  onPress={handleChangeAvatar}
+                  disabled={isUploadingAvatar}
+                  className="relative items-center justify-center my-3">
+                  <UserAvatar
+                    profilePicture={profilePicture}
+                    firstName={firstName}
+                    lastName={lastName}
+                    email={email}
+                    size={80}
+                  />
+
+                  {isUploadingAvatar ? (
+                    <View className="absolute inset-0 items-center justify-center bg-black/30 rounded-full">
+                      <ActivityIndicator color="#fff" />
+                    </View>
+                  ) : (
+                    <View className="absolute bottom-0 right-[110px] bg-[#C4A663] w-7 h-7 rounded-full items-center justify-center border-2 border-white">
+                      <Camera size={14} color="white" />
+                    </View>
+                  )}
+                </TouchableOpacity>
+
+                <Text className="text-[14px] font-medium font-dm-sans mb-1 text-[#444]">
+                  First Name
+                </Text>
+                <TextInput
+                  className="border border-[#F1EADC]  rounded-lg py-2.5 px-3 mb-3 text-[14px] text-[#333]"
+                  value={firstName}
+                  onChangeText={setFirstName}
+                  placeholder="First name"
+                  placeholderTextColor="#2C2C2C80"
                 />
 
-                {isUploadingAvatar ? (
-                  <View className="absolute inset-0 items-center justify-center bg-black/30 rounded-full">
-                    <ActivityIndicator color="#fff" />
-                  </View>
-                ) : (
-                  <View className="absolute bottom-0 right-[110px] bg-[#C4A663] w-7 h-7 rounded-full items-center justify-center border-2 border-white">
-                    <Camera size={14} color="white" />
-                  </View>
-                )}
-              </TouchableOpacity>
-
-              <Text className="text-[14px] font-medium font-dm-sans mb-1 text-[#444]">
-                First Name
-              </Text>
-              <TextInput
-                className="border border-[#F1EADC]  rounded-lg py-2.5 px-3 mb-3 text-[14px] text-[#333]"
-                value={firstName}
-                onChangeText={setFirstName}
-                placeholder="First name"
-                placeholderTextColor="#2C2C2C80"
-              />
-
-              <Text className="text-[14px] font-medium font-dm-sans mb-1 text-[#444]">
-                Last Name
-              </Text>
-              <TextInput
-                className="border border-[#F1EADC]  rounded-lg py-2.5 px-3 mb-3 text-[14px] text-[#333]"
-                value={lastName}
-                onChangeText={setLastName}
-                placeholder="Last name"
-                placeholderTextColor="#2C2C2C80"
-              />
-
-              <Text className="text-[14px] font-medium font-dm-sans mb-1 text-[#444]">
-                Email
-              </Text>
-              <TextInput
-                className="border border-[#F1EADC] bg-[#F5F1E8] rounded-lg py-2.5 px-3 mb-3 text-[14px] text-[#888]"
-                value={email}
-                editable={false}
-              />
-
-              <Text className="text-[14px] font-medium font-dm-sans mb-1 text-[#444]">
-                Bio
-              </Text>
-              <TextInput
-                className="border border-[#F1EADC]  rounded-lg py-2.5 px-3 mb-3 text-[14px] text-[#333]"
-                value={bio}
-                onChangeText={setBio}
-                placeholder="Interior design enthusiast"
-                placeholderTextColor="#2C2C2C80"
-                multiline
-              />
-            </View>
-
-            {/* APPEARANCE */}
-            {/* <View className="bg-transparent border-[1px] border-[#2C2C2C33]  rounded-2xl p-4 mb-5">
-              <View className="flex-row items-center gap-2 mb-3">
-                <Sun size={18} color="#C4A663" />
-                <Text className="text-[20px] font-semibold font-cormorant text-[#1A1A1A]">
-                  Appearance
+                <Text className="text-[14px] font-medium font-dm-sans mb-1 text-[#444]">
+                  Last Name
                 </Text>
+                <TextInput
+                  className="border border-[#F1EADC]  rounded-lg py-2.5 px-3 mb-3 text-[14px] text-[#333]"
+                  value={lastName}
+                  onChangeText={setLastName}
+                  placeholder="Last name"
+                  placeholderTextColor="#2C2C2C80"
+                />
+
+                <Text className="text-[14px] font-medium font-dm-sans mb-1 text-[#444]">
+                  Email
+                </Text>
+                <TextInput
+                  className="border border-[#F1EADC] bg-[#F5F1E8] rounded-lg py-2.5 px-3 mb-3 text-[14px] text-[#888]"
+                  value={email}
+                  editable={false}
+                />
+
+                <Text className="text-[14px] font-medium font-dm-sans mb-1 text-[#444]">
+                  Bio
+                </Text>
+                <TextInput
+                  className="border border-[#F1EADC]  rounded-lg py-2.5 px-3 mb-3 text-[14px] text-[#333]"
+                  value={bio}
+                  onChangeText={setBio}
+                  placeholder="Interior design enthusiast"
+                  placeholderTextColor="#2C2C2C80"
+                  multiline
+                />
               </View>
 
-              <View className="flex-row justify-between items-center">
-                <Text className="text-[14px] text-[#333] font-dm-sans">
-                  Dark Mode
-                </Text>
-                <AppSwitch value={darkMode} onValueChange={setDarkMode} />
-              </View>
-            </View> */}
+              {/* APPEARANCE */}
+              {/* <View className="bg-transparent border-[1px] border-[#2C2C2C33]  rounded-2xl p-4 mb-5">
+                <View className="flex-row items-center gap-2 mb-3">
+                  <Sun size={18} color="#C4A663" />
+                  <Text className="text-[20px] font-semibold font-cormorant text-[#1A1A1A]">
+                    Appearance
+                  </Text>
+                </View>
 
-            {/* DESIGN STYLE */}
-            <View className="bg-transparent border-[1px] border-[#2C2C2C33] rounded-2xl p-4 mb-20">
-              <View className="flex-row items-center gap-2 mb-3">
-                <Palette size={18} color="#C4A663" />
-                <Text className="text-[20px] font-semibold font-cormorant text-[#1A1A1A]">
-                  Design Style
-                </Text>
-              </View>
+                <View className="flex-row justify-between items-center">
+                  <Text className="text-[14px] text-[#333] font-dm-sans">
+                    Dark Mode
+                  </Text>
+                  <AppSwitch value={darkMode} onValueChange={setDarkMode} />
+                </View>
+              </View> */}
 
-              <Text className="text-[14px] font-dm-sans font-medium mt-1 mb-2 text-[#444]">
-                Add Personal Design Style
-              </Text>
-              <TextInput
-                className="border border-[#F1EADC] bg-[#FFFDF8] rounded-lg py-2.5 px-3 text-[14px]"
-                value={designStyle}
-                onChangeText={setDesignStyle}
-                placeholder="e.g. tech minimalist, bohemian, Scandinavian..."
-                placeholderTextColor="#2C2C2C80"
-              />
-            </View>
-          </>
+              {/* DESIGN STYLE */}
+              <View className="bg-transparent border-[1px] border-[#2C2C2C33] rounded-2xl p-4 mb-20">
+                <View className="flex-row items-center gap-2 mb-3">
+                  <Palette size={18} color="#C4A663" />
+                  <Text className="text-[20px] font-semibold font-cormorant text-[#1A1A1A]">
+                    Design Style
+                  </Text>
+                </View>
+
+                <Text className="text-[14px] font-dm-sans font-medium mt-1 mb-2 text-[#444]">
+                  Add Personal Design Style
+                </Text>
+                <TextInput
+                  className="border border-[#F1EADC] bg-[#FFFDF8] rounded-lg py-2.5 px-3 text-[14px]"
+                  value={designStyle}
+                  onChangeText={setDesignStyle}
+                  placeholder="e.g. tech minimalist, bohemian, Scandinavian..."
+                  placeholderTextColor="#2C2C2C80"
+                />
+              </View>
+            </>
+          )}
+        </ScrollView>
+        {hasChanges && (
+          <View
+            style={{paddingHorizontal: 20, paddingBottom: 16, paddingTop: 16}}>
+            <PrimaryButton
+              title={isSaving ? 'Saving...' : 'Save Changes'}
+              onPress={handleSave}
+            />
+          </View>
         )}
-      </ScrollView>
-      <View style={{paddingHorizontal: 20, paddingBottom: 16, paddingTop: 16}}>
-        <PrimaryButton
-          title={isSaving ? 'Saving...' : 'Save Changes'}
-          onPress={handleSave}
-        />
-      </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
