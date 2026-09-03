@@ -138,6 +138,7 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
         arView = ARView(frame: bounds)
         arView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         arView.cameraMode = .nonAR
+        arView.environment.background = .color(UIColor(red: 0.61, green: 0.67, blue: 0.57, alpha: 1))
         addSubview(arView)
         setupGestures()
     }
