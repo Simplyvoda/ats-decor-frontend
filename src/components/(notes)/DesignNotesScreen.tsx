@@ -182,7 +182,7 @@ export default function DesignNotesScreen() {
         </View>
         <TouchableOpacity
           onPress={goToCreate}
-          className="bg-brand rounded-full px-4 py-2 flex-row items-center">
+          className="bg-brand rounded-[12px] px-4 py-2 flex-row items-center">
           <Plus color="white" size={16} />
           <Text className="font-dm-sans text-white text-[13px] font-semibold ml-1">
             Add Notes

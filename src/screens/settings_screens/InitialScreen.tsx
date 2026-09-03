@@ -41,8 +41,8 @@ const InitialScreen = () => {
       title: 'Profile & Preference',
       subtitle: 'Personal info, account settings, preferences',
       tags: [
-        'Edit profile',
-        'Account Settings',
+        'Profile Information',
+        'Design Style Preferences',
         // 'Language & Region', // not implemented on Profile & Preferences
         // '+1 more', // was Appearance/Dark Mode — removed from that screen
       ],
@@ -53,9 +53,9 @@ const InitialScreen = () => {
       title: 'Shopping',
       subtitle: 'Purchase and payment settings',
       tags: [
-        'Payment Methods',
+        // 'Payment Methods',
         'Subscription Plan',
-        'Purchase History',
+        // 'Purchase History',
         // '+1 more', // no 4th section on the Shopping screen
       ],
       screen: 'Shopping',
@@ -65,9 +65,9 @@ const InitialScreen = () => {
       title: 'Security & Privacy',
       subtitle: 'Protect your account and data',
       tags: [
+        'Password & Security',
         'Privacy Settings',
         // 'Data Export', // not implemented on Security & Privacy
-        'Account Security',
       ],
       screen: 'SecurityPrivacy',
     },
@@ -75,7 +75,7 @@ const InitialScreen = () => {
       icon: 'HelpCircle',
       title: 'Help & Feedback',
       subtitle: 'Get Support & Share Feedback',
-      tags: ['FAQs', 'Contact Support', 'Send Feedback'],
+      tags: ['FAQs', 'Contact Support', 'Send Feedback', 'App Information'],
       screen: 'HelpFeedback',
     },
   ];

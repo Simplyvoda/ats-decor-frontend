@@ -96,6 +96,9 @@ const StudioComponent = () => {
                   designId: design.id,
                   designName: design.name,
                   furnitureLayout: design.furniture_layout,
+                  designStyle: design.style ?? undefined,
+                  designTags: design.tags?.map(t => t.name) ?? [],
+                  designIsPublic: design.is_public,
                 })
               }
               activeOpacity={0.7}>

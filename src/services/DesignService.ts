@@ -68,6 +68,52 @@ const DesignService = {
     return res.data;
   },
 
+  // Same shape as publish(), but replaces an already-saved design in place
+  // instead of creating a new one.
+  async update(
+    id: string,
+    payload: IPublishDesignPayload,
+  ): Promise<IDesignResponse> {
+    const formData = new FormData();
+    formData.append('name', payload.name);
+    formData.append('is_public', String(payload.isPublic));
+    if (payload.style) {
+      formData.append('style', payload.style);
+    }
+    if (payload.tags?.length) {
+      formData.append('tags', JSON.stringify(payload.tags));
+    }
+    if (payload.furnitureLayout) {
+      formData.append('furniture_layout', payload.furnitureLayout);
+    }
+
+    const thumbUri = payload.thumbnailPath.startsWith('file://')
+      ? payload.thumbnailPath
+      : `file://${payload.thumbnailPath}`;
+    formData.append('thumbnail', {
+      uri: thumbUri,
+      type: 'image/png',
+      name: 'thumbnail.png',
+    } as any);
+
+    // Local scans upload the USDZ; bundled/hosted models pass the reference
+    if (payload.modelUrl.startsWith('file://')) {
+      formData.append('file', {
+        uri: payload.modelUrl,
+        type: 'model/vnd.usdz+zip',
+        name: 'design.usdz',
+      } as any);
+    } else {
+      formData.append('model_url', payload.modelUrl);
+    }
+
+    const res = await api.patch(`/designs/${id}`, formData, {
+      headers: {'Content-Type': 'multipart/form-data'},
+      timeout: 120_000,
+    });
+    return res.data;
+  },
+
   async getExplore(): Promise<IDesignsResponse> {
     const res = await api.get('/designs/explore');
     return res.data;
