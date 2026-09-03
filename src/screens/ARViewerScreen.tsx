@@ -354,9 +354,9 @@ export default function ARViewerScreen() {
       onPress={() => handleSelectItem(item)}
       activeOpacity={0.7}>
       <Image source={item.thumbnail} style={styles.furnitureThumbnail} />
-      <Text style={styles.furnitureName} numberOfLines={2}>
+      {/* <Text style={styles.furnitureName} numberOfLines={2}>
         {item.name}
-      </Text>
+      </Text> */}
     </TouchableOpacity>
   );
 
