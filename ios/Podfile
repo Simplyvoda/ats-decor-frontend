@@ -95,6 +95,31 @@ target 'fe' do
       end
     end
 
+    # Work around upstream React Native bug: React-jsitooling and
+    # React-RuntimeCore both set header_dir "react/runtime", so without
+    # USE_FRAMEWORKS (we link statically) CocoaPods derives the same module
+    # name "react_runtime" for both — each podspec only gives itself a
+    # distinct module_name when USE_FRAMEWORKS is set. Harmless until
+    # something loads both modulemaps in one compile; Sentry's Swift
+    # interop does exactly that (RNSentry.xcconfig lists every pod's
+    # modulemap via -fmodule-map-file), producing "Redefinition of module
+    # 'react_runtime'". Rename each modulemap's module — plain #include
+    # usage elsewhere doesn't depend on the declared module name.
+    {
+      'React-jsitooling' => 'react_jsitooling',
+      'React-RuntimeCore' => 'react_runtimecore',
+    }.each do |pod_name, new_module_name|
+      modulemap_path = File.join(installer.sandbox.root.to_s, 'Target Support Files', pod_name, "#{pod_name}.modulemap")
+      if File.exist?(modulemap_path)
+        content = File.read(modulemap_path)
+        patched = content.sub(/^module react_runtime\b/, "module #{new_module_name}")
+        if patched != content
+          File.write(modulemap_path, patched)
+          Pod::UI.puts "Patched #{pod_name}.modulemap module name to #{new_module_name}".green
+        end
+      end
+    end
+
     # Patch upstream Sentry bug: SentrySDK.swift's deprecated capture(userFeedback:)
     # wrapper doesn't compile — SentrySDKInternal.capture(userFeedback:) fails to
     # resolve. Deprecated + unused by us, so disable that block after every install.
