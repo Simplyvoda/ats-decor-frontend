@@ -33,6 +33,7 @@ class RealityKitViewManager: RCTViewManager {
                 "toggleTopView": "toggleTopView",
                 "resetCamera": "resetCamera",
                 "captureSnapshot": "captureSnapshot",
+                "captureTopViewSnapshot": "captureTopViewSnapshot",
                 "removeSelectedFurniture": "removeSelectedFurniture",
                 "exportFurnitureLayout": "exportFurnitureLayout",
                 "placeFurnitureFromLayout": "placeFurnitureFromLayout",
@@ -74,6 +75,13 @@ class RealityKitViewManager: RCTViewManager {
         bridge.uiManager.addUIBlock { _, viewRegistry in
             guard let view = viewRegistry?[reactTag] as? RealityKitView else { return }
             view.captureSnapshot()
+        }
+    }
+
+    @objc func captureTopViewSnapshot(_ reactTag: NSNumber) {
+        bridge.uiManager.addUIBlock { _, viewRegistry in
+            guard let view = viewRegistry?[reactTag] as? RealityKitView else { return }
+            view.captureTopViewSnapshot()
         }
     }
 

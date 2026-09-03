@@ -388,6 +388,56 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
         }
     }
 
+    // Captures a top-down (floor-plan) snapshot for use as a design
+    // thumbnail, without disturbing the user's on-screen camera — moves to
+    // top view, captures, then restores the exact prior state. Result
+    // arrives via the same onSnapshotReady event as captureSnapshot().
+    func captureTopViewSnapshot() {
+        guard let cam = camera, let pivot = cameraPivot else {
+            onSnapshotReady?(["error": "Scene not ready"])
+            return
+        }
+
+        // Snapshot the full camera state so it can be restored exactly
+        let savedCam = cam.transform
+        let savedPivotOrientation = pivot.orientation
+        let savedPivotPosition = pivot.position
+        let restore = {
+            cam.transform = savedCam
+            pivot.orientation = savedPivotOrientation
+            pivot.position = savedPivotPosition
+        }
+
+        // Same camera math as toggleTopView()/exportDesignPdf()'s top shot
+        pivot.orientation = simd_quatf(angle: 0, axis: [0, 1, 0])
+        let extent = roomBounds.map { max($0.extents.x, $0.extents.z) } ?? 5.0
+        let height = (roomBounds?.extents.y ?? 2.0) * 0.5 + extent * 1.1
+        cam.position = [0, height, 0]
+        cam.look(at: .zero, from: cam.position, upVector: [0, 0, -1], relativeTo: pivot)
+
+        // Camera moves need a beat before snapshotting — RealityKit renders
+        // continuously, but grabbing the very next frame can race the move.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in
+            guard let self = self else { return }
+            self.arView.snapshot(saveToHDR: false) { image in
+                restore()
+                guard let image = image, let data = image.pngData() else {
+                    self.onSnapshotReady?(["error": "Snapshot capture failed"])
+                    return
+                }
+                let filename = "design_snapshot_\(Int(Date().timeIntervalSince1970 * 1000)).png"
+                let fileURL = URL(fileURLWithPath: NSTemporaryDirectory())
+                    .appendingPathComponent(filename)
+                do {
+                    try data.write(to: fileURL)
+                    self.onSnapshotReady?(["path": fileURL.path])
+                } catch {
+                    self.onSnapshotReady?(["error": error.localizedDescription])
+                }
+            }
+        }
+    }
+
     // MARK: - PDF Export
 
     // Captures the design as a one-page PDF: room view on top, top-down view

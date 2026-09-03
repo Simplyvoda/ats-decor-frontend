@@ -1,7 +1,15 @@
 import {Eye, EyeOff, LockKeyhole} from 'lucide-react-native';
 import React, {useState} from 'react';
 import {Controller, useForm} from 'react-hook-form';
-import {Text, TextInput, TouchableOpacity, View} from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
@@ -70,6 +78,10 @@ const SetPassword = () => {
 
   return (
     <SafeAreaView className="h-screen p-6 bg-offWhite">
+      <KeyboardAvoidingView
+        className="flex-1"
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <ScrollView className="w-full">
       <View className="relative flex items-center justify-center my-2">
         <Text className="text-xl font-semibold text-gray-primary">
           Set New Password
@@ -170,6 +182,8 @@ const SetPassword = () => {
           isSubmitting={isSubmitting}
         />
       </View>
+      </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };

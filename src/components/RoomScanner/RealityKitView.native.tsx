@@ -88,6 +88,17 @@ export const captureSnapshotCommand = (ref: React.RefObject<any>) => {
   );
 };
 
+// Capture a top-down (floor-plan) PNG for use as a design thumbnail, without
+// disturbing the user's on-screen camera; result arrives via onSnapshotReady.
+export const captureTopViewSnapshotCommand = (ref: React.RefObject<any>) => {
+  UIManager.dispatchViewManagerCommand(
+    findNodeHandle(ref.current),
+    UIManager.getViewManagerConfig('RealityKitView').Commands
+      .captureTopViewSnapshot,
+    [],
+  );
+};
+
 // Remove the currently selected furniture piece from the scene.
 export const removeSelectedFurnitureCommand = (ref: React.RefObject<any>) => {
   UIManager.dispatchViewManagerCommand(

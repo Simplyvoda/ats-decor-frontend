@@ -26,6 +26,7 @@ RCT_EXTERN_METHOD(loadFurniture:(nonnull NSNumber *)reactTag urlString:(NSString
 RCT_EXTERN_METHOD(toggleTopView:(nonnull NSNumber *)reactTag)
 RCT_EXTERN_METHOD(resetCamera:(nonnull NSNumber *)reactTag)
 RCT_EXTERN_METHOD(captureSnapshot:(nonnull NSNumber *)reactTag)
+RCT_EXTERN_METHOD(captureTopViewSnapshot:(nonnull NSNumber *)reactTag)
 RCT_EXTERN_METHOD(removeSelectedFurniture:(nonnull NSNumber *)reactTag)
 RCT_EXTERN_METHOD(exportFurnitureLayout:(nonnull NSNumber *)reactTag)
 RCT_EXTERN_METHOD(placeFurnitureFromLayout:(nonnull NSNumber *)reactTag itemJson:(NSString *)itemJson)

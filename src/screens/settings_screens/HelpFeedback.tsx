@@ -2,6 +2,8 @@ import React, {useState} from 'react';
 import {
   View,
   Text,
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
   TouchableOpacity,
   TextInput,
@@ -96,167 +98,173 @@ When you’re ready for more, upgrade to Hobbyist (or higher) to unlock addition
   ];
 
   return (
-    <ScrollView
-      className="flex-1 bg-offWhite px-5 pt-[70px]"
-      showsVerticalScrollIndicator={false}>
-      {/* HEADER */}
-      <View className="flex-row items-center mb-6">
-      <ChevronLeft
-          className="text-[#2C2C2C]"
-          size={24}
-          onPress={() => goBack(navigation)}
-        />
-        <Text className="text-[20px] ml-5 font-semibold text-[#1A1A1A] font-cormorant">
-        Help & Feedback
-        </Text>
-      </View>
-
-      {/* FAQ SECTION */}
-      <View className="border border-[#2C2C2C33] rounded-2xl p-4 mb-6 mt-4">
-        <View className="flex-row items-center gap-2 mb-3">
-          <HelpCircle size={18} color="#C4A663" />
-          <Text className="text-xl font-semibold font-cormorant text-[#1A1A1A]">
-            Frequently Asked Questions
+    <KeyboardAvoidingView
+      style={{flex: 1}}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <ScrollView
+        className="flex-1 bg-offWhite px-5 pt-[70px]"
+        showsVerticalScrollIndicator={false}>
+        {/* HEADER */}
+        <View className="flex-row items-center mb-6">
+          <ChevronLeft
+            className="text-[#2C2C2C]"
+            size={24}
+            onPress={() => goBack(navigation)}
+          />
+          <Text className="text-[20px] ml-5 font-semibold text-[#1A1A1A] font-cormorant">
+            Help & Feedback
           </Text>
         </View>
 
-        {/* Search Bar */}
-        <TextInput
-          className="border border-[#2C2C2C33] bg-white rounded-lg py-2.5 px-3 text-[14px] text-[#333] mt-4 mb-8"
-          placeholder="Search FAQs"
-          placeholderTextColor="#2C2C2C80"
-          value={faqSearch}
-          onChangeText={text => {
-            setFaqSearch(text);
-            setOpenIndex(null);
-          }}
-        />
+        {/* FAQ SECTION */}
+        <View className="border border-[#2C2C2C33] rounded-2xl p-4 mb-6 mt-4">
+          <View className="flex-row items-center gap-2 mb-3">
+            <HelpCircle size={18} color="#C4A663" />
+            <Text className="text-xl font-semibold font-cormorant text-[#1A1A1A]">
+              Frequently Asked Questions
+            </Text>
+          </View>
 
-        {/* FAQ List */}
-        {faqs
-          .filter(faq => {
-            const q = faqSearch.trim().toLowerCase();
-            return (
-              !q ||
-              faq.question.toLowerCase().includes(q) ||
-              faq.answer.toLowerCase().includes(q)
-            );
-          })
-          .map((faq, index) => {
-          const isOpen = openIndex === index;
-          return (
-            <View
-              key={index}
-              className="border border-[#C1A36A33] rounded-md mb-3 bg-transparent">
-              <TouchableOpacity
-                onPress={() => setOpenIndex(isOpen ? null : index)}
-                className="flex-row justify-between items-center px-4 py-3">
-                <Text className="text-[#1A1A1A] font-dm-sans font-medium w-[85%]">
-                  {faq.question}
-                </Text>
-                {isOpen ? (
-                  <ChevronUp size={18} color="#2C2C2C80" />
-                ) : (
-                  <ChevronDown size={18} color="#2C2C2C80" />
-                )}
-              </TouchableOpacity>
-              {isOpen && (
-                <View className="px-4 pb-4">
-                  {faq.answer.split('\n').map((line, i) => (
-                    <Text
-                      key={i}
-                      className="text-[#444] text-[13px] font-dm-sans mb-1 leading-5">
-                      {line}
-                    </Text>
-                  ))}
-                </View>
-              )}
-            </View>
-          );
-        })}
-      </View>
+          {/* Search Bar */}
+          <TextInput
+            className="border border-[#2C2C2C33] bg-white rounded-lg py-2.5 px-3 text-[14px] text-[#333] mt-4 mb-8"
+            placeholder="Search FAQs"
+            placeholderTextColor="#2C2C2C80"
+            value={faqSearch}
+            onChangeText={text => {
+              setFaqSearch(text);
+              setOpenIndex(null);
+            }}
+          />
 
-      {/* CONTACT SUPPORT */}
-      <View className=" border border-[#2C2C2C33] rounded-2xl px-4 pt-4 pb-10 mb-5">
-        <View className="flex-row items-center gap-2 mb-5">
-          <Headset size={18} color="#C4A663" />
-          <Text className="text-xl font-semibold font-cormorant text-[#1A1A1A]">
-            Contact Support
-          </Text>
-        </View>
-        <View className="flex-row">
-          <TouchableOpacity
-            className="flex-1 border border-[#2C2C2C33] rounded-xl py-3 flex-col items-center justify-center gap-2"
-            onPress={() =>
-              Linking.openURL(
-                `mailto:${SUPPORT_EMAIL}?subject=PlaDomus Support`,
-              ).catch(() =>
-                Toast.show({type: 'error', text1: 'Could not open mail app'}),
-              )
-            }>
-            <Mail size={16} color="#C4A663" />
-            <Text className="text-[#2C2C2C] font-medium">Email</Text>
-          </TouchableOpacity>
-          {/* Live Chat — coming soon
-          <TouchableOpacity
-            className="flex-1 border border-[#2C2C2C33] rounded-xl py-3 ml-2 flex-col items-center justify-center gap-2"
-            onPress={() =>
-              Toast.show({type: 'info', text1: 'Live chat coming soon'})
-            }>
-            <MessageSquare size={16} color="#C4A663" />
-            <Text className="text-[#2C2C2C] font-medium">Live Chat</Text>
-          </TouchableOpacity>
-          */}
-        </View>
-      </View>
-
-      {/* SUPPORT HOURS */}
-      <View className="bg-[#C1A36A0D]  rounded-2xl p-4 mb-5">
-        <Text className="text-[#1A1A1A] font-semibold mb-2 font-cormorant text-xl">Support Hours</Text>
-        <Text className="text-[#444] text-sm leading-5 font-dm-sans">
-          Monday – Friday: 9 AM – 5 PM EST{'\n'}Saturday: 10 AM – 4 PM EST
-        </Text>
-      </View>
-
-      {/* SEND FEEDBACK */}
-      <View className="border border-[#2C2C2C33] rounded-2xl p-4 mb-5">
-        <Text className="text-[#1A1A1A] font-semibold mb-5 text-xl font-cormorant">Send Feedback</Text>
-        <Text className="text-[#444] text-sm mb-1 font-dm-sans">Your Feedback</Text>
-        <TextInput
-          multiline
-          numberOfLines={5}
-          className="border border-[#F1EADC] bg-white rounded-lg py-5 px-3 text-[14px] text-[#333] mb-6"
-          placeholder="Tell us what you think or suggest improvements..."
-          placeholderTextColor="#2C2C2C80"
-          value={feedback}
-          onChangeText={setFeedback}
-        />
-        <PrimaryButton
-          title={isSending ? 'Sending...' : 'Send Feedback'}
-          onPress={handleSendFeedback}
-        />
-      </View>
-
-      {/* APP INFORMATION */}
-      <View className=" border border-[#2C2C2C33] rounded-2xl p-4 mb-10">
-        <Text className="text-[#1A1A1A] font-semibold font-cormorant text-xl mb-3">
-          App Information
-        </Text>
-        <Text className="text-[#444] text-sm mb-1 font-dm-sans">Version 1.1.0</Text>
-        <Text className="text-[#444] text-sm mb-3 font-dm-sans">
-          Last Updated: July 3, 2025
-        </Text>
-        <SecondaryButton
-          title="Rate App"
-          onPress={() =>
-            Toast.show({
-              type: 'info',
-              text1: 'Rating available once we hit the App Store',
+          {/* FAQ List */}
+          {faqs
+            .filter(faq => {
+              const q = faqSearch.trim().toLowerCase();
+              return (
+                !q ||
+                faq.question.toLowerCase().includes(q) ||
+                faq.answer.toLowerCase().includes(q)
+              );
             })
-          }
-        />
-      </View>
-    </ScrollView>
+            .map((faq, index) => {
+            const isOpen = openIndex === index;
+            return (
+              <View
+                key={index}
+                className="border border-[#C1A36A33] rounded-md mb-3 bg-transparent">
+                <TouchableOpacity
+                  onPress={() => setOpenIndex(isOpen ? null : index)}
+                  className="flex-row justify-between items-center px-4 py-3">
+                  <Text className="text-[#1A1A1A] font-dm-sans font-medium w-[85%]">
+                    {faq.question}
+                  </Text>
+                  {isOpen ? (
+                    <ChevronUp size={18} color="#2C2C2C80" />
+                  ) : (
+                    <ChevronDown size={18} color="#2C2C2C80" />
+                  )}
+                </TouchableOpacity>
+                {isOpen && (
+                  <View className="px-4 pb-4">
+                    {faq.answer.split('\n').map((line, i) => (
+                      <Text
+                        key={i}
+                        className="text-[#444] text-[13px] font-dm-sans mb-1 leading-5">
+                        {line}
+                      </Text>
+                    ))}
+                  </View>
+                )}
+              </View>
+            );
+          })}
+        </View>
+
+        {/* CONTACT SUPPORT */}
+        <View className=" border border-[#2C2C2C33] rounded-2xl px-4 pt-4 pb-10 mb-5">
+          <View className="flex-row items-center gap-2 mb-5">
+            <Headset size={18} color="#C4A663" />
+            <Text className="text-xl font-semibold font-cormorant text-[#1A1A1A]">
+              Contact Support
+            </Text>
+          </View>
+          <View className="flex-row">
+            <TouchableOpacity
+              className="flex-1 border border-[#2C2C2C33] rounded-xl py-3 flex-col items-center justify-center gap-2"
+              onPress={() =>
+                Linking.openURL(
+                  `mailto:${SUPPORT_EMAIL}?subject=PlaDomus Support`,
+                ).catch(() =>
+                  Toast.show({type: 'error', text1: 'Could not open mail app'}),
+                )
+              }>
+              <Mail size={16} color="#C4A663" />
+              <Text className="text-[#2C2C2C] font-medium">Email</Text>
+            </TouchableOpacity>
+            {/* Live Chat — coming soon
+            <TouchableOpacity
+              className="flex-1 border border-[#2C2C2C33] rounded-xl py-3 ml-2 flex-col items-center justify-center gap-2"
+              onPress={() =>
+                Toast.show({type: 'info', text1: 'Live chat coming soon'})
+              }>
+              <MessageSquare size={16} color="#C4A663" />
+              <Text className="text-[#2C2C2C] font-medium">Live Chat</Text>
+            </TouchableOpacity>
+            */}
+          </View>
+        </View>
+
+        {/* SUPPORT HOURS */}
+        <View className="bg-[#C1A36A0D]  rounded-2xl p-4 mb-5">
+          <Text className="text-[#1A1A1A] font-semibold mb-2 font-cormorant text-xl">Support Hours</Text>
+          <Text className="text-[#444] text-sm leading-5 font-dm-sans">
+            Monday – Friday: 9 AM – 5 PM EST{'\n'}Saturday: 10 AM – 4 PM EST
+          </Text>
+        </View>
+
+        {/* SEND FEEDBACK */}
+        <View className="border border-[#2C2C2C33] rounded-2xl p-4 mb-5">
+          <Text className="text-[#1A1A1A] font-semibold mb-5 text-xl font-cormorant">Send Feedback</Text>
+          <Text className="text-[#444] text-sm mb-1 font-dm-sans">Your Feedback</Text>
+          <TextInput
+            multiline
+            numberOfLines={5}
+            className="border border-[#F1EADC] bg-white rounded-lg py-5 px-3 text-[14px] text-[#333] mb-6"
+            placeholder="Tell us what you think or suggest improvements..."
+            placeholderTextColor="#2C2C2C80"
+            value={feedback}
+            onChangeText={setFeedback}
+          />
+          {feedback.trim().length > 0 && (
+            <PrimaryButton
+              title={isSending ? 'Sending...' : 'Send Feedback'}
+              onPress={handleSendFeedback}
+            />
+          )}
+        </View>
+
+        {/* APP INFORMATION */}
+        <View className=" border border-[#2C2C2C33] rounded-2xl p-4 mb-10">
+          <Text className="text-[#1A1A1A] font-semibold font-cormorant text-xl mb-3">
+            App Information
+          </Text>
+          <Text className="text-[#444] text-sm mb-1 font-dm-sans">Version 1.1.0</Text>
+          <Text className="text-[#444] text-sm mb-3 font-dm-sans">
+            Last Updated: July 3, 2025
+          </Text>
+          <SecondaryButton
+            title="Rate App"
+            onPress={() =>
+              Toast.show({
+                type: 'info',
+                text1: 'Rating available once we hit the App Store',
+              })
+            }
+          />
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 

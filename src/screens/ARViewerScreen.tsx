@@ -34,7 +34,7 @@ import {useNavigation, useRoute} from '@react-navigation/native';
 import {Dropdown} from 'react-native-element-dropdown';
 import Toast from 'react-native-toast-message';
 import RealityKitNativeView, {
-  captureSnapshotCommand,
+  captureTopViewSnapshotCommand,
   exportDesignPdfCommand,
   exportFurnitureLayoutCommand,
   loadFurnitureCommand,
@@ -306,15 +306,25 @@ export default function ARViewerScreen() {
           text1: pubIsPublic ? 'Published to Explore' : 'Design saved',
         });
 
-        // Attach any note jotted before this design had an id
-        const draft = await NoteService.getDraftNote();
-        if (draft) {
+        // Attach any notes jotted before this design had an id
+        const drafts = await NoteService.getDraftNotes();
+        if (drafts.length > 0) {
           try {
-            await NoteService.createNote({...draft, project_id: res.data.id});
+            await Promise.all(
+              drafts.map(d =>
+                NoteService.createNote({
+                  title: d.title,
+                  description: d.description,
+                  is_private: d.is_private,
+                  project_id: res.data.id,
+                  tags: d.tags,
+                }),
+              ),
+            );
           } catch {
             // Best-effort — the design save itself already succeeded
           } finally {
-            await NoteService.clearDraftNote();
+            await NoteService.clearDraftNotes();
           }
         }
 
@@ -336,7 +346,7 @@ export default function ARViewerScreen() {
       }
     };
 
-    captureSnapshotCommand(realityKitRef);
+    captureTopViewSnapshotCommand(realityKitRef);
   };
 
   const sheetAnim = useRef(new Animated.Value(SHEET_PEEK)).current;
@@ -465,27 +475,22 @@ export default function ARViewerScreen() {
             {/* 3-dot dropdown menu */}
             {showToolsMenu && (
               <View style={styles.toolsMenu}>
-                <TouchableOpacity
-                  style={styles.toolsMenuItem}
-                  onPress={() => {
-                    setShowToolsMenu(false);
-                    if (currentDesignId) {
-                      // Saved design — browse its existing notes first
+                {!viewOnly && (
+                  <TouchableOpacity
+                    style={styles.toolsMenuItem}
+                    onPress={() => {
+                      setShowToolsMenu(false);
+                      // Notes taken before the design is saved show up here
+                      // too, held as local drafts until it is.
                       (navigation as any).navigate('DesignNotes', {
                         designId: currentDesignId,
                         designName: route.params?.designName,
                       });
-                    } else {
-                      // Not saved yet — nothing to list, jump straight to
-                      // creating one (held as a local draft until saved)
-                      (navigation as any).navigate('CreateNote', {
-                        fromARViewer: true,
-                      });
-                    }
-                  }}>
-                  <NotebookPen color="#C4A962" size={18} />
-                  <Text style={styles.toolsMenuText}>Notes</Text>
-                </TouchableOpacity>
+                    }}>
+                    <NotebookPen color="#C4A962" size={18} />
+                    <Text style={styles.toolsMenuText}>Notes</Text>
+                  </TouchableOpacity>
+                )}
                 {!viewOnly && (
                   <TouchableOpacity
                     style={styles.toolsMenuItem}
