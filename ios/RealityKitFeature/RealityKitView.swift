@@ -202,9 +202,9 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
                 print("✅ Room loaded from:", url.lastPathComponent)
             } catch {
                 print("❌ loadRoom failed:", error)
-                SentrySDK.capture(error: error, block: { scope in
-                    scope.setContext(value: ["url": url.absoluteString], key: "room")
-                })
+                let roomErrorScope = Scope()
+                roomErrorScope.setContext(value: ["url": url.absoluteString], key: "room")
+                SentrySDK.capture(error: error, scope: roomErrorScope)
                 self.showToast("Couldn't load room: \(error.localizedDescription)", duration: 5.0)
             }
         }
@@ -660,9 +660,9 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
                 print("✅ Furniture ready:", resolvedURL.lastPathComponent)
             } catch {
                 print("❌ loadFurniture failed:", error)
-                SentrySDK.capture(error: error, block: { scope in
-                    scope.setContext(value: ["url": resolvedURL.absoluteString], key: "furniture")
-                })
+                let furnitureLoadErrorScope = Scope()
+                furnitureLoadErrorScope.setContext(value: ["url": resolvedURL.absoluteString], key: "furniture")
+                SentrySDK.capture(error: error, scope: furnitureLoadErrorScope)
                 self.showToast("Couldn't load this model")
             }
         }
@@ -747,9 +747,9 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
                 print("✅ Restored furniture:", resolvedURL.lastPathComponent)
             } catch {
                 print("❌ placeFurnitureFromLayout failed:", error)
-                SentrySDK.capture(error: error, block: { scope in
-                    scope.setContext(value: ["url": resolvedURL.absoluteString], key: "furniture")
-                })
+                let furnitureLayoutErrorScope = Scope()
+                furnitureLayoutErrorScope.setContext(value: ["url": resolvedURL.absoluteString], key: "furniture")
+                SentrySDK.capture(error: error, scope: furnitureLayoutErrorScope)
             }
         }
     }
