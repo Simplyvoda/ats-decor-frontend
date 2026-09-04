@@ -202,9 +202,12 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
                 print("✅ Room loaded from:", url.lastPathComponent)
             } catch {
                 print("❌ loadRoom failed:", error)
-                let roomErrorScope = Scope()
-                roomErrorScope.setContext(value: ["url": url.absoluteString], key: "room")
-                SentrySDK.capture(error: error, with: roomErrorScope) 
+                // Sentry's scope-taking capture(error:) overloads aren't
+                // resolving in this project's build (both `scope:` and
+                // `block:` fail as "Extra argument" even though the source
+                // declares them) — using the plain overload, the one
+                // confirmed to actually compile here.
+                SentrySDK.capture(error: error)
                 self.showToast("Couldn't load room: \(error.localizedDescription)", duration: 5.0)
             }
         }
@@ -660,9 +663,7 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
                 print("✅ Furniture ready:", resolvedURL.lastPathComponent)
             } catch {
                 print("❌ loadFurniture failed:", error)
-                let furnitureLoadErrorScope = Scope()
-                furnitureLoadErrorScope.setContext(value: ["url": resolvedURL.absoluteString], key: "furniture")
-                SentrySDK.capture(error: error, with: furnitureLoadErrorScope)
+                SentrySDK.capture(error: error)
                 self.showToast("Couldn't load this model")
             }
         }
@@ -747,9 +748,7 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
                 print("✅ Restored furniture:", resolvedURL.lastPathComponent)
             } catch {
                 print("❌ placeFurnitureFromLayout failed:", error)
-                let furnitureLayoutErrorScope = Scope()
-                furnitureLayoutErrorScope.setContext(value: ["url": resolvedURL.absoluteString], key: "furniture")
-                SentrySDK.capture(error: error, with: furnitureLayoutErrorScope) 
+                SentrySDK.capture(error: error) 
             }
         }
     }
