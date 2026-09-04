@@ -169,7 +169,26 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
 
         if FileManager.default.fileExists(atPath: dest.path) { return dest }
 
-        let (tmp, _) = try await URLSession.shared.download(from: url)
+        let (tmp, response) = try await URLSession.shared.download(from: url)
+        // A failed download (404, auth redirect, server error, ...) still
+        // "succeeds" as far as URLSession is concerned — it just hands back
+        // whatever error page the server sent instead of the real file.
+        // Without this check that error page gets cached and treated as a
+        // valid room model forever (see loadRoom's cache-eviction fix for
+        // the other half of this).
+        if let httpResponse = response as? HTTPURLResponse, !(200...299).contains(httpResponse.statusCode) {
+            try? FileManager.default.removeItem(at: tmp)
+            // Breadcrumb (not capture — the caller's catch block already
+            // reports this error to Sentry; this just adds the failing
+            // URL/status to that report's trail instead of double-reporting).
+            let breadcrumb = Breadcrumb(level: .error, category: "room.download")
+            breadcrumb.message = "Room model download failed"
+            breadcrumb.data = ["url": url.absoluteString, "statusCode": httpResponse.statusCode]
+            SentrySDK.addBreadcrumb(breadcrumb)
+            throw URLError(.badServerResponse, userInfo: [
+                NSLocalizedDescriptionKey: "Room model download failed (HTTP \(httpResponse.statusCode))",
+            ])
+        }
         try? FileManager.default.removeItem(at: dest)
         try FileManager.default.moveItem(at: tmp, to: dest)
         return dest
@@ -178,10 +197,25 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
     // MARK: - Room Loading
 
     func loadRoom(from url: URL) {
+        let isRemote = url.scheme == "https" || url.scheme == "http"
         Task { @MainActor in
             do {
                 let localURL = try await self.localFileURL(for: url)
-                let entity = try await Entity.load(contentsOf: localURL)
+                let entity: Entity
+                do {
+                    entity = try await Entity.load(contentsOf: localURL)
+                } catch {
+                    // A cached download that RealityKit can't import is
+                    // most likely corrupted (e.g. cached before the
+                    // response-validation fix above existed) — evict it so
+                    // the next attempt re-downloads instead of reusing the
+                    // same broken file forever. Never touch bundled/local
+                    // files, only ones we downloaded ourselves.
+                    if isRemote {
+                        try? FileManager.default.removeItem(at: localURL)
+                    }
+                    throw error
+                }
                 let bounds = entity.visualBounds(relativeTo: nil)
                 entity.position -= bounds.center
 
