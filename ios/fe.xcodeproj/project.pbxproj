@@ -273,7 +273,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "set -e\n\nWITH_ENVIRONMENT=\"$REACT_NATIVE_PATH/scripts/xcode/with-environment.sh\"\nSENTRY_XCODE=\"$REACT_NATIVE_PATH/../@sentry/react-native/scripts/sentry-xcode.sh\"\n\n/bin/sh -c \"$WITH_ENVIRONMENT $SENTRY_XCODE\"\n";
+			shellScript = "set -e\n\n# sentry-cli's source map auto-upload hits \"Permission denied (os error 13)\"\n# in this build environment (root cause not yet identified — not Xcode's\n# User Script Sandboxing, that's already off). Disabling auto-upload so the\n# archive isn't blocked on it; source maps can be uploaded separately once\n# the underlying permission issue is diagnosed.\nexport SENTRY_DISABLE_AUTO_UPLOAD=true\n\nWITH_ENVIRONMENT=\"$REACT_NATIVE_PATH/scripts/xcode/with-environment.sh\"\nSENTRY_XCODE=\"$REACT_NATIVE_PATH/../@sentry/react-native/scripts/sentry-xcode.sh\"\n\n/bin/sh -c \"$WITH_ENVIRONMENT $SENTRY_XCODE\"\n";
 		};
 		2C6ACA23712F6B71BF676325 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
