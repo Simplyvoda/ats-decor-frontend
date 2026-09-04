@@ -95,37 +95,54 @@ target 'fe' do
       end
     end
 
-    # Work around upstream React Native bug: React-jsitooling and
-    # React-RuntimeCore both set header_dir "react/runtime", so without
-    # USE_FRAMEWORKS (we link statically) CocoaPods puts both pods' public
-    # headers in the same Headers/Public/react_runtime/ folder and derives
-    # the same module name "react_runtime" for both (each podspec only
-    # gives itself a distinct module_name when USE_FRAMEWORKS is set).
-    # Renaming the module alone isn't enough: both modulemaps also declare
-    # "umbrella header", which makes Clang treat the module as owning the
-    # *entire directory* it lives in — two umbrella modules can't both
-    # claim the same shared directory ("Umbrella for module ... already
-    # covers this directory"). Their umbrella headers already #import
-    # every one of that pod's own headers by name (checked directly), so
-    # directory-wide inference isn't needed — downgrade "umbrella header"
-    # to a plain "header" declaration (and drop the wildcard submodule
-    # line, which requires umbrella inference to mean anything) so each
-    # module only claims its own umbrella header file, not the directory.
-    {
-      'React-jsitooling' => 'react_jsitooling',
-      'React-RuntimeCore' => 'react_runtimecore',
-    }.each do |pod_name, new_module_name|
-      modulemap_path = File.join(installer.sandbox.root.to_s, 'Target Support Files', pod_name, "#{pod_name}.modulemap")
-      if File.exist?(modulemap_path)
-        patched = <<~MODULEMAP
-          module #{new_module_name} {
-            header "#{pod_name}-umbrella.h"
-            export *
-          }
-        MODULEMAP
-        if File.read(modulemap_path) != patched
-          File.write(modulemap_path, patched)
-          Pod::UI.puts "Patched #{pod_name}.modulemap to a non-umbrella module '#{new_module_name}'".green
+    # Work around upstream React Native bug: several ReactCommon-family
+    # pods share a header_dir with a sibling pod — e.g. React-jsitooling
+    # and React-RuntimeCore both use "react/runtime"; ReactCommon and
+    # React-RuntimeApple both use "ReactCommon" — so without USE_FRAMEWORKS
+    # (we link statically) CocoaPods puts each pair's public headers in
+    # the same Headers/Public/<dir>/ folder and derives the same module
+    # name for both (each podspec only gives itself a distinct module_name
+    # when USE_FRAMEWORKS is set). Worse, both modulemaps in a pair also
+    # declare "umbrella header", which makes Clang treat the module as
+    # owning the *entire directory* it lives in — two umbrella modules
+    # can't share one directory even once uniquely named ("Umbrella for
+    # module ... already covers this directory"). Both problems only
+    # surface once something loads every pod's modulemap in one compile —
+    # Sentry's Swift interop does that via -fmodule-map-file in
+    # RNSentry.xcconfig — so new pairs keep turning up one at a time as
+    # more of the project gets compiled under Sentry. Fix all of them at
+    # once: for every Headers/Public/<dir> shared by more than one
+    # modulemap, give each module a name unique to its own pod, and
+    # downgrade "umbrella header" to a plain "header" declaration. Their
+    # umbrella headers already #import every header of that pod by name
+    # (checked directly for the first pair hit), so directory-wide
+    # inference isn't needed — each module ends up claiming only its own
+    # umbrella header file, not the shared directory.
+    public_headers_dir = File.join(installer.sandbox.root.to_s, 'Headers', 'Public')
+    if Dir.exist?(public_headers_dir)
+      Dir.children(public_headers_dir).each do |subdir|
+        subdir_path = File.join(public_headers_dir, subdir)
+        next unless File.directory?(subdir_path)
+
+        modulemaps = Dir.glob(File.join(subdir_path, '*.modulemap'))
+        next if modulemaps.size < 2
+
+        modulemaps.each do |symlink_path|
+          pod_name = File.basename(symlink_path, '.modulemap')
+          modulemap_path = File.join(installer.sandbox.root.to_s, 'Target Support Files', pod_name, "#{pod_name}.modulemap")
+          next unless File.exist?(modulemap_path)
+
+          new_module_name = pod_name.gsub(/[^0-9A-Za-z_]/, '_')
+          patched = <<~MODULEMAP
+            module #{new_module_name} {
+              header "#{pod_name}-umbrella.h"
+              export *
+            }
+          MODULEMAP
+          if File.read(modulemap_path) != patched
+            File.write(modulemap_path, patched)
+            Pod::UI.puts "Patched #{pod_name}.modulemap (shared dir #{subdir}) to non-umbrella module '#{new_module_name}'".green
+          end
         end
       end
     end
