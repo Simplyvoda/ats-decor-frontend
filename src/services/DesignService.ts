@@ -96,16 +96,9 @@ const DesignService = {
       name: 'thumbnail.png',
     } as any);
 
-    // Local scans upload the USDZ; bundled/hosted models pass the reference
-    if (payload.modelUrl.startsWith('file://')) {
-      formData.append('file', {
-        uri: payload.modelUrl,
-        type: 'model/vnd.usdz+zip',
-        name: 'design.usdz',
-      } as any);
-    } else {
-      formData.append('model_url', payload.modelUrl);
-    }
+    // A design's room scan is set once at creation — there's no rescan
+    // feature, so unlike publish() this never sends a model file/URL; the
+    // backend ignores this route's file field regardless.
 
     const res = await api.patch(`/designs/${id}`, formData, {
       headers: {'Content-Type': 'multipart/form-data'},
