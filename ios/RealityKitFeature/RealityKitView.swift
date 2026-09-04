@@ -202,9 +202,9 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
                 print("✅ Room loaded from:", url.lastPathComponent)
             } catch {
                 print("❌ loadRoom failed:", error)
-                SentrySDK.capture(error: error) { scope in
+                SentrySDK.capture(error: error, block: { scope in
                     scope.setContext(value: ["url": url.absoluteString], key: "room")
-                }
+                })
                 self.showToast("Couldn't load room: \(error.localizedDescription)", duration: 5.0)
             }
         }
@@ -660,9 +660,9 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
                 print("✅ Furniture ready:", resolvedURL.lastPathComponent)
             } catch {
                 print("❌ loadFurniture failed:", error)
-                SentrySDK.capture(error: error) { scope in
+                SentrySDK.capture(error: error, block: { scope in
                     scope.setContext(value: ["url": resolvedURL.absoluteString], key: "furniture")
-                }
+                })
                 self.showToast("Couldn't load this model")
             }
         }
@@ -747,9 +747,9 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
                 print("✅ Restored furniture:", resolvedURL.lastPathComponent)
             } catch {
                 print("❌ placeFurnitureFromLayout failed:", error)
-                SentrySDK.capture(error: error) { scope in
+                SentrySDK.capture(error: error, block: { scope in
                     scope.setContext(value: ["url": resolvedURL.absoluteString], key: "furniture")
-                }
+                })
             }
         }
     }
