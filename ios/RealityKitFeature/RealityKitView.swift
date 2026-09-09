@@ -381,8 +381,15 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
                 // of the default rough convex approximation meant for
                 // objects a physics simulation would push around — a
                 // scanned/authored room never moves, so the more accurate
-                // shape is strictly better here with no downside.
-                entity.generateCollisionShapes(recursive: true, static: true)
+                // shape is strictly better here with no downside. That
+                // parameter is iOS 18+ only though, and this app's minimum
+                // target is 16.1 (see IPHONEOS_DEPLOYMENT_TARGET), so it
+                // falls back to the plain (approximate) call below 18.
+                if #available(iOS 18.0, *) {
+                    entity.generateCollisionShapes(recursive: true, static: true)
+                } else {
+                    entity.generateCollisionShapes(recursive: true)
+                }
                 self.tagCollision(entity, group: Self.floorCollisionGroup)
 
                 let anchor = AnchorEntity(world: .zero)
