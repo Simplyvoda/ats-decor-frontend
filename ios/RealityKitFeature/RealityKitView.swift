@@ -35,6 +35,7 @@
 import UIKit
 import RealityKit
 import CryptoKit
+import Combine
 import React
 import Sentry
 
@@ -112,6 +113,21 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
     // the same point under it that you originally grabbed.
     private var dragOffset: SIMD3<Float> = .zero
 
+    // ── Resize handle ────────────────────────────────────────────────────
+    // A small on-screen dot pinned to the far corner of the selected piece,
+    // dragged with one finger to resize it. This exists so pinch can be
+    // reserved exclusively for camera zoom (matching how every zoom/pan
+    // app — Maps, Photos, Figma's canvas — treats pinch as a viewport
+    // gesture, never overloaded onto a selected object). Before this,
+    // pinch resized the selected piece INSTEAD of zooming, and because
+    // placing or dragging furniture auto-selects it, that meant pinch
+    // silently stopped zooming during normal use — indistinguishable from
+    // "only pan still works", which is exactly the bug this replaces.
+    private var resizeHandle: UIView!
+    private var resizeHandleUpdateSubscription: Cancellable?
+    private var resizeStartScale: SIMD3<Float> = .one
+    private var resizeStartDistance: CGFloat = 1
+
     // Separate collision groups for the room mesh vs. placed furniture, so
     // floorHit() can raycast against ONLY the floor. Without this, dragging
     // a piece across the room — or even just over another piece — can have
@@ -184,6 +200,108 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
         arView.environment.background = .color(UIColor(red: 0.61, green: 0.67, blue: 0.57, alpha: 1))
         addSubview(arView)
         setupGestures()
+        setupResizeHandle()
+    }
+
+    // A plain UIView, NOT part of the RealityKit scene — added as a sibling
+    // subview on top of arView so it can be dragged with its own gesture
+    // recognizer without competing with the 3D view's camera gestures at
+    // all (a touch that starts on this small circle hit-tests to this view,
+    // never to arView underneath it). Its on-screen position is kept in
+    // sync with the selected piece's actual world-space corner every frame
+    // via updateResizeHandlePosition(), driven by RealityKit's own render
+    // loop (SceneEvents.Update) rather than anything gesture-driven, since
+    // the camera can move (orbit/pan/zoom) independently of any drag.
+    private func setupResizeHandle() {
+        let handle = UIView(frame: CGRect(x: 0, y: 0, width: 32, height: 32))
+        handle.backgroundColor = .white
+        handle.layer.cornerRadius = 16
+        handle.layer.borderWidth = 2
+        handle.layer.borderColor = UIColor.systemBlue.cgColor
+        handle.layer.shadowColor = UIColor.black.cgColor
+        handle.layer.shadowOpacity = 0.25
+        handle.layer.shadowRadius = 3
+        handle.layer.shadowOffset = CGSize(width: 0, height: 1)
+        handle.isHidden = true
+        addSubview(handle)
+        resizeHandle = handle
+
+        let icon = UIImageView(image: UIImage(systemName: "arrow.up.left.and.arrow.down.right"))
+        icon.tintColor = .systemBlue
+        icon.contentMode = .scaleAspectFit
+        icon.frame = handle.bounds.insetBy(dx: 7, dy: 7)
+        icon.isUserInteractionEnabled = false
+        handle.addSubview(icon)
+
+        let pan = UIPanGestureRecognizer(target: self, action: #selector(handleResizeHandleDrag(_:)))
+        handle.addGestureRecognizer(pan)
+
+        resizeHandleUpdateSubscription = arView.scene.subscribe(to: SceneEvents.Update.self) { [weak self] _ in
+            self?.updateResizeHandlePosition()
+        }
+    }
+
+    // Runs every rendered frame. Hides the handle when nothing is selected;
+    // otherwise projects the selected piece's far top corner (world space)
+    // to a screen point and pins the handle there — so it tracks the piece
+    // correctly through camera orbit/pan/zoom, and through the piece's own
+    // resizing, without needing to be told explicitly when any of those happen.
+    private func updateResizeHandlePosition() {
+        guard let selected = selectedFurniture else {
+            if !resizeHandle.isHidden { resizeHandle.isHidden = true }
+            return
+        }
+        let worldBounds = selected.visualBounds(relativeTo: nil)
+        let handleWorldPoint = SIMD3<Float>(worldBounds.max.x, worldBounds.center.y, worldBounds.max.z)
+        guard let screenPoint = arView.project(handleWorldPoint) else {
+            resizeHandle.isHidden = true
+            return
+        }
+        resizeHandle.isHidden = false
+        // screenPoint is in arView's coordinate space; resizeHandle is a
+        // sibling subview of arView (both children of self), so its center
+        // must be expressed in self's space, not arView's — convert rather
+        // than assume the two spaces are numerically identical.
+        resizeHandle.center = self.convert(screenPoint, from: arView)
+    }
+
+    // Dragging the handle resizes the selected piece uniformly, scaled by
+    // how much farther (or closer) the finger is from the piece's screen
+    // center compared to where the drag started — the same "drag a corner
+    // handle away from center to grow it" convention as Keynote/PowerPoint
+    // shape handles. Deliberately reads the finger's raw position rather
+    // than the handle view's own position: the handle's position is a pure
+    // readout (see updateResizeHandlePosition), not the source of truth.
+    @objc private func handleResizeHandleDrag(_ gesture: UIPanGestureRecognizer) {
+        guard let selected = selectedFurniture else { return }
+        switch gesture.state {
+        case .began:
+            resizeStartScale = selected.scale
+            let centerScreen = arView.project(selected.visualBounds(relativeTo: nil).center)
+                ?? self.convert(resizeHandle.center, to: arView)
+            let touch = gesture.location(in: arView)
+            resizeStartDistance = max(20, hypot(touch.x - centerScreen.x, touch.y - centerScreen.y))
+        case .changed:
+            guard let centerScreen = arView.project(selected.visualBounds(relativeTo: nil).center) else { return }
+            let touch = gesture.location(in: arView)
+            let currentDistance = max(20, hypot(touch.x - centerScreen.x, touch.y - centerScreen.y))
+            let ratio = Float(currentDistance / resizeStartDistance)
+            selected.scale = resizeStartScale * ratio
+
+            // Re-apply the same floor-snap used at placement time (see
+            // handleTap) so the piece stays grounded instead of drifting
+            // above/below the floor as its height changes with scale.
+            if let anchor = selected.parent {
+                let floorWorldY = anchor.position(relativeTo: nil).y
+                let worldBounds = selected.visualBounds(relativeTo: nil)
+                if worldBounds.min.y.isFinite {
+                    let isFlat = furnitureIsFlat[ObjectIdentifier(selected)] ?? false
+                    selected.position.y += floorWorldY - worldBounds.min.y + floorLift(isFlat: isFlat)
+                }
+            }
+        default:
+            break
+        }
     }
 
     // Remote https models are downloaded once and cached; local URLs pass through.
@@ -267,10 +385,22 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
                 // entire vertical extent can be thinner than the slab itself,
                 // so nothing pokes out to be visible until scaled up enough
                 // to exceed the slab's thickness. A straight-down raycast
-                // from above the room's center finds the actual top surface;
-                // the old bounds-based value is kept only as a fallback for
-                // rooms whose center happens to not sit over floor geometry.
-                let downFrom = SIMD3<Float>(0, bounds.max.y - bounds.center.y + 0.5, 0)
+                // from the room's own interior air finds the actual top
+                // surface. Crucially this starts INSIDE the empty room
+                // volume (room vertical middle, same point setupOrbitCamera
+                // uses), not from above the ceiling: a room mesh is often
+                // one solid shell with real thickness on every side, so a
+                // ray fired from ABOVE the roof going down hits the ROOF'S
+                // OWN outward-facing top surface first — which also has an
+                // upward normal and so passed the same filter, planting
+                // floorY near ceiling height and floating every placed piece
+                // up near the ceiling instead of the floor. Starting inside
+                // the room's open air, below that outer shell, the first
+                // thing straight down CAN be is the real floor. The old
+                // bounds-based value is kept only as a fallback for rooms
+                // whose center happens to not sit over open floor space.
+                let midY = (bounds.min.y + bounds.max.y) / 2 - bounds.center.y
+                let downFrom = SIMD3<Float>(0, midY, 0)
                 let downTo = SIMD3<Float>(0, bounds.min.y - bounds.center.y - 0.5, 0)
                 let downHits = arView.scene.raycast(
                     from: downFrom, to: downTo, query: .nearest,
@@ -914,7 +1044,7 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
             // Nothing pending — try to select a placed piece
             if let furniture = furnitureHit(at: location) {
                 setSelectedFurniture(furniture)
-                showToast("Drag to move · Pinch · Rotate · Tap 🗑 to remove", duration: 3.5)
+                showToast("Drag to move · Handle to resize · Rotate · Tap 🗑 to remove", duration: 3.5)
             } else if selectedFurniture != nil {
                 setSelectedFurniture(nil)
                 showToast("Deselected — tap a piece to select it")
@@ -1035,7 +1165,7 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
         pendingFurnitureURL = nil
         pendingFurnitureIsFlat = false
 
-        showToast("Drag to move · Pinch · Rotate · Tap 🗑 to remove", duration: 3.5)
+        showToast("Drag to move · Handle to resize · Rotate · Tap 🗑 to remove", duration: 3.5)
         print("🪑 Placed furniture — total:", placedFurniture.count)
     }
 
@@ -1139,24 +1269,13 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
         guard gesture.state == .changed else { return }
         defer { gesture.scale = 1.0 }
 
-        // Furniture selected → pinch resizes it (tap empty space to deselect
-        // and get camera zoom back).
-        if let selected = selectedFurniture {
-            selected.scale *= Float(gesture.scale)
-            // Keep the bottom on the floor while resizing.
-            // See the matching note in handleTap: check min.y for finiteness,
-            // not extents.y — a flat piece has near-zero thickness but valid
-            // bounds, and skipping it here undoes the same fix on every pinch.
-            if let anchor = selected.parent {
-                let floorWorldY = anchor.position(relativeTo: nil).y
-                let worldBounds = selected.visualBounds(relativeTo: nil)
-                if worldBounds.min.y.isFinite {
-                    let isFlat = furnitureIsFlat[ObjectIdentifier(selected)] ?? false
-                    selected.position.y += floorWorldY - worldBounds.min.y + floorLift(isFlat: isFlat)
-                }
-            }
-            return
-        }
+        // Pinch is reserved exclusively for camera zoom, selected furniture
+        // or not — resizing a selected piece now happens by dragging its
+        // on-screen resize handle instead (see setupResizeHandle). Pinch
+        // used to resize the selected piece here, but placing or dragging
+        // furniture auto-selects it, so in ordinary use pinch would stop
+        // zooming right when you'd most want to zoom in to check your
+        // placement — indistinguishable from pinch being broken entirely.
 
         if isTopView, let cam = camera {
             // In top view, pinch moves the camera up/down instead of orbit zoom
