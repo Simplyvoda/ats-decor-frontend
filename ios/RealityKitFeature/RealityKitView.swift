@@ -140,6 +140,13 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
     private static let floorCollisionGroup = CollisionGroup(rawValue: 1 << 0)
     private static let furnitureCollisionGroup = CollisionGroup(rawValue: 1 << 1)
 
+    // App brand color (tailwind.config.js: colors.brand = '#C1A36A') —
+    // there's no shared native color asset for it yet, so it's defined
+    // here rather than re-approximated by eye a second time (see
+    // composeDesignPdf's logo-fallback color below, which predates this
+    // and was an eyeballed guess at the same amber).
+    private static let brandAmber = UIColor(red: 193 / 255, green: 163 / 255, blue: 106 / 255, alpha: 1)
+
     private func tagCollision(_ entity: Entity, group: CollisionGroup) {
         if var collision = entity.components[CollisionComponent.self] {
             collision.filter = CollisionFilter(group: group, mask: .all)
@@ -217,7 +224,7 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
         handle.backgroundColor = .white
         handle.layer.cornerRadius = 16
         handle.layer.borderWidth = 2
-        handle.layer.borderColor = UIColor.systemBlue.cgColor
+        handle.layer.borderColor = Self.brandAmber.cgColor
         handle.layer.shadowColor = UIColor.black.cgColor
         handle.layer.shadowOpacity = 0.25
         handle.layer.shadowRadius = 3
@@ -227,7 +234,7 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
         resizeHandle = handle
 
         let icon = UIImageView(image: UIImage(systemName: "arrow.up.left.and.arrow.down.right"))
-        icon.tintColor = .systemBlue
+        icon.tintColor = Self.brandAmber
         icon.contentMode = .scaleAspectFit
         icon.frame = handle.bounds.insetBy(dx: 7, dy: 7)
         icon.isUserInteractionEnabled = false
@@ -369,48 +376,21 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
                 entity.position -= bounds.center
 
                 // Generate collision shapes so raycasting hits the floor
-                entity.generateCollisionShapes(recursive: true)
+                // (used by floorHit's X/Z placement raycast below). static:
+                // true asks for a precise, exact-to-the-mesh shape instead
+                // of the default rough convex approximation meant for
+                // objects a physics simulation would push around — a
+                // scanned/authored room never moves, so the more accurate
+                // shape is strictly better here with no downside.
+                entity.generateCollisionShapes(recursive: true, static: true)
                 self.tagCollision(entity, group: Self.floorCollisionGroup)
 
                 let anchor = AnchorEntity(world: .zero)
                 anchor.addChild(entity)
                 arView.scene.addAnchor(anchor)
 
-                // bounds.min.y is the bottom of the WHOLE room mesh — for a
-                // scanned/authored floor that's a slab with real thickness
-                // (not an infinitely thin plane), that's the underside of
-                // the slab, not the walkable top surface. Furniture placed
-                // at that Y sits buried inside the floor's thickness instead
-                // of resting on it — worst for flat pieces like rugs, whose
-                // entire vertical extent can be thinner than the slab itself,
-                // so nothing pokes out to be visible until scaled up enough
-                // to exceed the slab's thickness. A straight-down raycast
-                // from the room's own interior air finds the actual top
-                // surface. Crucially this starts INSIDE the empty room
-                // volume (room vertical middle, same point setupOrbitCamera
-                // uses), not from above the ceiling: a room mesh is often
-                // one solid shell with real thickness on every side, so a
-                // ray fired from ABOVE the roof going down hits the ROOF'S
-                // OWN outward-facing top surface first — which also has an
-                // upward normal and so passed the same filter, planting
-                // floorY near ceiling height and floating every placed piece
-                // up near the ceiling instead of the floor. Starting inside
-                // the room's open air, below that outer shell, the first
-                // thing straight down CAN be is the real floor. The old
-                // bounds-based value is kept only as a fallback for rooms
-                // whose center happens to not sit over open floor space.
-                let midY = (bounds.min.y + bounds.max.y) / 2 - bounds.center.y
-                let downFrom = SIMD3<Float>(0, midY, 0)
-                let downTo = SIMD3<Float>(0, bounds.min.y - bounds.center.y - 0.5, 0)
-                let downHits = arView.scene.raycast(
-                    from: downFrom, to: downTo, query: .nearest,
-                    mask: Self.floorCollisionGroup, relativeTo: nil
-                )
-                if let topHit = downHits.first(where: { $0.normal.y > 0.7 }) {
-                    self.floorY = topHit.position.y
-                } else {
-                    self.floorY = bounds.min.y - bounds.center.y
-                }
+                // Room is shifted by -center, so the floor plane lands here in world space
+                self.floorY = bounds.min.y - bounds.center.y
                 NSLog("🏠 room bounds: min.y=%.4f max.y=%.4f center.y=%.4f → floorY=%.4f",
                       bounds.min.y, bounds.max.y, bounds.center.y, self.floorY ?? .nan)
 

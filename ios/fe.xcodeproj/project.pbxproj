@@ -21,7 +21,6 @@
 		A02821102EC89D9800F31026 /* RoomplanViewManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A028210F2EC89D9800F31026 /* RoomplanViewManager.swift */; };
 		A02821652EC8AB0200F31026 /* RoomplanViewManager.m in Sources */ = {isa = PBXBuildFile; fileRef = A02821642EC8AB0200F31026 /* RoomplanViewManager.m */; };
 		A0679A322F33B975002EF03A /* RealityKitModule.m in Sources */ = {isa = PBXBuildFile; fileRef = A0679A302F33B975002EF03A /* RealityKitModule.m */; };
-		A0679A332F33B975002EF03A /* RealityKitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0679A312F33B975002EF03A /* RealityKitViewController.swift */; };
 		A0D530633049A3B4008DB519 /* RoomPlanSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0D530623049A3AE008DB519 /* RoomPlanSupport.swift */; };
 		A0D530673049A5AB008DB519 /* RoomPlanSupport.m in Sources */ = {isa = PBXBuildFile; fileRef = A0D530663049A5AB008DB519 /* RoomPlanSupport.m */; };
 		A0FEA7042F00000000000004 /* RealityKitModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0FEA7032F00000000000003 /* RealityKitModule.swift */; };
@@ -50,7 +49,6 @@
 		A028210F2EC89D9800F31026 /* RoomplanViewManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomplanViewManager.swift; sourceTree = "<group>"; };
 		A02821642EC8AB0200F31026 /* RoomplanViewManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RoomplanViewManager.m; sourceTree = "<group>"; };
 		A0679A302F33B975002EF03A /* RealityKitModule.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RealityKitModule.m; sourceTree = "<group>"; };
-		A0679A312F33B975002EF03A /* RealityKitViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RealityKitViewController.swift; sourceTree = "<group>"; };
 		A0A43A723025661300D60071 /* fe.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = fe.entitlements; path = fe/fe.entitlements; sourceTree = "<group>"; };
 		A0A60AD22EC8E4380095C3EB /* fe-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "fe-Bridging-Header.h"; sourceTree = "<group>"; };
 		A0D530623049A3AE008DB519 /* RoomPlanSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomPlanSupport.swift; sourceTree = "<group>"; };
@@ -151,7 +149,6 @@
 				A016CC0D2FDA328B00C215B3 /* RealityKitViewManager.m */,
 				A016CC0E2FDA328B00C215B3 /* RealityKitViewManager.swift */,
 				A0679A302F33B975002EF03A /* RealityKitModule.m */,
-				A0679A312F33B975002EF03A /* RealityKitViewController.swift */,
 				A0FEA7032F00000000000003 /* RealityKitModule.swift */,
 			);
 			path = RealityKitFeature;
@@ -360,7 +357,6 @@
 				A0D530633049A3B4008DB519 /* RoomPlanSupport.swift in Sources */,
 				A0D530673049A5AB008DB519 /* RoomPlanSupport.m in Sources */,
 				A016CC122FDA328B00C215B3 /* RealityKitView.swift in Sources */,
-				A0679A332F33B975002EF03A /* RealityKitViewController.swift in Sources */,
 				A0FEA7042F00000000000004 /* RealityKitModule.swift in Sources */,
 				A02821652EC8AB0200F31026 /* RoomplanViewManager.m in Sources */,
 			);
