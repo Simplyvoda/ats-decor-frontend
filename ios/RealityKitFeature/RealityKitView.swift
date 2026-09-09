@@ -102,6 +102,37 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
     private var furnitureIsFlat: [ObjectIdentifier: Bool] = [:]
     private var selectedFurniture: Entity?
     private var draggingFurniture: Entity?
+    // XZ offset between the touched floor point and the dragged piece's
+    // anchor at the moment the drag began. Without this, .changed snaps the
+    // anchor straight to wherever the finger's raycast lands, which
+    // re-centers the piece under the finger the instant you touch it unless
+    // you happened to grab exact dead-center — reading as the piece
+    // "jumping" to a different spot. Applying this offset on every update
+    // instead makes the piece follow the finger's movement while keeping
+    // the same point under it that you originally grabbed.
+    private var dragOffset: SIMD3<Float> = .zero
+
+    // Separate collision groups for the room mesh vs. placed furniture, so
+    // floorHit() can raycast against ONLY the floor. Without this, dragging
+    // a piece across the room — or even just over another piece — can have
+    // the drag raycast hit the TOP of a different (or the same) furniture
+    // entity instead of the floor beneath it, since raycast .all returns
+    // whichever collision geometry is nearest the camera along that ray,
+    // not specifically the floor. The hit X/Z then jumps to wherever that
+    // other surface actually sits, which reads as the dragged piece
+    // "teleporting" to an unrelated spot.
+    private static let floorCollisionGroup = CollisionGroup(rawValue: 1 << 0)
+    private static let furnitureCollisionGroup = CollisionGroup(rawValue: 1 << 1)
+
+    private func tagCollision(_ entity: Entity, group: CollisionGroup) {
+        if var collision = entity.components[CollisionComponent.self] {
+            collision.filter = CollisionFilter(group: group, mask: .all)
+            entity.components[CollisionComponent.self] = collision
+        }
+        for child in entity.children {
+            tagCollision(child, group: group)
+        }
+    }
 
     // ── Prop (JS → native) ────────────────────────────────────────────────
     // RN doesn't call a setter method for props — it applies them via
@@ -219,17 +250,39 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
                 let bounds = entity.visualBounds(relativeTo: nil)
                 entity.position -= bounds.center
 
-                // Room is shifted by -center, so the floor plane lands here in world space
-                self.floorY = bounds.min.y - bounds.center.y
-                NSLog("🏠 room bounds: min.y=%.4f max.y=%.4f center.y=%.4f → floorY=%.4f",
-                      bounds.min.y, bounds.max.y, bounds.center.y, self.floorY ?? .nan)
-
                 // Generate collision shapes so raycasting hits the floor
                 entity.generateCollisionShapes(recursive: true)
+                self.tagCollision(entity, group: Self.floorCollisionGroup)
 
                 let anchor = AnchorEntity(world: .zero)
                 anchor.addChild(entity)
                 arView.scene.addAnchor(anchor)
+
+                // bounds.min.y is the bottom of the WHOLE room mesh — for a
+                // scanned/authored floor that's a slab with real thickness
+                // (not an infinitely thin plane), that's the underside of
+                // the slab, not the walkable top surface. Furniture placed
+                // at that Y sits buried inside the floor's thickness instead
+                // of resting on it — worst for flat pieces like rugs, whose
+                // entire vertical extent can be thinner than the slab itself,
+                // so nothing pokes out to be visible until scaled up enough
+                // to exceed the slab's thickness. A straight-down raycast
+                // from above the room's center finds the actual top surface;
+                // the old bounds-based value is kept only as a fallback for
+                // rooms whose center happens to not sit over floor geometry.
+                let downFrom = SIMD3<Float>(0, bounds.max.y - bounds.center.y + 0.5, 0)
+                let downTo = SIMD3<Float>(0, bounds.min.y - bounds.center.y - 0.5, 0)
+                let downHits = arView.scene.raycast(
+                    from: downFrom, to: downTo, query: .nearest,
+                    mask: Self.floorCollisionGroup, relativeTo: nil
+                )
+                if let topHit = downHits.first(where: { $0.normal.y > 0.7 }) {
+                    self.floorY = topHit.position.y
+                } else {
+                    self.floorY = bounds.min.y - bounds.center.y
+                }
+                NSLog("🏠 room bounds: min.y=%.4f max.y=%.4f center.y=%.4f → floorY=%.4f",
+                      bounds.min.y, bounds.max.y, bounds.center.y, self.floorY ?? .nan)
 
                 setupOrbitCamera(bounds: bounds)
                 addLighting()
@@ -301,11 +354,15 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
     private func floorHit(at location: CGPoint) -> SIMD3<Float>? {
         guard let ray = arView.ray(through: location) else { return nil }
 
+        // Restricted to the floor's own collision group — furniture is
+        // deliberately excluded here (see floorCollisionGroup), otherwise a
+        // drag or placement raycast that happens to pass over another piece
+        // would land on ITS top surface instead of the actual floor.
         let results = arView.scene.raycast(
             from: ray.origin,
             to: ray.origin + ray.direction * 100,
             query: .nearest,
-            mask: .all,
+            mask: Self.floorCollisionGroup,
             relativeTo: nil
         )
         if let hit = results.first(where: { $0.normal.y > 0.7 }) {
@@ -358,17 +415,17 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
     }
 
     // Which placed furniture piece (if any) is under this screen point?
-    // Uses .all (not .nearest) — the room mesh is often the closest hit
-    // along the ray at a piece's edges, which would otherwise mask the
-    // furniture entirely. Hits come back nearest-first, so the first one
-    // that resolves to a placed piece is the one actually under the tap.
+    // Raycast is scoped to furnitureCollisionGroup, so the room mesh can't
+    // be hit here at all. Uses .all (not .nearest) anyway — hits still come
+    // back nearest-first among overlapping furniture, so the first one that
+    // resolves to a placed piece is the one actually closest to the tap.
     private func furnitureHit(at location: CGPoint) -> Entity? {
         guard let ray = arView.ray(through: location) else { return nil }
         let hits = arView.scene.raycast(
             from: ray.origin,
             to: ray.origin + ray.direction * 100,
             query: .all,
-            mask: .all,
+            mask: Self.furnitureCollisionGroup,
             relativeTo: nil
         )
         for hit in hits {
@@ -376,7 +433,28 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
                 if isDescendant(hit.entity, of: furniture) { return furniture }
             }
         }
-        return nil
+
+        // Exact-mesh raycast misses thin/small geometry constantly (a chair
+        // leg, a lamp's stem, a rug's near-zero thickness edge) — on a
+        // smaller screen (e.g. iPhone 11) that's an even smaller target to
+        // land a finger on precisely. A miss here doesn't just fail to
+        // select: handlePan then falls through to its camera-orbit branch,
+        // so the finger drag rotates/pans the CAMERA instead of moving the
+        // furniture — which reads as "the furniture jumped somewhere else"
+        // when really the room moved under it. Falling back to nearest
+        // on-screen piece within a forgiving tap radius (44pt — Apple's own
+        // minimum recommended touch target) fixes selection without needing
+        // a pixel-perfect hit.
+        let tapTolerance: CGFloat = 44
+        var best: (entity: Entity, distance: CGFloat)?
+        for furniture in placedFurniture {
+            guard let screenPoint = arView.project(furniture.position(relativeTo: nil)) else { continue }
+            let d = hypot(screenPoint.x - location.x, screenPoint.y - location.y)
+            if d < tapTolerance, best == nil || d < best!.distance {
+                best = (furniture, d)
+            }
+        }
+        return best?.entity
     }
 
     // MARK: - Furniture Selection
@@ -776,6 +854,7 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
                 self.arView.scene.addAnchor(anchor)
 
                 placed.generateCollisionShapes(recursive: true)
+                self.tagCollision(placed, group: Self.furnitureCollisionGroup)
                 self.placedFurniture.append(placed)
                 self.furnitureURLs[ObjectIdentifier(placed)] = urlString
                 self.furnitureIsFlat[ObjectIdentifier(placed)] = isFlat
@@ -869,11 +948,38 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
         // wrong height — while this same local measurement, already used
         // below for sizing, has always come out right on screen).
         let localBounds = placed.visualBounds(relativeTo: placed)
+        let bakedRotation = placed.transform.rotation
+        let localCorners: [SIMD3<Float>] = {
+            let mn = localBounds.min
+            let mx = localBounds.max
+            return [
+                SIMD3(mn.x, mn.y, mn.z), SIMD3(mn.x, mn.y, mx.z),
+                SIMD3(mn.x, mx.y, mn.z), SIMD3(mn.x, mx.y, mx.z),
+                SIMD3(mx.x, mn.y, mn.z), SIMD3(mx.x, mn.y, mx.z),
+                SIMD3(mx.x, mx.y, mn.z), SIMD3(mx.x, mx.y, mx.z),
+            ]
+        }()
 
         // Default size relative to the room (~15% of its larger side), so it
         // looks right no matter what units the scan or the model use.
         // User can pinch to fine-tune afterwards.
-        let currentWidth = localBounds.extents.x
+        //
+        // The "width" used here is the model's horizontal (X/Z) footprint
+        // AFTER its baked rotation is applied, not the raw local X extent.
+        // Some USDZ assets (rugs in particular) carry a baked axis-conversion
+        // rotation, same as the floor-snap math below — reading local X
+        // directly can pick up what is actually the model's thin/short axis
+        // once that rotation is accounted for, silently scaling the whole
+        // piece down to a near-invisible sliver instead of a rug-sized flat
+        // object (only noticeable once zoomed out far enough to see it as
+        // more than a speck).
+        let rotatedCorners = localCorners.map { bakedRotation.act($0) }
+        let rotatedXs = rotatedCorners.map(\.x)
+        let rotatedZs = rotatedCorners.map(\.z)
+        let currentWidth = max(
+            (rotatedXs.max() ?? 0) - (rotatedXs.min() ?? 0),
+            (rotatedZs.max() ?? 0) - (rotatedZs.min() ?? 0)
+        )
         if currentWidth > 0.001 {
             let roomSide = roomBounds.map { max($0.extents.x, $0.extents.z) } ?? 4.0
             let targetWidth = roomSide * 0.15
@@ -903,16 +1009,8 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
         // being overridden.
         if localBounds.min.y.isFinite {
             let lift = floorLift(isFlat: pendingFurnitureIsFlat)
-            let mn = localBounds.min
-            let mx = localBounds.max
-            let corners: [SIMD3<Float>] = [
-                SIMD3(mn.x, mn.y, mn.z), SIMD3(mn.x, mn.y, mx.z),
-                SIMD3(mn.x, mx.y, mn.z), SIMD3(mn.x, mx.y, mx.z),
-                SIMD3(mx.x, mn.y, mn.z), SIMD3(mx.x, mn.y, mx.z),
-                SIMD3(mx.x, mx.y, mn.z), SIMD3(mx.x, mx.y, mx.z),
-            ]
             let rot = placed.transform.rotation
-            let lowestY = corners.map { rot.act($0 * placed.scale).y }.min() ?? 0
+            let lowestY = localCorners.map { rot.act($0 * placed.scale).y }.min() ?? 0
             placed.position.y = lift - lowestY
             let rv = rot.vector
             NSLog("🧭 floor-snap (exact): hitY=%.4f localMinY=%.4f lowestY=%.4f rot=(%.3f,%.3f,%.3f,%.3f) scaleY=%.4f isFlat=%@ posY=%.4f",
@@ -924,6 +1022,7 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
         }
 
         placed.generateCollisionShapes(recursive: true)
+        tagCollision(placed, group: Self.furnitureCollisionGroup)
         placedFurniture.append(placed)
         if let url = pendingFurnitureURL {
             furnitureURLs[ObjectIdentifier(placed)] = url
@@ -980,14 +1079,22 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
             draggingFurniture = editingEnabled ? furnitureHit(at: location) : nil
             if let dragging = draggingFurniture {
                 setSelectedFurniture(dragging)
+                if let hit = floorHit(at: location), let anchor = dragging.parent {
+                    let anchorWorld = anchor.position(relativeTo: nil)
+                    dragOffset = SIMD3<Float>(anchorWorld.x - hit.x, 0, anchorWorld.z - hit.z)
+                } else {
+                    dragOffset = .zero
+                }
             }
         case .changed:
             if let dragging = draggingFurniture {
                 if let hit = floorHit(at: location), let anchor = dragging.parent {
-                    // Move anchor on the floor plane; preserve the y offset for floor-snap.
+                    // Move anchor on the floor plane, offset by the original
+                    // grab point (see dragOffset), and preserve the y offset
+                    // for floor-snap.
                     let anchorWorldY = anchor.position(relativeTo: nil).y
                     anchor.setPosition(
-                        SIMD3<Float>(hit.x, anchorWorldY, hit.z),
+                        SIMD3<Float>(hit.x + dragOffset.x, anchorWorldY, hit.z + dragOffset.z),
                         relativeTo: nil
                     )
                 }
@@ -1057,7 +1164,16 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
             return
         }
 
-        cameraRadius = max(0.1, min(20.0, cameraRadius / Float(gesture.scale)))
+        // Floor was 0.1m — close enough that the camera can end up nearly
+        // on top of a large flat piece (a rug spanning a meter or more),
+        // and RealityKit's per-entity frustum/occlusion culling can drop
+        // such pieces once the camera gets that close, since the test is
+        // against the whole entity's bounding volume, not the thin actual
+        // geometry — reading as "the rug disappeared." 0.5m matches the
+        // minimum this file already uses elsewhere (see setupOrbitCamera),
+        // so zoom can't get closer than a distance already known to render
+        // everything correctly.
+        cameraRadius = max(0.5, min(20.0, cameraRadius / Float(gesture.scale)))
         applyOrbit()
     }
 
