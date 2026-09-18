@@ -22,27 +22,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     reactNativeDelegate = delegate
     reactNativeFactory = factory
 
-    window = UIWindow(frame: UIScreen.main.bounds)
-
-    factory.startReactNative(
-      withModuleName: "fe",
-      in: window,
-      launchOptions: launchOptions
-    )
-
+    // Window creation and startReactNative() now happen in SceneDelegate —
+    // under Scene lifecycle (see ios/fe.xcodeproj/Info.plist's
+    // UIApplicationSceneManifest), the window belongs to the scene, not
+    // the app delegate.
     return true
-  }
-
-  // Forwards atsdecor:// deep links (email confirmation, password reset)
-  // to React Native's Linking module — without this, iOS launches the app
-  // but the URL never reaches the JS `Linking.addEventListener('url', ...)`
-  // listener at all.
-  func application(
-    _ app: UIApplication,
-    open url: URL,
-    options: [UIApplication.OpenURLOptionsKey: Any] = [:]
-  ) -> Bool {
-    return RCTLinkingManager.application(app, open: url, options: options)
   }
 }
 
