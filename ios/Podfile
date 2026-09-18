@@ -60,6 +60,17 @@ target 'fe' do
         config.build_settings['SWIFT_ENABLE_EXPLICIT_MODULES'] = 'NO'
         config.build_settings['CLANG_ENABLE_EXPLICIT_MODULES'] = 'NO'
 
+        # Some pods' auto-generated resource-bundle/privacy-manifest
+        # sub-targets (e.g. RNCAsyncStorage-RNCAsyncStorage_resources,
+        # RNSVG-RNSVGFilters, Sentry-Sentry) keep the old deployment target
+        # baked into their own podspec instead of picking up this Podfile's
+        # `platform :ios, '16'` — react_native_post_install doesn't touch
+        # them. Newer Xcode SDKs reject anything below iOS 15 outright, so
+        # force every target's floor up to our minimum.
+        if config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'].to_f < 16.0
+          config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '16.0'
+        end
+
         if config.build_settings['OTHER_LDFLAGS']
           config.build_settings['OTHER_LDFLAGS'] =
             config.build_settings['OTHER_LDFLAGS']

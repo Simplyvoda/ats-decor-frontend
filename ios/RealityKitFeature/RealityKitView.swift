@@ -35,6 +35,7 @@
 import UIKit
 import RealityKit
 import CryptoKit
+import Combine
 import React
 import Sentry
 
@@ -102,6 +103,59 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
     private var furnitureIsFlat: [ObjectIdentifier: Bool] = [:]
     private var selectedFurniture: Entity?
     private var draggingFurniture: Entity?
+    // XZ offset between the touched floor point and the dragged piece's
+    // anchor at the moment the drag began. Without this, .changed snaps the
+    // anchor straight to wherever the finger's raycast lands, which
+    // re-centers the piece under the finger the instant you touch it unless
+    // you happened to grab exact dead-center — reading as the piece
+    // "jumping" to a different spot. Applying this offset on every update
+    // instead makes the piece follow the finger's movement while keeping
+    // the same point under it that you originally grabbed.
+    private var dragOffset: SIMD3<Float> = .zero
+
+    // ── Resize handle ────────────────────────────────────────────────────
+    // A small on-screen dot pinned to the far corner of the selected piece,
+    // dragged with one finger to resize it. This exists so pinch can be
+    // reserved exclusively for camera zoom (matching how every zoom/pan
+    // app — Maps, Photos, Figma's canvas — treats pinch as a viewport
+    // gesture, never overloaded onto a selected object). Before this,
+    // pinch resized the selected piece INSTEAD of zooming, and because
+    // placing or dragging furniture auto-selects it, that meant pinch
+    // silently stopped zooming during normal use — indistinguishable from
+    // "only pan still works", which is exactly the bug this replaces.
+    private var resizeHandle: UIView!
+    private var resizeHandleUpdateSubscription: Cancellable?
+    private var resizeStartScale: SIMD3<Float> = .one
+    private var resizeStartDistance: CGFloat = 1
+
+    // Separate collision groups for the room mesh vs. placed furniture, so
+    // floorHit() can raycast against ONLY the floor. Without this, dragging
+    // a piece across the room — or even just over another piece — can have
+    // the drag raycast hit the TOP of a different (or the same) furniture
+    // entity instead of the floor beneath it, since raycast .all returns
+    // whichever collision geometry is nearest the camera along that ray,
+    // not specifically the floor. The hit X/Z then jumps to wherever that
+    // other surface actually sits, which reads as the dragged piece
+    // "teleporting" to an unrelated spot.
+    private static let floorCollisionGroup = CollisionGroup(rawValue: 1 << 0)
+    private static let furnitureCollisionGroup = CollisionGroup(rawValue: 1 << 1)
+
+    // App brand color (tailwind.config.js: colors.brand = '#C1A36A') —
+    // there's no shared native color asset for it yet, so it's defined
+    // here rather than re-approximated by eye a second time (see
+    // composeDesignPdf's logo-fallback color below, which predates this
+    // and was an eyeballed guess at the same amber).
+    private static let brandAmber = UIColor(red: 193 / 255, green: 163 / 255, blue: 106 / 255, alpha: 1)
+
+    private func tagCollision(_ entity: Entity, group: CollisionGroup) {
+        if var collision = entity.components[CollisionComponent.self] {
+            collision.filter = CollisionFilter(group: group, mask: .all)
+            entity.components[CollisionComponent.self] = collision
+        }
+        for child in entity.children {
+            tagCollision(child, group: group)
+        }
+    }
 
     // ── Prop (JS → native) ────────────────────────────────────────────────
     // RN doesn't call a setter method for props — it applies them via
@@ -153,6 +207,136 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
         arView.environment.background = .color(UIColor(red: 0.61, green: 0.67, blue: 0.57, alpha: 1))
         addSubview(arView)
         setupGestures()
+        setupResizeHandle()
+    }
+
+    // A plain UIView, NOT part of the RealityKit scene — added as a sibling
+    // subview on top of arView so it can be dragged with its own gesture
+    // recognizer without competing with the 3D view's camera gestures at
+    // all (a touch that starts on this small circle hit-tests to this view,
+    // never to arView underneath it). Its on-screen position is kept in
+    // sync with the selected piece's actual world-space corner every frame
+    // via updateResizeHandlePosition(), driven by RealityKit's own render
+    // loop (SceneEvents.Update) rather than anything gesture-driven, since
+    // the camera can move (orbit/pan/zoom) independently of any drag.
+    private func setupResizeHandle() {
+        // The outer view is the actual touch target, sized to Apple's own
+        // 44pt minimum recommended tap target (same threshold furnitureHit
+        // already uses below for the same reason — a small visible dot is
+        // an unreliably small thing to land a finger on precisely,
+        // especially on a smaller screen). The visible white dot inside it
+        // stays smaller (32pt) so it doesn't look oversized sitting on the
+        // furniture piece — only the dot is drawn; the extra hit-area
+        // margin around it is invisible but still grabbable.
+        let hitAreaSize: CGFloat = 44
+        let handle = UIView(frame: CGRect(x: 0, y: 0, width: hitAreaSize, height: hitAreaSize))
+        handle.backgroundColor = .clear
+        handle.isHidden = true
+        addSubview(handle)
+        resizeHandle = handle
+
+        let dotSize: CGFloat = 32
+        let dot = UIView(frame: CGRect(
+            x: (hitAreaSize - dotSize) / 2, y: (hitAreaSize - dotSize) / 2,
+            width: dotSize, height: dotSize
+        ))
+        dot.backgroundColor = .white
+        dot.layer.cornerRadius = dotSize / 2
+        dot.layer.borderWidth = 2
+        dot.layer.borderColor = Self.brandAmber.cgColor
+        dot.layer.shadowColor = UIColor.black.cgColor
+        dot.layer.shadowOpacity = 0.25
+        dot.layer.shadowRadius = 3
+        dot.layer.shadowOffset = CGSize(width: 0, height: 1)
+        dot.isUserInteractionEnabled = false
+        handle.addSubview(dot)
+
+        let icon = UIImageView(image: UIImage(systemName: "arrow.up.left.and.arrow.down.right"))
+        icon.tintColor = Self.brandAmber
+        icon.contentMode = .scaleAspectFit
+        icon.frame = dot.bounds.insetBy(dx: 7, dy: 7)
+        icon.isUserInteractionEnabled = false
+        dot.addSubview(icon)
+
+        let pan = UIPanGestureRecognizer(target: self, action: #selector(handleResizeHandleDrag(_:)))
+        handle.addGestureRecognizer(pan)
+
+        resizeHandleUpdateSubscription = arView.scene.subscribe(to: SceneEvents.Update.self) { [weak self] _ in
+            self?.updateResizeHandlePosition()
+        }
+    }
+
+    // Runs every rendered frame. Hides the handle when nothing is selected;
+    // otherwise projects the selected piece's far top corner (world space)
+    // to a screen point and pins the handle there — so it tracks the piece
+    // correctly through camera orbit/pan/zoom, and through the piece's own
+    // resizing, without needing to be told explicitly when any of those happen.
+    private func updateResizeHandlePosition() {
+        guard let selected = selectedFurniture else {
+            if !resizeHandle.isHidden { resizeHandle.isHidden = true }
+            return
+        }
+        let worldBounds = selected.visualBounds(relativeTo: nil)
+        let handleWorldPoint = SIMD3<Float>(worldBounds.max.x, worldBounds.center.y, worldBounds.max.z)
+        guard let screenPoint = arView.project(handleWorldPoint) else {
+            resizeHandle.isHidden = true
+            return
+        }
+        resizeHandle.isHidden = false
+        // screenPoint is in arView's coordinate space; resizeHandle is a
+        // sibling subview of arView (both children of self), so its center
+        // must be expressed in self's space, not arView's — convert rather
+        // than assume the two spaces are numerically identical.
+        resizeHandle.center = self.convert(screenPoint, from: arView)
+    }
+
+    // Dragging the handle resizes the selected piece uniformly, scaled by
+    // how much farther (or closer) the finger is from a fixed pivot point
+    // compared to where the drag started — the same "drag a corner handle
+    // away from a fixed point to grow it" convention as Keynote/PowerPoint
+    // shape handles. Deliberately reads the finger's raw position rather
+    // than the handle view's own position: the handle's position is a pure
+    // readout (see updateResizeHandlePosition), not the source of truth.
+    //
+    // The pivot is the piece's ANCHOR position, not its visual-bounds
+    // center — that distinction matters a lot here. An earlier version
+    // measured from `selected.visualBounds(relativeTo: nil).center`,
+    // recomputed fresh every .changed call. But the floor re-snap a few
+    // lines below also changes `selected.position.y` every .changed call —
+    // so that "center" was both being read from AND written to inside the
+    // same feedback loop, moving out from under the gesture as scale
+    // changed and making the resize feel jumpy/unpredictable rather than
+    // tracking the finger cleanly. The anchor's position never moves during
+    // a resize (only the child entity's local Y offset within it does, for
+    // floor-snap) — it's a genuinely fixed reference for the whole gesture.
+    @objc private func handleResizeHandleDrag(_ gesture: UIPanGestureRecognizer) {
+        guard let selected = selectedFurniture, let anchor = selected.parent else { return }
+        switch gesture.state {
+        case .began:
+            resizeStartScale = selected.scale
+            let pivotScreen = arView.project(anchor.position(relativeTo: nil))
+                ?? self.convert(resizeHandle.center, to: arView)
+            let touch = gesture.location(in: arView)
+            resizeStartDistance = max(20, hypot(touch.x - pivotScreen.x, touch.y - pivotScreen.y))
+        case .changed:
+            guard let pivotScreen = arView.project(anchor.position(relativeTo: nil)) else { return }
+            let touch = gesture.location(in: arView)
+            let currentDistance = max(20, hypot(touch.x - pivotScreen.x, touch.y - pivotScreen.y))
+            let ratio = Float(currentDistance / resizeStartDistance)
+            selected.scale = resizeStartScale * ratio
+
+            // Re-apply the same floor-snap used at placement time (see
+            // handleTap) so the piece stays grounded instead of drifting
+            // above/below the floor as its height changes with scale.
+            let floorWorldY = anchor.position(relativeTo: nil).y
+            let worldBounds = selected.visualBounds(relativeTo: nil)
+            if worldBounds.min.y.isFinite {
+                let isFlat = furnitureIsFlat[ObjectIdentifier(selected)] ?? false
+                selected.position.y += floorWorldY - worldBounds.min.y + floorLift(isFlat: isFlat)
+            }
+        default:
+            break
+        }
     }
 
     // Remote https models are downloaded once and cached; local URLs pass through.
@@ -219,17 +403,31 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
                 let bounds = entity.visualBounds(relativeTo: nil)
                 entity.position -= bounds.center
 
-                // Room is shifted by -center, so the floor plane lands here in world space
-                self.floorY = bounds.min.y - bounds.center.y
-                NSLog("🏠 room bounds: min.y=%.4f max.y=%.4f center.y=%.4f → floorY=%.4f",
-                      bounds.min.y, bounds.max.y, bounds.center.y, self.floorY ?? .nan)
-
                 // Generate collision shapes so raycasting hits the floor
-                entity.generateCollisionShapes(recursive: true)
+                // (used by floorHit's X/Z placement raycast below). static:
+                // true asks for a precise, exact-to-the-mesh shape instead
+                // of the default rough convex approximation meant for
+                // objects a physics simulation would push around — a
+                // scanned/authored room never moves, so the more accurate
+                // shape is strictly better here with no downside. That
+                // parameter is iOS 18+ only though, and this app's minimum
+                // target is 16.1 (see IPHONEOS_DEPLOYMENT_TARGET), so it
+                // falls back to the plain (approximate) call below 18.
+                if #available(iOS 18.0, *) {
+                    entity.generateCollisionShapes(recursive: true, static: true)
+                } else {
+                    entity.generateCollisionShapes(recursive: true)
+                }
+                self.tagCollision(entity, group: Self.floorCollisionGroup)
 
                 let anchor = AnchorEntity(world: .zero)
                 anchor.addChild(entity)
                 arView.scene.addAnchor(anchor)
+
+                // Room is shifted by -center, so the floor plane lands here in world space
+                self.floorY = bounds.min.y - bounds.center.y
+                NSLog("🏠 room bounds: min.y=%.4f max.y=%.4f center.y=%.4f → floorY=%.4f",
+                      bounds.min.y, bounds.max.y, bounds.center.y, self.floorY ?? .nan)
 
                 setupOrbitCamera(bounds: bounds)
                 addLighting()
@@ -301,11 +499,15 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
     private func floorHit(at location: CGPoint) -> SIMD3<Float>? {
         guard let ray = arView.ray(through: location) else { return nil }
 
+        // Restricted to the floor's own collision group — furniture is
+        // deliberately excluded here (see floorCollisionGroup), otherwise a
+        // drag or placement raycast that happens to pass over another piece
+        // would land on ITS top surface instead of the actual floor.
         let results = arView.scene.raycast(
             from: ray.origin,
             to: ray.origin + ray.direction * 100,
             query: .nearest,
-            mask: .all,
+            mask: Self.floorCollisionGroup,
             relativeTo: nil
         )
         if let hit = results.first(where: { $0.normal.y > 0.7 }) {
@@ -358,17 +560,17 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
     }
 
     // Which placed furniture piece (if any) is under this screen point?
-    // Uses .all (not .nearest) — the room mesh is often the closest hit
-    // along the ray at a piece's edges, which would otherwise mask the
-    // furniture entirely. Hits come back nearest-first, so the first one
-    // that resolves to a placed piece is the one actually under the tap.
+    // Raycast is scoped to furnitureCollisionGroup, so the room mesh can't
+    // be hit here at all. Uses .all (not .nearest) anyway — hits still come
+    // back nearest-first among overlapping furniture, so the first one that
+    // resolves to a placed piece is the one actually closest to the tap.
     private func furnitureHit(at location: CGPoint) -> Entity? {
         guard let ray = arView.ray(through: location) else { return nil }
         let hits = arView.scene.raycast(
             from: ray.origin,
             to: ray.origin + ray.direction * 100,
             query: .all,
-            mask: .all,
+            mask: Self.furnitureCollisionGroup,
             relativeTo: nil
         )
         for hit in hits {
@@ -376,7 +578,28 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
                 if isDescendant(hit.entity, of: furniture) { return furniture }
             }
         }
-        return nil
+
+        // Exact-mesh raycast misses thin/small geometry constantly (a chair
+        // leg, a lamp's stem, a rug's near-zero thickness edge) — on a
+        // smaller screen (e.g. iPhone 11) that's an even smaller target to
+        // land a finger on precisely. A miss here doesn't just fail to
+        // select: handlePan then falls through to its camera-orbit branch,
+        // so the finger drag rotates/pans the CAMERA instead of moving the
+        // furniture — which reads as "the furniture jumped somewhere else"
+        // when really the room moved under it. Falling back to nearest
+        // on-screen piece within a forgiving tap radius (44pt — Apple's own
+        // minimum recommended touch target) fixes selection without needing
+        // a pixel-perfect hit.
+        let tapTolerance: CGFloat = 44
+        var best: (entity: Entity, distance: CGFloat)?
+        for furniture in placedFurniture {
+            guard let screenPoint = arView.project(furniture.position(relativeTo: nil)) else { continue }
+            let d = hypot(screenPoint.x - location.x, screenPoint.y - location.y)
+            if d < tapTolerance, best == nil || d < best!.distance {
+                best = (furniture, d)
+            }
+        }
+        return best?.entity
     }
 
     // MARK: - Furniture Selection
@@ -776,6 +999,7 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
                 self.arView.scene.addAnchor(anchor)
 
                 placed.generateCollisionShapes(recursive: true)
+                self.tagCollision(placed, group: Self.furnitureCollisionGroup)
                 self.placedFurniture.append(placed)
                 self.furnitureURLs[ObjectIdentifier(placed)] = urlString
                 self.furnitureIsFlat[ObjectIdentifier(placed)] = isFlat
@@ -835,7 +1059,7 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
             // Nothing pending — try to select a placed piece
             if let furniture = furnitureHit(at: location) {
                 setSelectedFurniture(furniture)
-                showToast("Drag to move · Pinch · Rotate · Tap 🗑 to remove", duration: 3.5)
+                showToast("Drag to move · Handle to resize · Rotate · Tap 🗑 to remove", duration: 3.5)
             } else if selectedFurniture != nil {
                 setSelectedFurniture(nil)
                 showToast("Deselected — tap a piece to select it")
@@ -869,11 +1093,38 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
         // wrong height — while this same local measurement, already used
         // below for sizing, has always come out right on screen).
         let localBounds = placed.visualBounds(relativeTo: placed)
+        let bakedRotation = placed.transform.rotation
+        let localCorners: [SIMD3<Float>] = {
+            let mn = localBounds.min
+            let mx = localBounds.max
+            return [
+                SIMD3(mn.x, mn.y, mn.z), SIMD3(mn.x, mn.y, mx.z),
+                SIMD3(mn.x, mx.y, mn.z), SIMD3(mn.x, mx.y, mx.z),
+                SIMD3(mx.x, mn.y, mn.z), SIMD3(mx.x, mn.y, mx.z),
+                SIMD3(mx.x, mx.y, mn.z), SIMD3(mx.x, mx.y, mx.z),
+            ]
+        }()
 
         // Default size relative to the room (~15% of its larger side), so it
         // looks right no matter what units the scan or the model use.
         // User can pinch to fine-tune afterwards.
-        let currentWidth = localBounds.extents.x
+        //
+        // The "width" used here is the model's horizontal (X/Z) footprint
+        // AFTER its baked rotation is applied, not the raw local X extent.
+        // Some USDZ assets (rugs in particular) carry a baked axis-conversion
+        // rotation, same as the floor-snap math below — reading local X
+        // directly can pick up what is actually the model's thin/short axis
+        // once that rotation is accounted for, silently scaling the whole
+        // piece down to a near-invisible sliver instead of a rug-sized flat
+        // object (only noticeable once zoomed out far enough to see it as
+        // more than a speck).
+        let rotatedCorners = localCorners.map { bakedRotation.act($0) }
+        let rotatedXs = rotatedCorners.map(\.x)
+        let rotatedZs = rotatedCorners.map(\.z)
+        let currentWidth = max(
+            (rotatedXs.max() ?? 0) - (rotatedXs.min() ?? 0),
+            (rotatedZs.max() ?? 0) - (rotatedZs.min() ?? 0)
+        )
         if currentWidth > 0.001 {
             let roomSide = roomBounds.map { max($0.extents.x, $0.extents.z) } ?? 4.0
             let targetWidth = roomSide * 0.15
@@ -903,16 +1154,8 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
         // being overridden.
         if localBounds.min.y.isFinite {
             let lift = floorLift(isFlat: pendingFurnitureIsFlat)
-            let mn = localBounds.min
-            let mx = localBounds.max
-            let corners: [SIMD3<Float>] = [
-                SIMD3(mn.x, mn.y, mn.z), SIMD3(mn.x, mn.y, mx.z),
-                SIMD3(mn.x, mx.y, mn.z), SIMD3(mn.x, mx.y, mx.z),
-                SIMD3(mx.x, mn.y, mn.z), SIMD3(mx.x, mn.y, mx.z),
-                SIMD3(mx.x, mx.y, mn.z), SIMD3(mx.x, mx.y, mx.z),
-            ]
             let rot = placed.transform.rotation
-            let lowestY = corners.map { rot.act($0 * placed.scale).y }.min() ?? 0
+            let lowestY = localCorners.map { rot.act($0 * placed.scale).y }.min() ?? 0
             placed.position.y = lift - lowestY
             let rv = rot.vector
             NSLog("🧭 floor-snap (exact): hitY=%.4f localMinY=%.4f lowestY=%.4f rot=(%.3f,%.3f,%.3f,%.3f) scaleY=%.4f isFlat=%@ posY=%.4f",
@@ -924,6 +1167,7 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
         }
 
         placed.generateCollisionShapes(recursive: true)
+        tagCollision(placed, group: Self.furnitureCollisionGroup)
         placedFurniture.append(placed)
         if let url = pendingFurnitureURL {
             furnitureURLs[ObjectIdentifier(placed)] = url
@@ -936,7 +1180,7 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
         pendingFurnitureURL = nil
         pendingFurnitureIsFlat = false
 
-        showToast("Drag to move · Pinch · Rotate · Tap 🗑 to remove", duration: 3.5)
+        showToast("Drag to move · Handle to resize · Rotate · Tap 🗑 to remove", duration: 3.5)
         print("🪑 Placed furniture — total:", placedFurniture.count)
     }
 
@@ -980,14 +1224,22 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
             draggingFurniture = editingEnabled ? furnitureHit(at: location) : nil
             if let dragging = draggingFurniture {
                 setSelectedFurniture(dragging)
+                if let hit = floorHit(at: location), let anchor = dragging.parent {
+                    let anchorWorld = anchor.position(relativeTo: nil)
+                    dragOffset = SIMD3<Float>(anchorWorld.x - hit.x, 0, anchorWorld.z - hit.z)
+                } else {
+                    dragOffset = .zero
+                }
             }
         case .changed:
             if let dragging = draggingFurniture {
                 if let hit = floorHit(at: location), let anchor = dragging.parent {
-                    // Move anchor on the floor plane; preserve the y offset for floor-snap.
+                    // Move anchor on the floor plane, offset by the original
+                    // grab point (see dragOffset), and preserve the y offset
+                    // for floor-snap.
                     let anchorWorldY = anchor.position(relativeTo: nil).y
                     anchor.setPosition(
-                        SIMD3<Float>(hit.x, anchorWorldY, hit.z),
+                        SIMD3<Float>(hit.x + dragOffset.x, anchorWorldY, hit.z + dragOffset.z),
                         relativeTo: nil
                     )
                 }
@@ -1032,24 +1284,13 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
         guard gesture.state == .changed else { return }
         defer { gesture.scale = 1.0 }
 
-        // Furniture selected → pinch resizes it (tap empty space to deselect
-        // and get camera zoom back).
-        if let selected = selectedFurniture {
-            selected.scale *= Float(gesture.scale)
-            // Keep the bottom on the floor while resizing.
-            // See the matching note in handleTap: check min.y for finiteness,
-            // not extents.y — a flat piece has near-zero thickness but valid
-            // bounds, and skipping it here undoes the same fix on every pinch.
-            if let anchor = selected.parent {
-                let floorWorldY = anchor.position(relativeTo: nil).y
-                let worldBounds = selected.visualBounds(relativeTo: nil)
-                if worldBounds.min.y.isFinite {
-                    let isFlat = furnitureIsFlat[ObjectIdentifier(selected)] ?? false
-                    selected.position.y += floorWorldY - worldBounds.min.y + floorLift(isFlat: isFlat)
-                }
-            }
-            return
-        }
+        // Pinch is reserved exclusively for camera zoom, selected furniture
+        // or not — resizing a selected piece now happens by dragging its
+        // on-screen resize handle instead (see setupResizeHandle). Pinch
+        // used to resize the selected piece here, but placing or dragging
+        // furniture auto-selects it, so in ordinary use pinch would stop
+        // zooming right when you'd most want to zoom in to check your
+        // placement — indistinguishable from pinch being broken entirely.
 
         if isTopView, let cam = camera {
             // In top view, pinch moves the camera up/down instead of orbit zoom
@@ -1057,7 +1298,16 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
             return
         }
 
-        cameraRadius = max(0.1, min(20.0, cameraRadius / Float(gesture.scale)))
+        // Floor was 0.1m — close enough that the camera can end up nearly
+        // on top of a large flat piece (a rug spanning a meter or more),
+        // and RealityKit's per-entity frustum/occlusion culling can drop
+        // such pieces once the camera gets that close, since the test is
+        // against the whole entity's bounding volume, not the thin actual
+        // geometry — reading as "the rug disappeared." 0.5m matches the
+        // minimum this file already uses elsewhere (see setupOrbitCamera),
+        // so zoom can't get closer than a distance already known to render
+        // everything correctly.
+        cameraRadius = max(0.5, min(20.0, cameraRadius / Float(gesture.scale)))
         applyOrbit()
     }
 

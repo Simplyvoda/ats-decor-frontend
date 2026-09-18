@@ -44,72 +44,54 @@ class RealityKitViewManager: RCTViewManager {
 
     // ── Commands ──────────────────────────────────────────────────────────
     // Commands arrive on this manager (a singleton) carrying a reactTag —
-    // the integer id of one mounted view. addUIBlock schedules the closure
-    // on the UI thread after pending view-hierarchy updates settle and
-    // provides the registry that maps tag → live view instance. That's the
-    // whole job of these methods: translate "JS said do X to view #42" into
-    // a plain Swift method call on the right RealityKitView.
+    // the integer id of one mounted view. withView schedules the lookup on
+    // the UI thread (via addUIBlock, after pending view-hierarchy updates
+    // settle) and translates the tag into the live RealityKitView instance,
+    // or does nothing if it no longer resolves to one. Every command below
+    // is just "translate JS's reactTag into a method call on that view" —
+    // see RoomplanViewManager.swift's withView for the same pattern applied
+    // to the other native view in this app.
 
-    @objc func loadFurniture(_ reactTag: NSNumber, urlString: NSString, isFlat: Bool) {
+    private func withView(_ reactTag: NSNumber, _ action: @escaping (RealityKitView) -> Void) {
         bridge.uiManager.addUIBlock { _, viewRegistry in
             guard let view = viewRegistry?[reactTag] as? RealityKitView else { return }
-            view.loadFurniture(urlString: urlString as String, isFlat: isFlat)
+            action(view)
         }
+    }
+
+    @objc func loadFurniture(_ reactTag: NSNumber, urlString: NSString, isFlat: Bool) {
+        withView(reactTag) { $0.loadFurniture(urlString: urlString as String, isFlat: isFlat) }
     }
 
     @objc func toggleTopView(_ reactTag: NSNumber) {
-        bridge.uiManager.addUIBlock { _, viewRegistry in
-            guard let view = viewRegistry?[reactTag] as? RealityKitView else { return }
-            view.toggleTopView()
-        }
+        withView(reactTag) { $0.toggleTopView() }
     }
 
     @objc func resetCamera(_ reactTag: NSNumber) {
-        bridge.uiManager.addUIBlock { _, viewRegistry in
-            guard let view = viewRegistry?[reactTag] as? RealityKitView else { return }
-            view.resetCamera()
-        }
+        withView(reactTag) { $0.resetCamera() }
     }
 
     @objc func captureSnapshot(_ reactTag: NSNumber) {
-        bridge.uiManager.addUIBlock { _, viewRegistry in
-            guard let view = viewRegistry?[reactTag] as? RealityKitView else { return }
-            view.captureSnapshot()
-        }
+        withView(reactTag) { $0.captureSnapshot() }
     }
 
     @objc func captureTopViewSnapshot(_ reactTag: NSNumber) {
-        bridge.uiManager.addUIBlock { _, viewRegistry in
-            guard let view = viewRegistry?[reactTag] as? RealityKitView else { return }
-            view.captureTopViewSnapshot()
-        }
+        withView(reactTag) { $0.captureTopViewSnapshot() }
     }
 
     @objc func removeSelectedFurniture(_ reactTag: NSNumber) {
-        bridge.uiManager.addUIBlock { _, viewRegistry in
-            guard let view = viewRegistry?[reactTag] as? RealityKitView else { return }
-            view.removeSelectedFurniture()
-        }
+        withView(reactTag) { $0.removeSelectedFurniture() }
     }
 
     @objc func exportFurnitureLayout(_ reactTag: NSNumber) {
-        bridge.uiManager.addUIBlock { _, viewRegistry in
-            guard let view = viewRegistry?[reactTag] as? RealityKitView else { return }
-            view.exportFurnitureLayout()
-        }
+        withView(reactTag) { $0.exportFurnitureLayout() }
     }
 
     @objc func placeFurnitureFromLayout(_ reactTag: NSNumber, itemJson: NSString) {
-        bridge.uiManager.addUIBlock { _, viewRegistry in
-            guard let view = viewRegistry?[reactTag] as? RealityKitView else { return }
-            view.placeFurnitureFromLayout(itemJson as String)
-        }
+        withView(reactTag) { $0.placeFurnitureFromLayout(itemJson as String) }
     }
 
     @objc func exportDesignPdf(_ reactTag: NSNumber, name: NSString) {
-        bridge.uiManager.addUIBlock { _, viewRegistry in
-            guard let view = viewRegistry?[reactTag] as? RealityKitView else { return }
-            view.exportDesignPdf(name: name as String)
-        }
+        withView(reactTag) { $0.exportDesignPdf(name: name as String) }
     }
 }

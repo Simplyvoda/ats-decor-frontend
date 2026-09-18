@@ -12,6 +12,7 @@
 		566E3793A2904823BDFA927B /* DMSans-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 6A0FD5EE046C43BF97E2BC5C /* DMSans-Medium.ttf */; };
 		58027BFBC61B45D0A14FE933 /* CormorantGaramond-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 28429C529CE14408BFDF2176 /* CormorantGaramond-Medium.ttf */; };
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
+		2C32D4D6A5F0AF45484CAB9C /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB6FD604AC24597B94599A79 /* SceneDelegate.swift */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 		A016CC102FDA328B00C215B3 /* RealityKitViewManager.m in Sources */ = {isa = PBXBuildFile; fileRef = A016CC0D2FDA328B00C215B3 /* RealityKitViewManager.m */; };
 		A016CC112FDA328B00C215B3 /* RealityKitViewManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A016CC0E2FDA328B00C215B3 /* RealityKitViewManager.swift */; };
@@ -21,7 +22,6 @@
 		A02821102EC89D9800F31026 /* RoomplanViewManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A028210F2EC89D9800F31026 /* RoomplanViewManager.swift */; };
 		A02821652EC8AB0200F31026 /* RoomplanViewManager.m in Sources */ = {isa = PBXBuildFile; fileRef = A02821642EC8AB0200F31026 /* RoomplanViewManager.m */; };
 		A0679A322F33B975002EF03A /* RealityKitModule.m in Sources */ = {isa = PBXBuildFile; fileRef = A0679A302F33B975002EF03A /* RealityKitModule.m */; };
-		A0679A332F33B975002EF03A /* RealityKitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0679A312F33B975002EF03A /* RealityKitViewController.swift */; };
 		A0D530633049A3B4008DB519 /* RoomPlanSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0D530623049A3AE008DB519 /* RoomPlanSupport.swift */; };
 		A0D530673049A5AB008DB519 /* RoomPlanSupport.m in Sources */ = {isa = PBXBuildFile; fileRef = A0D530663049A5AB008DB519 /* RoomPlanSupport.m */; };
 		A0FEA7042F00000000000004 /* RealityKitModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0FEA7032F00000000000003 /* RealityKitModule.swift */; };
@@ -40,6 +40,7 @@
 		5C452F58C2DC42B2BD956E2D /* Colors.xcassets */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = folder.assetcatalog; name = Colors.xcassets; path = fe/Colors.xcassets; sourceTree = "<group>"; };
 		6A0FD5EE046C43BF97E2BC5C /* DMSans-Medium.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "DMSans-Medium.ttf"; path = "../assets/fonts/DMSans-Medium.ttf"; sourceTree = "<group>"; };
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = fe/AppDelegate.swift; sourceTree = "<group>"; };
+		AB6FD604AC24597B94599A79 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SceneDelegate.swift; path = fe/SceneDelegate.swift; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = fe/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		878E4AC6A4067D7D3C5E0A2A /* Pods-fe.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-fe.release.xcconfig"; path = "Target Support Files/Pods-fe/Pods-fe.release.xcconfig"; sourceTree = "<group>"; };
 		A016CC0D2FDA328B00C215B3 /* RealityKitViewManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RealityKitViewManager.m; sourceTree = "<group>"; };
@@ -50,7 +51,6 @@
 		A028210F2EC89D9800F31026 /* RoomplanViewManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomplanViewManager.swift; sourceTree = "<group>"; };
 		A02821642EC8AB0200F31026 /* RoomplanViewManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RoomplanViewManager.m; sourceTree = "<group>"; };
 		A0679A302F33B975002EF03A /* RealityKitModule.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RealityKitModule.m; sourceTree = "<group>"; };
-		A0679A312F33B975002EF03A /* RealityKitViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RealityKitViewController.swift; sourceTree = "<group>"; };
 		A0A43A723025661300D60071 /* fe.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = fe.entitlements; path = fe/fe.entitlements; sourceTree = "<group>"; };
 		A0A60AD22EC8E4380095C3EB /* fe-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "fe-Bridging-Header.h"; sourceTree = "<group>"; };
 		A0D530623049A3AE008DB519 /* RoomPlanSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomPlanSupport.swift; sourceTree = "<group>"; };
@@ -81,6 +81,7 @@
 				A0A43A723025661300D60071 /* fe.entitlements */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				761780EC2CA45674006654EE /* AppDelegate.swift */,
+				AB6FD604AC24597B94599A79 /* SceneDelegate.swift */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */,
@@ -151,7 +152,6 @@
 				A016CC0D2FDA328B00C215B3 /* RealityKitViewManager.m */,
 				A016CC0E2FDA328B00C215B3 /* RealityKitViewManager.swift */,
 				A0679A302F33B975002EF03A /* RealityKitModule.m */,
-				A0679A312F33B975002EF03A /* RealityKitViewController.swift */,
 				A0FEA7032F00000000000003 /* RealityKitModule.swift */,
 			);
 			path = RealityKitFeature;
@@ -353,6 +353,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				761780ED2CA45674006654EE /* AppDelegate.swift in Sources */,
+				2C32D4D6A5F0AF45484CAB9C /* SceneDelegate.swift in Sources */,
 				A0679A322F33B975002EF03A /* RealityKitModule.m in Sources */,
 				A016CC102FDA328B00C215B3 /* RealityKitViewManager.m in Sources */,
 				A016CC112FDA328B00C215B3 /* RealityKitViewManager.swift in Sources */,
@@ -360,7 +361,6 @@
 				A0D530633049A3B4008DB519 /* RoomPlanSupport.swift in Sources */,
 				A0D530673049A5AB008DB519 /* RoomPlanSupport.m in Sources */,
 				A016CC122FDA328B00C215B3 /* RealityKitView.swift in Sources */,
-				A0679A332F33B975002EF03A /* RealityKitViewController.swift in Sources */,
 				A0FEA7042F00000000000004 /* RealityKitModule.swift in Sources */,
 				A02821652EC8AB0200F31026 /* RoomplanViewManager.m in Sources */,
 			);
