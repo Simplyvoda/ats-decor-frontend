@@ -220,25 +220,43 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
     // loop (SceneEvents.Update) rather than anything gesture-driven, since
     // the camera can move (orbit/pan/zoom) independently of any drag.
     private func setupResizeHandle() {
-        let handle = UIView(frame: CGRect(x: 0, y: 0, width: 32, height: 32))
-        handle.backgroundColor = .white
-        handle.layer.cornerRadius = 16
-        handle.layer.borderWidth = 2
-        handle.layer.borderColor = Self.brandAmber.cgColor
-        handle.layer.shadowColor = UIColor.black.cgColor
-        handle.layer.shadowOpacity = 0.25
-        handle.layer.shadowRadius = 3
-        handle.layer.shadowOffset = CGSize(width: 0, height: 1)
+        // The outer view is the actual touch target, sized to Apple's own
+        // 44pt minimum recommended tap target (same threshold furnitureHit
+        // already uses below for the same reason — a small visible dot is
+        // an unreliably small thing to land a finger on precisely,
+        // especially on a smaller screen). The visible white dot inside it
+        // stays smaller (32pt) so it doesn't look oversized sitting on the
+        // furniture piece — only the dot is drawn; the extra hit-area
+        // margin around it is invisible but still grabbable.
+        let hitAreaSize: CGFloat = 44
+        let handle = UIView(frame: CGRect(x: 0, y: 0, width: hitAreaSize, height: hitAreaSize))
+        handle.backgroundColor = .clear
         handle.isHidden = true
         addSubview(handle)
         resizeHandle = handle
 
+        let dotSize: CGFloat = 32
+        let dot = UIView(frame: CGRect(
+            x: (hitAreaSize - dotSize) / 2, y: (hitAreaSize - dotSize) / 2,
+            width: dotSize, height: dotSize
+        ))
+        dot.backgroundColor = .white
+        dot.layer.cornerRadius = dotSize / 2
+        dot.layer.borderWidth = 2
+        dot.layer.borderColor = Self.brandAmber.cgColor
+        dot.layer.shadowColor = UIColor.black.cgColor
+        dot.layer.shadowOpacity = 0.25
+        dot.layer.shadowRadius = 3
+        dot.layer.shadowOffset = CGSize(width: 0, height: 1)
+        dot.isUserInteractionEnabled = false
+        handle.addSubview(dot)
+
         let icon = UIImageView(image: UIImage(systemName: "arrow.up.left.and.arrow.down.right"))
         icon.tintColor = Self.brandAmber
         icon.contentMode = .scaleAspectFit
-        icon.frame = handle.bounds.insetBy(dx: 7, dy: 7)
+        icon.frame = dot.bounds.insetBy(dx: 7, dy: 7)
         icon.isUserInteractionEnabled = false
-        handle.addSubview(icon)
+        dot.addSubview(icon)
 
         let pan = UIPanGestureRecognizer(target: self, action: #selector(handleResizeHandleDrag(_:)))
         handle.addGestureRecognizer(pan)
@@ -273,38 +291,48 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
     }
 
     // Dragging the handle resizes the selected piece uniformly, scaled by
-    // how much farther (or closer) the finger is from the piece's screen
-    // center compared to where the drag started — the same "drag a corner
-    // handle away from center to grow it" convention as Keynote/PowerPoint
+    // how much farther (or closer) the finger is from a fixed pivot point
+    // compared to where the drag started — the same "drag a corner handle
+    // away from a fixed point to grow it" convention as Keynote/PowerPoint
     // shape handles. Deliberately reads the finger's raw position rather
     // than the handle view's own position: the handle's position is a pure
     // readout (see updateResizeHandlePosition), not the source of truth.
+    //
+    // The pivot is the piece's ANCHOR position, not its visual-bounds
+    // center — that distinction matters a lot here. An earlier version
+    // measured from `selected.visualBounds(relativeTo: nil).center`,
+    // recomputed fresh every .changed call. But the floor re-snap a few
+    // lines below also changes `selected.position.y` every .changed call —
+    // so that "center" was both being read from AND written to inside the
+    // same feedback loop, moving out from under the gesture as scale
+    // changed and making the resize feel jumpy/unpredictable rather than
+    // tracking the finger cleanly. The anchor's position never moves during
+    // a resize (only the child entity's local Y offset within it does, for
+    // floor-snap) — it's a genuinely fixed reference for the whole gesture.
     @objc private func handleResizeHandleDrag(_ gesture: UIPanGestureRecognizer) {
-        guard let selected = selectedFurniture else { return }
+        guard let selected = selectedFurniture, let anchor = selected.parent else { return }
         switch gesture.state {
         case .began:
             resizeStartScale = selected.scale
-            let centerScreen = arView.project(selected.visualBounds(relativeTo: nil).center)
+            let pivotScreen = arView.project(anchor.position(relativeTo: nil))
                 ?? self.convert(resizeHandle.center, to: arView)
             let touch = gesture.location(in: arView)
-            resizeStartDistance = max(20, hypot(touch.x - centerScreen.x, touch.y - centerScreen.y))
+            resizeStartDistance = max(20, hypot(touch.x - pivotScreen.x, touch.y - pivotScreen.y))
         case .changed:
-            guard let centerScreen = arView.project(selected.visualBounds(relativeTo: nil).center) else { return }
+            guard let pivotScreen = arView.project(anchor.position(relativeTo: nil)) else { return }
             let touch = gesture.location(in: arView)
-            let currentDistance = max(20, hypot(touch.x - centerScreen.x, touch.y - centerScreen.y))
+            let currentDistance = max(20, hypot(touch.x - pivotScreen.x, touch.y - pivotScreen.y))
             let ratio = Float(currentDistance / resizeStartDistance)
             selected.scale = resizeStartScale * ratio
 
             // Re-apply the same floor-snap used at placement time (see
             // handleTap) so the piece stays grounded instead of drifting
             // above/below the floor as its height changes with scale.
-            if let anchor = selected.parent {
-                let floorWorldY = anchor.position(relativeTo: nil).y
-                let worldBounds = selected.visualBounds(relativeTo: nil)
-                if worldBounds.min.y.isFinite {
-                    let isFlat = furnitureIsFlat[ObjectIdentifier(selected)] ?? false
-                    selected.position.y += floorWorldY - worldBounds.min.y + floorLift(isFlat: isFlat)
-                }
+            let floorWorldY = anchor.position(relativeTo: nil).y
+            let worldBounds = selected.visualBounds(relativeTo: nil)
+            if worldBounds.min.y.isFinite {
+                let isFlat = furnitureIsFlat[ObjectIdentifier(selected)] ?? false
+                selected.position.y += floorWorldY - worldBounds.min.y + floorLift(isFlat: isFlat)
             }
         default:
             break
