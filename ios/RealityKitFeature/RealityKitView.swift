@@ -496,7 +496,20 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
     // Where does a screen tap land on the floor?
     // Collision raycast first; if the scan mesh has no usable collision
     // geometry, fall back to intersecting the ray with the floor plane.
-    private func floorHit(at location: CGPoint) -> SIMD3<Float>? {
+    //
+    // useLocalHeight controls which Y comes back. Default (false) is for
+    // PLACING a new piece: different taps should agree on height, so Y is
+    // pinned to the single room-wide floorY constant (see loadRoom) rather
+    // than whichever triangle happened to be under this particular tap —
+    // a raw mesh raycast is noisy enough on scanned floors (RoomPlan or,
+    // especially, non-LiDAR photogrammetry scans from devices like the
+    // iPhone 11) that two taps a foot apart can disagree by several
+    // centimeters. true is for DRAGGING an existing piece across the
+    // floor: there, a fixed global height is actively wrong on any floor
+    // that isn't perfectly flat — the piece should track the real local
+    // mesh height as it moves, or it visibly sinks below (or floats above)
+    // the floor surface once dragged away from where it was placed.
+    private func floorHit(at location: CGPoint, useLocalHeight: Bool = false) -> SIMD3<Float>? {
         guard let ray = arView.ray(through: location) else { return nil }
 
         // Restricted to the floor's own collision group — furniture is
@@ -511,16 +524,7 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
             relativeTo: nil
         )
         if let hit = results.first(where: { $0.normal.y > 0.7 }) {
-            // Take X/Z from the raycast (that's genuinely where the tap
-            // landed), but NOT Y. A mesh raycast samples one triangle of a
-            // scanned floor, which is noisy — RoomPlan/Polycam floors are
-            // rarely perfectly flat, so different taps can return Y values
-            // several centimeters apart even on what looks like one flat
-            // floor. floorY is one stable value for the whole room (from
-            // the room's overall bounds at load time, see loadRoom), so
-            // every placed piece sits at a consistent height regardless of
-            // which triangle happened to be under this particular tap.
-            let y = floorY ?? hit.position.y
+            let y = useLocalHeight ? hit.position.y : (floorY ?? hit.position.y)
             return SIMD3<Float>(hit.position.x, y, hit.position.z)
         }
 
@@ -1233,13 +1237,14 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
             }
         case .changed:
             if let dragging = draggingFurniture {
-                if let hit = floorHit(at: location), let anchor = dragging.parent {
-                    // Move anchor on the floor plane, offset by the original
-                    // grab point (see dragOffset), and preserve the y offset
-                    // for floor-snap.
-                    let anchorWorldY = anchor.position(relativeTo: nil).y
+                // useLocalHeight: true — follow the real floor mesh height at
+                // the new spot, not the height from wherever the piece was
+                // originally placed. On an uneven scan (see floorHit), reusing
+                // the old anchor Y here is what made furniture sink below the
+                // visible floor once dragged away from its placement point.
+                if let hit = floorHit(at: location, useLocalHeight: true), let anchor = dragging.parent {
                     anchor.setPosition(
-                        SIMD3<Float>(hit.x + dragOffset.x, anchorWorldY, hit.z + dragOffset.z),
+                        SIMD3<Float>(hit.x + dragOffset.x, hit.y, hit.z + dragOffset.z),
                         relativeTo: nil
                     )
                 }
