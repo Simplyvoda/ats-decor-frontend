@@ -28,8 +28,9 @@
 //    camera's local distance (cameraRadius). See applyOrbit().
 //  • cameraMode is .nonAR: this is a virtual 3D scene renderer, NOT a live
 //    camera/AR passthrough — which is also why it works in the simulator.
-//  • Each placed furniture piece hangs under its own AnchorEntity at the
-//    floor point where it was placed.
+//  • Each placed furniture piece hangs under its own plain holder Entity at
+//    the floor point where it was placed; all holders share one root anchor
+//    at the world origin. See furnitureHolder(at:).
 //
 
 import UIKit
@@ -112,6 +113,12 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
     // instead makes the piece follow the finger's movement while keeping
     // the same point under it that you originally grabbed.
     private var dragOffset: SIMD3<Float> = .zero
+    // Height of the dragged piece's holder when the drag began. Written
+    // back unchanged on every update, so a drag can only move a piece
+    // sideways — never up or down.
+    private var dragHeight: Float = 0
+    // Fixed parent of every placed piece's holder. See furnitureHolder(at:).
+    private var furnitureRoot: AnchorEntity?
 
     // ── Resize handle ────────────────────────────────────────────────────
     // A small on-screen dot pinned to the far corner of the selected piece,
@@ -496,20 +503,7 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
     // Where does a screen tap land on the floor?
     // Collision raycast first; if the scan mesh has no usable collision
     // geometry, fall back to intersecting the ray with the floor plane.
-    //
-    // useLocalHeight controls which Y comes back. Default (false) is for
-    // PLACING a new piece: different taps should agree on height, so Y is
-    // pinned to the single room-wide floorY constant (see loadRoom) rather
-    // than whichever triangle happened to be under this particular tap —
-    // a raw mesh raycast is noisy enough on scanned floors (RoomPlan or,
-    // especially, non-LiDAR photogrammetry scans from devices like the
-    // iPhone 11) that two taps a foot apart can disagree by several
-    // centimeters. true is for DRAGGING an existing piece across the
-    // floor: there, a fixed global height is actively wrong on any floor
-    // that isn't perfectly flat — the piece should track the real local
-    // mesh height as it moves, or it visibly sinks below (or floats above)
-    // the floor surface once dragged away from where it was placed.
-    private func floorHit(at location: CGPoint, useLocalHeight: Bool = false) -> SIMD3<Float>? {
+    private func floorHit(at location: CGPoint) -> SIMD3<Float>? {
         guard let ray = arView.ray(through: location) else { return nil }
 
         // Restricted to the floor's own collision group — furniture is
@@ -524,23 +518,64 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
             relativeTo: nil
         )
         if let hit = results.first(where: { $0.normal.y > 0.7 }) {
-            let y = useLocalHeight ? hit.position.y : (floorY ?? hit.position.y)
+            // Take X/Z from the raycast (that's genuinely where the tap
+            // landed), but NOT Y. A mesh raycast samples one triangle of
+            // the room model, and floors are rarely perfectly flat, so
+            // different taps can return Y values several centimeters
+            // apart. floorY is one stable value for the whole room (from
+            // the room's overall bounds at load time, see loadRoom), so
+            // every placed piece sits at a consistent height regardless of
+            // which triangle happened to be under this particular tap.
+            let y = floorY ?? hit.position.y
             return SIMD3<Float>(hit.position.x, y, hit.position.z)
         }
 
-        if let y = floorY, abs(ray.direction.y) > 0.0001 {
-            let t = (y - ray.origin.y) / ray.direction.y
-            if t > 0 {
-                var p = ray.origin + ray.direction * t
-                // The room is centered at the origin — keep the point inside it
-                if let b = roomBounds {
-                    p.x = max(-b.extents.x / 2, min(b.extents.x / 2, p.x))
-                    p.z = max(-b.extents.z / 2, min(b.extents.z / 2, p.z))
-                }
-                return p
-            }
+        return floorPlanePoint(at: location)
+    }
+
+    // Where does the finger's ray cross the flat floor plane (y = floorY)?
+    // Plain arithmetic — no raycast, no collision shapes, nothing read from
+    // the scene. Dragging uses this instead of floorHit: the room mesh can
+    // carry built-in furniture whose top surfaces a raycast would land on,
+    // and a drag must give the same answer on every OS version.
+    private func floorPlanePoint(at location: CGPoint) -> SIMD3<Float>? {
+        guard let y = floorY,
+              let ray = arView.ray(through: location),
+              abs(ray.direction.y) > 0.0001
+        else { return nil }
+        let t = (y - ray.origin.y) / ray.direction.y
+        guard t > 0 else { return nil }
+        var p = ray.origin + ray.direction * t
+        // The room is centered at the origin — keep the point inside it
+        if let b = roomBounds {
+            p.x = max(-b.extents.x / 2, min(b.extents.x / 2, p.x))
+            p.z = max(-b.extents.z / 2, min(b.extents.z / 2, p.z))
         }
-        return nil
+        p.y = y
+        return p
+    }
+
+    // Creates the parent a placed piece hangs under, at `position`.
+    //
+    // A plain Entity under one root anchor fixed at the world origin, NOT an
+    // AnchorEntity per piece: an anchor's world transform is partly owned by
+    // RealityKit's anchoring system, so moving one means converting to and
+    // from world space through the engine. A plain holder's `position` is
+    // only ever what this file assigns to it, and because the root never
+    // leaves the origin, that value is also its world position.
+    private func furnitureHolder(at position: SIMD3<Float>) -> Entity {
+        let root: AnchorEntity
+        if let existing = furnitureRoot {
+            root = existing
+        } else {
+            root = AnchorEntity(world: .zero)
+            arView.scene.addAnchor(root)
+            furnitureRoot = root
+        }
+        let holder = Entity()
+        holder.position = position
+        root.addChild(holder)
+        return holder
     }
 
     // How far above the floor to lift a piece so its bottom doesn't sit
@@ -620,11 +655,8 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
 
     func removeSelectedFurniture() {
         guard let selected = selectedFurniture else { return }
-        if let anchor = selected.parent as? AnchorEntity {
-            arView.scene.removeAnchor(anchor)
-        } else {
-            selected.removeFromParent()
-        }
+        // Remove the piece's holder too, not just the model inside it.
+        (selected.parent ?? selected).removeFromParent()
         placedFurniture.removeAll { $0 === selected }
         furnitureURLs.removeValue(forKey: ObjectIdentifier(selected))
         furnitureIsFlat.removeValue(forKey: ObjectIdentifier(selected))
@@ -998,9 +1030,7 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
                 placed.scale = SIMD3<Float>(Float(scaleArr[0]), Float(scaleArr[1]), Float(scaleArr[2]))
 
                 let worldPosition = SIMD3<Float>(Float(posArr[0]), Float(posArr[1]), Float(posArr[2]))
-                let anchor = AnchorEntity(world: worldPosition)
-                anchor.addChild(placed)
-                self.arView.scene.addAnchor(anchor)
+                self.furnitureHolder(at: worldPosition).addChild(placed)
 
                 placed.generateCollisionShapes(recursive: true)
                 self.tagCollision(placed, group: Self.furnitureCollisionGroup)
@@ -1136,9 +1166,7 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
             placed.scale = SIMD3<Float>(repeating: s)
         }
 
-        let anchor = AnchorEntity(world: hitPosition)
-        anchor.addChild(placed)
-        arView.scene.addAnchor(anchor)
+        furnitureHolder(at: hitPosition).addChild(placed)
 
         // Deterministic floor snap — pure arithmetic, no post-insertion
         // bounds query. Apple's USDZ convention is base-at-y=0 precisely so
@@ -1228,24 +1256,25 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
             draggingFurniture = editingEnabled ? furnitureHit(at: location) : nil
             if let dragging = draggingFurniture {
                 setSelectedFurniture(dragging)
-                if let hit = floorHit(at: location), let anchor = dragging.parent {
-                    let anchorWorld = anchor.position(relativeTo: nil)
-                    dragOffset = SIMD3<Float>(anchorWorld.x - hit.x, 0, anchorWorld.z - hit.z)
-                } else {
-                    dragOffset = .zero
+                if let holder = dragging.parent {
+                    dragHeight = holder.position.y
+                    if let point = floorPlanePoint(at: location) {
+                        dragOffset = SIMD3<Float>(holder.position.x - point.x, 0, holder.position.z - point.z)
+                    } else {
+                        dragOffset = .zero
+                    }
                 }
             }
         case .changed:
             if let dragging = draggingFurniture {
-                // useLocalHeight: true — follow the real floor mesh height at
-                // the new spot, not the height from wherever the piece was
-                // originally placed. On an uneven scan (see floorHit), reusing
-                // the old anchor Y here is what made furniture sink below the
-                // visible floor once dragged away from its placement point.
-                if let hit = floorHit(at: location, useLocalHeight: true), let anchor = dragging.parent {
-                    anchor.setPosition(
-                        SIMD3<Float>(hit.x + dragOffset.x, hit.y, hit.z + dragOffset.z),
-                        relativeTo: nil
+                // X/Z come from where the finger crosses the floor plane;
+                // the height is the number captured in .began. Nothing here
+                // is converted to or from world space by RealityKit (see
+                // furnitureHolder), so the piece cannot drift vertically no
+                // matter how many updates a drag produces.
+                if let point = floorPlanePoint(at: location), let holder = dragging.parent {
+                    holder.position = SIMD3<Float>(
+                        point.x + dragOffset.x, dragHeight, point.z + dragOffset.z
                     )
                 }
                 return
