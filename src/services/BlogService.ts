@@ -3,6 +3,7 @@ import {
   BlogCommentResponse,
   BlogCommentsResponse,
   BlogLikeResponse,
+  BlogPostResponse,
   BlogPostsResponse,
 } from '../../interface/blog.interface';
 
@@ -19,8 +20,16 @@ const BlogService = {
         limit: params.limit ?? 15,
         search: params.search || undefined,
         sort: params.sort ?? 'DESC',
+        // List rows only: no article text or author details per post
+        summary: true,
       },
     });
+    return res.data;
+  },
+
+  // The full post (article text, author box) for the article screen
+  async getPost(postId: string): Promise<BlogPostResponse> {
+    const res = await api.get<BlogPostResponse>(`/blog-posts/${postId}`);
     return res.data;
   },
 

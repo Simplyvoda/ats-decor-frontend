@@ -78,6 +78,11 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
     // Fired with {path} after exportDesignPdf(), or {error} on failure
     @objc var onDesignPdfExported: RCTDirectEventBlock?
 
+    // Fired once the room model has finished loading: {success: true}, or
+    // {success: false, error} on failure. JS shows a loading indicator
+    // until this arrives.
+    @objc var onRoomLoaded: RCTDirectEventBlock?
+
     private var yaw: Float = 0
     private var pitch: Float = 0
     private var cameraRadius: Float = 5.0
@@ -119,6 +124,17 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
     private var dragHeight: Float = 0
     // Fixed parent of every placed piece's holder. See furnitureHolder(at:).
     private var furnitureRoot: AnchorEntity?
+
+    // Furniture models already parsed this session, keyed by source URL.
+    // Never added to the scene themselves — every placed piece is a clone —
+    // so the same chair placed six times is read from disk once, not six.
+    private var modelTemplates: [URL: Entity] = [:]
+    // Loads still in progress, so several requests for the same model
+    // (restoring a design fires one per piece, all at once) share one load.
+    private var modelLoads: [URL: Task<Entity, Error>] = [:]
+    // Cached model files used this session — never pruned while in use.
+    private var sessionModelPaths: Set<String> = []
+    private static let modelCacheLimitBytes = 500 * 1024 * 1024
 
     // ── Resize handle ────────────────────────────────────────────────────
     // A small on-screen dot pinned to the far corner of the selected piece,
@@ -171,7 +187,14 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
     // get, making it the de facto "prop changed" handler.
     @objc var modelUrl: NSString? {
         didSet {
-            guard let urlStr = modelUrl as String?, let url = resolveURL(urlStr) else { return }
+            guard let urlStr = modelUrl as String?, let url = resolveURL(urlStr) else {
+                // Deferred: props arrive one at a time, and onRoomLoaded may
+                // not be set yet at this point.
+                DispatchQueue.main.async { [weak self] in
+                    self?.onRoomLoaded?(["success": false, "error": "Room model not found"])
+                }
+                return
+            }
             loadRoom(from: url)
         }
     }
@@ -357,8 +380,13 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
         let digest = SHA256.hash(data: Data(url.absoluteString.utf8))
         let hex = digest.map { String(format: "%02x", $0) }.joined().prefix(16)
         let dest = modelsDir.appendingPathComponent("\(hex)_\(url.lastPathComponent)")
+        sessionModelPaths.insert(dest.path)
 
-        if FileManager.default.fileExists(atPath: dest.path) { return dest }
+        if FileManager.default.fileExists(atPath: dest.path) {
+            // Mark as recently used so pruneModelCache() removes it last.
+            try? FileManager.default.setAttributes([.modificationDate: Date()], ofItemAtPath: dest.path)
+            return dest
+        }
 
         let (tmp, response) = try await URLSession.shared.download(from: url)
         // A failed download (404, auth redirect, server error, ...) still
@@ -385,6 +413,80 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
         return dest
     }
 
+    // Keeps the downloaded-model cache under modelCacheLimitBytes by
+    // deleting the least recently used files first. Skips anything used
+    // this session or touched in the last hour, so a file that is about to
+    // be loaded is never removed. Runs off the main thread.
+    private func pruneModelCache() {
+        let keeping = sessionModelPaths
+        let limit = Self.modelCacheLimitBytes
+        DispatchQueue.global(qos: .utility).async {
+            let caches = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+            let modelsDir = caches.appendingPathComponent("models", isDirectory: true)
+            let keys: [URLResourceKey] = [.fileSizeKey, .contentModificationDateKey]
+            guard let files = try? FileManager.default.contentsOfDirectory(
+                at: modelsDir, includingPropertiesForKeys: keys
+            ) else { return }
+
+            var entries: [(url: URL, size: Int, date: Date)] = files.compactMap { file in
+                guard let values = try? file.resourceValues(forKeys: Set(keys)),
+                      let size = values.fileSize else { return nil }
+                return (file, size, values.contentModificationDate ?? .distantPast)
+            }
+            var total = entries.reduce(0) { $0 + $1.size }
+            guard total > limit else { return }
+
+            entries.sort { $0.date < $1.date }
+            let recentCutoff = Date().addingTimeInterval(-3600)
+            for entry in entries where total > limit {
+                if keeping.contains(entry.url.path) || entry.date > recentCutoff { continue }
+                try? FileManager.default.removeItem(at: entry.url)
+                total -= entry.size
+            }
+        }
+    }
+
+    // Parses a model file without blocking the main thread. The plain
+    // Entity.load(contentsOf:) is synchronous: on the main actor it freezes
+    // the whole screen (spinners included) until a large model is read.
+    private func loadEntityOffMainThread(at url: URL) async throws -> Entity {
+        if #available(iOS 18.0, *) {
+            return try await Entity(contentsOf: url)
+        }
+        return try await withCheckedThrowingContinuation { continuation in
+            var request: AnyCancellable?
+            request = Entity.loadAsync(contentsOf: url).sink(
+                receiveCompletion: { completion in
+                    if case .failure(let error) = completion {
+                        continuation.resume(throwing: error)
+                    }
+                    request = nil
+                },
+                receiveValue: { entity in
+                    continuation.resume(returning: entity)
+                }
+            )
+            _ = request
+        }
+    }
+
+    // The parsed model for a furniture URL: downloaded and read at most
+    // once per session. Callers must clone the result, never place it.
+    private func furnitureTemplate(for url: URL) async throws -> Entity {
+        if let cached = modelTemplates[url] { return cached }
+        if let running = modelLoads[url] { return try await running.value }
+
+        let load = Task { @MainActor () throws -> Entity in
+            let localURL = try await self.localFileURL(for: url)
+            return try await self.loadEntityOffMainThread(at: localURL)
+        }
+        modelLoads[url] = load
+        defer { modelLoads[url] = nil }
+        let entity = try await load.value
+        modelTemplates[url] = entity
+        return entity
+    }
+
     // MARK: - Room Loading
 
     func loadRoom(from url: URL) {
@@ -394,7 +496,7 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
                 let localURL = try await self.localFileURL(for: url)
                 let entity: Entity
                 do {
-                    entity = try await Entity.load(contentsOf: localURL)
+                    entity = try await self.loadEntityOffMainThread(at: localURL)
                 } catch {
                     // A cached download that RealityKit can't import is
                     // most likely corrupted (e.g. cached before the
@@ -439,7 +541,10 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
                 setupOrbitCamera(bounds: bounds)
                 addLighting()
                 print("✅ Room loaded from:", url.lastPathComponent)
+                self.onRoomLoaded?(["success": true])
+                self.pruneModelCache()
             } catch {
+                self.onRoomLoaded?(["success": false, "error": error.localizedDescription])
                 print("❌ loadRoom failed:", error)
                 // Sentry's scope-taking capture(error:) overloads aren't
                 // resolving in this project's build (both `scope:` and
@@ -731,11 +836,11 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
                 // centered in frame, a centered square crop here keeps it
                 // whole instead of leaving that crop to chance at display time.
                 let image = self.centerCropSquare(rawImage)
-                guard let data = image.pngData() else {
+                guard let data = self.thumbnailJPEG(from: image) else {
                     self.onSnapshotReady?(["error": "Snapshot capture failed"])
                     return
                 }
-                let filename = "design_snapshot_\(Int(Date().timeIntervalSince1970 * 1000)).png"
+                let filename = "design_snapshot_\(Int(Date().timeIntervalSince1970 * 1000)).jpg"
                 let fileURL = URL(fileURLWithPath: NSTemporaryDirectory())
                     .appendingPathComponent(filename)
                 do {
@@ -757,6 +862,25 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
         let cropRect = CGRect(x: originX, y: originY, width: side, height: side)
         guard let cropped = image.cgImage?.cropping(to: cropRect) else { return image }
         return UIImage(cgImage: cropped, scale: image.scale, orientation: image.imageOrientation)
+    }
+
+    // Encodes a design thumbnail as a JPEG no larger than 1024 px a side.
+    // The raw capture is a full-resolution PNG of the screen (well over
+    // 1000 px square on current phones), but thumbnails are only ever shown
+    // in list cards — the extra pixels cost upload time, mobile data and
+    // memory on every screen that lists designs, for nothing visible.
+    private func thumbnailJPEG(from image: UIImage, maxSide: CGFloat = 1024) -> Data? {
+        let pixelWidth = image.size.width * image.scale
+        let pixelHeight = image.size.height * image.scale
+        let ratio = min(1, maxSide / max(pixelWidth, pixelHeight))
+        let target = CGSize(width: pixelWidth * ratio, height: pixelHeight * ratio)
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = 1
+        format.opaque = true
+        let resized = UIGraphicsImageRenderer(size: target, format: format).image { _ in
+            image.draw(in: CGRect(origin: .zero, size: target))
+        }
+        return resized.jpegData(compressionQuality: 0.8)
     }
 
     // MARK: - PDF Export
@@ -947,8 +1071,7 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
 
         Task { @MainActor in
             do {
-                let localURL = try await self.localFileURL(for: resolvedURL)
-                let item = try await Entity.load(contentsOf: localURL)
+                let item = try await self.furnitureTemplate(for: resolvedURL)
                 self.pendingFurniture = item
                 self.pendingFurnitureURL = urlString
                 self.pendingFurnitureIsFlat = isFlat
@@ -1020,9 +1143,8 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
 
         Task { @MainActor in
             do {
-                let localURL = try await self.localFileURL(for: resolvedURL)
-                let item = try await Entity.load(contentsOf: localURL)
-                let placed = item.clone(recursive: true)
+                let template = try await self.furnitureTemplate(for: resolvedURL)
+                let placed = template.clone(recursive: true)
 
                 placed.transform.rotation = simd_quatf(
                     vector: SIMD4<Float>(Float(rotArr[0]), Float(rotArr[1]), Float(rotArr[2]), Float(rotArr[3]))

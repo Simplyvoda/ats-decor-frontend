@@ -11,12 +11,13 @@ import {
   View,
 } from 'react-native';
 import {ChevronLeft, Grid3x3, Heart, AlignJustify} from 'lucide-react-native';
-import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
 import {goBack, navigateTo} from '../../../utils/navigation';
 import MoodboardService from '../../../services/MoodboardService';
 import DesignService from '../../../services/DesignService';
 import {IMoodboardItem} from '../../../../interface/design.interface';
+import useRefetchOnFocus from '../../../hooks/useRefetchOnFocus';
 
 type ViewMode = 'grid' | 'list';
 
@@ -31,22 +32,20 @@ const ViewMoodboards = () => {
     try {
       const res = await MoodboardService.getMoodboard();
       setItems(res.data);
+      return true;
     } catch (err: any) {
       Toast.show({
         type: 'error',
         text1: 'Could not load moodboard',
         text2: err.response?.data?.message || err.message,
       });
+      return false;
     } finally {
       setIsLoading(false);
     }
   }, []);
 
-  useFocusEffect(
-    useCallback(() => {
-      fetchMoodboard();
-    }, [fetchMoodboard]),
-  );
+  useRefetchOnFocus(fetchMoodboard, ['moodboard', 'designs'], 5 * 60 * 1000);
 
   const handleUnlike = async (item: IMoodboardItem) => {
     // Optimistic removal
@@ -92,7 +91,7 @@ const ViewMoodboards = () => {
       <View style={grid ? styles.gridImageWrapper : styles.imageWrapper}>
         {item.design?.thumbnail_url ? (
           <Image
-            source={{uri: item.design.thumbnail_url}}
+            source={{uri: item.design.thumbnail_url, cache: 'force-cache'}}
             style={styles.image}
             resizeMode="cover"
           />

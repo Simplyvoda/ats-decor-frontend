@@ -4,6 +4,7 @@ import {
   IDesignsResponse,
   IPublishDesignPayload,
 } from '../../interface/design.interface';
+import {bumpDataVersion} from '../utils/dataVersion';
 
 const DesignService = {
   async upload(fileUrl: string, name: string): Promise<IDesignResponse> {
@@ -19,7 +20,34 @@ const DesignService = {
       headers: {'Content-Type': 'multipart/form-data'},
       timeout: 120_000,
     });
+    bumpDataVersion('designs');
     return res.data;
+  },
+
+  // Uploads a scanned room straight to storage, so a large file doesn't
+  // have to pass through the API server. Returns the stored file's key, or
+  // null when that isn't possible (an older backend without the route, a
+  // failed upload) — publish() then sends the file through the API, the way
+  // it always did.
+  async uploadModelDirect(fileUri: string): Promise<string | null> {
+    try {
+      const res = await api.post('/designs/upload-url');
+      const {upload_url, headers, model_key} = res.data.data;
+      const file = await (await fetch(fileUri)).blob();
+      try {
+        const put = await fetch(upload_url, {
+          method: 'PUT',
+          headers,
+          body: file,
+        });
+        return put.ok ? model_key : null;
+      } finally {
+        // Frees the native copy of the file held behind the blob
+        (file as any).close?.();
+      }
+    } catch {
+      return null;
+    }
   },
 
   async getDesigns(): Promise<IDesignsResponse> {
@@ -46,17 +74,22 @@ const DesignService = {
       : `file://${payload.thumbnailPath}`;
     formData.append('thumbnail', {
       uri: thumbUri,
-      type: 'image/png',
-      name: 'thumbnail.png',
+      type: 'image/jpeg',
+      name: 'thumbnail.jpg',
     } as any);
 
     // Local scans upload the USDZ; bundled/hosted models pass the reference
     if (payload.modelUrl.startsWith('file://')) {
-      formData.append('file', {
-        uri: payload.modelUrl,
-        type: 'model/vnd.usdz+zip',
-        name: 'design.usdz',
-      } as any);
+      const modelKey = await this.uploadModelDirect(payload.modelUrl);
+      if (modelKey) {
+        formData.append('model_key', modelKey);
+      } else {
+        formData.append('file', {
+          uri: payload.modelUrl,
+          type: 'model/vnd.usdz+zip',
+          name: 'design.usdz',
+        } as any);
+      }
     } else {
       formData.append('model_url', payload.modelUrl);
     }
@@ -65,6 +98,7 @@ const DesignService = {
       headers: {'Content-Type': 'multipart/form-data'},
       timeout: 120_000,
     });
+    bumpDataVersion('designs');
     return res.data;
   },
 
@@ -92,8 +126,8 @@ const DesignService = {
       : `file://${payload.thumbnailPath}`;
     formData.append('thumbnail', {
       uri: thumbUri,
-      type: 'image/png',
-      name: 'thumbnail.png',
+      type: 'image/jpeg',
+      name: 'thumbnail.jpg',
     } as any);
 
     // A design's room scan is set once at creation — there's no rescan
@@ -104,11 +138,15 @@ const DesignService = {
       headers: {'Content-Type': 'multipart/form-data'},
       timeout: 120_000,
     });
+    bumpDataVersion('designs');
     return res.data;
   },
 
-  async getExplore(): Promise<IDesignsResponse> {
-    const res = await api.get('/designs/explore');
+  async getExplore(params: {
+    page: number;
+    limit: number;
+  }): Promise<IDesignsResponse> {
+    const res = await api.get('/designs/explore', {params});
     return res.data;
   },
 
@@ -121,11 +159,13 @@ const DesignService = {
     const res = await api.patch(`/designs/${id}/visibility`, {
       is_public: isPublic,
     });
+    bumpDataVersion('designs');
     return res.data;
   },
 
   async deleteDesign(id: string): Promise<void> {
     await api.delete(`/designs/${id}`);
+    bumpDataVersion('designs');
   },
 };
 

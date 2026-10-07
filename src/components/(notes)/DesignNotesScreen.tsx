@@ -8,11 +8,12 @@ import {
   View,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import {useFocusEffect, useNavigation, useRoute} from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
 import NoteService from '../../services/NoteService';
 import {IDraftNote, INote} from '../../../interface/note.interface';
 import {goBack, navigateTo} from '../../utils/navigation';
+import useRefetchOnFocus from '../../hooks/useRefetchOnFocus';
 
 const formatDate = (iso: string) => {
   const d = new Date(iso);
@@ -48,22 +49,20 @@ export default function DesignNotesScreen() {
       ]);
       setNotes(savedRes?.data ?? []);
       setDrafts(draftList);
+      return true;
     } catch (err: any) {
       Toast.show({
         type: 'error',
         text1: 'Could not load notes',
         text2: err.response?.data?.message || err.message,
       });
+      return false;
     } finally {
       setIsLoading(false);
     }
   }, [designId]);
 
-  useFocusEffect(
-    useCallback(() => {
-      fetchNotes();
-    }, [fetchNotes]),
-  );
+  useRefetchOnFocus(fetchNotes, ['notes'], 5 * 60 * 1000);
 
   const items: ListItem[] = [
     ...drafts.map(d => ({kind: 'draft' as const, key: d.localId, draft: d})),

@@ -37,5 +37,6 @@ RCT_EXPORT_VIEW_PROPERTY(onSnapshotReady, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onFurnitureSelectionChanged, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onFurnitureLayoutExported, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onDesignPdfExported, RCTDirectEventBlock)
+RCT_EXPORT_VIEW_PROPERTY(onRoomLoaded, RCTDirectEventBlock)
 
 @end
