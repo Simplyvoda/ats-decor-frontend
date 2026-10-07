@@ -37,6 +37,10 @@ interface RealityKitViewProps {
   onDesignPdfExported?: (e: {
     nativeEvent: {path?: string; error?: string};
   }) => void;
+  // Fired once when the room model has finished loading (or failed to)
+  onRoomLoaded?: (e: {
+    nativeEvent: {success: boolean; error?: string};
+  }) => void;
 }
 
 const RealityKitNativeView = requireNativeComponent<RealityKitViewProps>('RealityKitView');
@@ -88,7 +92,7 @@ export const captureSnapshotCommand = (ref: React.RefObject<any>) => {
   );
 };
 
-// Capture a top-down (floor-plan) PNG for use as a design thumbnail, without
+// Capture a top-down (floor-plan) JPEG for use as a design thumbnail, without
 // disturbing the user's on-screen camera; result arrives via onSnapshotReady.
 export const captureTopViewSnapshotCommand = (ref: React.RefObject<any>) => {
   UIManager.dispatchViewManagerCommand(

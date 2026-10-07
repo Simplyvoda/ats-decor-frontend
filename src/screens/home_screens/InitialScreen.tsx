@@ -39,7 +39,7 @@ const HomeScreen = () => {
     sort,
     setSort,
     loadMore,
-  } = useBlogFeed();
+  } = useBlogFeed(isBlogTab);
 
   const listHeader = (
     <>
@@ -73,7 +73,10 @@ const HomeScreen = () => {
 
       {/* Tab content */}
       <View style={styles.tabContent}>
-        {activeTab === 'Studio' && <StudioComponent />}
+        {/* Kept mounted while hidden so switching tabs doesn't reload it */}
+        <View style={activeTab === 'Studio' ? undefined : styles.hidden}>
+          <StudioComponent />
+        </View>
         {activeTab === 'MoodBoard' && <MoodBoardComponent />}
         {isBlogTab && (
           <BlogHeader
@@ -166,6 +169,9 @@ const styles = StyleSheet.create({
   // Content
   tabContent: {
     paddingTop: 4,
+  },
+  hidden: {
+    display: 'none',
   },
   loader: {
     marginVertical: 24,

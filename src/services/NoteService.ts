@@ -6,6 +6,7 @@ import {
   INoteResponse,
   INotesResponse,
 } from '../../interface/note.interface';
+import {bumpDataVersion} from '../utils/dataVersion';
 
 // Notes jotted from the AR viewer before its design has been saved have
 // nowhere to attach to yet — they're held here as pending drafts until the
@@ -36,6 +37,7 @@ const NoteService = {
 
   async createNote(payload: ICreateNotePayload): Promise<INoteResponse> {
     const res = await api.post('/notes', payload);
+    bumpDataVersion('notes');
     return res.data;
   },
 
@@ -44,21 +46,25 @@ const NoteService = {
     payload: Partial<ICreateNotePayload>,
   ): Promise<INoteResponse> {
     const res = await api.patch(`/notes/${id}`, payload);
+    bumpDataVersion('notes');
     return res.data;
   },
 
   async softDelete(id: string): Promise<INoteResponse> {
     const res = await api.patch(`/notes/${id}/soft-delete`);
+    bumpDataVersion('notes');
     return res.data;
   },
 
   async restore(id: string): Promise<INoteResponse> {
     const res = await api.patch(`/notes/${id}/restore`);
+    bumpDataVersion('notes');
     return res.data;
   },
 
   async deleteForever(id: string): Promise<void> {
     await api.delete(`/notes/${id}`);
+    bumpDataVersion('notes');
   },
 
   async getDraftNotes(): Promise<IDraftNote[]> {
@@ -81,6 +87,7 @@ const NoteService = {
       PENDING_NOTE_DRAFTS_KEY,
       JSON.stringify([...drafts, draft]),
     );
+    bumpDataVersion('notes');
     return draft;
   },
 
@@ -101,6 +108,7 @@ const NoteService = {
         : d,
     );
     await AsyncStorage.setItem(PENDING_NOTE_DRAFTS_KEY, JSON.stringify(updated));
+    bumpDataVersion('notes');
   },
 
   async deleteDraftNote(localId: string): Promise<void> {
@@ -109,10 +117,12 @@ const NoteService = {
       PENDING_NOTE_DRAFTS_KEY,
       JSON.stringify(drafts.filter(d => d.localId !== localId)),
     );
+    bumpDataVersion('notes');
   },
 
   async clearDraftNotes(): Promise<void> {
     await AsyncStorage.removeItem(PENDING_NOTE_DRAFTS_KEY);
+    bumpDataVersion('notes');
   },
 };
 

@@ -1,5 +1,5 @@
 import {Compass, Eye, EyeOff, Heart} from 'lucide-react-native';
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -10,13 +10,16 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
 import DesignService from '../../services/DesignService';
 import MoodboardService from '../../services/MoodboardService';
 import {IDesign} from '../../../interface/design.interface';
 import {navigateTo} from '../../utils/navigation';
 import SharedHeader from '../shared/Header';
+import useRefetchOnFocus from '../../hooks/useRefetchOnFocus';
+
+const PAGE_SIZE = 12;
 
 export default function ExploreScreen() {
   const navigation = useNavigation();
@@ -24,32 +27,73 @@ export default function ExploreScreen() {
   const [designs, setDesigns] = useState<IDesign[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
+
+  // How many designs are on screen right now. A refresh reloads that many
+  // (not just the first page), so the list doesn't shrink under the user
+  // when they come back from a design they scrolled down to.
+  const loadedCount = useRef(0);
+  useEffect(() => {
+    loadedCount.current = designs.length;
+  }, [designs]);
 
   const fetchFeed = useCallback(async () => {
     try {
-      const res = await DesignService.getExplore();
+      const limit = Math.max(
+        PAGE_SIZE,
+        Math.ceil(loadedCount.current / PAGE_SIZE) * PAGE_SIZE,
+      );
+      const res = await DesignService.getExplore({page: 1, limit});
       setDesigns(res.data);
+      // A backend without paging returns everything and no total
+      setHasMore(res.total !== undefined && res.data.length < res.total);
+      return true;
     } catch (err: any) {
       Toast.show({
         type: 'error',
         text1: 'Could not load Explore',
         text2: err.response?.data?.message || err.message,
       });
+      return false;
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
     }
   }, []);
 
-  useFocusEffect(
-    useCallback(() => {
-      fetchFeed();
-    }, [fetchFeed]),
-  );
+  // Other people publish to this feed, so it is also refreshed if the copy
+  // on screen is more than two minutes old.
+  useRefetchOnFocus(fetchFeed, ['designs', 'moodboard'], 2 * 60 * 1000);
 
   const onRefresh = () => {
     setIsRefreshing(true);
     fetchFeed();
+  };
+
+  const loadMore = async () => {
+    if (isLoading || isRefreshing || isLoadingMore || !hasMore) {
+      return;
+    }
+    setIsLoadingMore(true);
+    try {
+      const res = await DesignService.getExplore({
+        page: Math.floor(designs.length / PAGE_SIZE) + 1,
+        limit: PAGE_SIZE,
+      });
+      const seen = new Set(designs.map(d => d.id));
+      const fresh = res.data.filter(d => !seen.has(d.id));
+      setDesigns(prev => [...prev, ...fresh]);
+      setHasMore(
+        fresh.length > 0 &&
+          res.total !== undefined &&
+          designs.length + fresh.length < res.total,
+      );
+    } catch {
+      // Leave what's loaded on screen; scrolling again retries
+    } finally {
+      setIsLoadingMore(false);
+    }
   };
 
   const toggleLike = async (design: IDesign) => {
@@ -152,7 +196,8 @@ export default function ExploreScreen() {
       <View className="w-full aspect-[4/3] bg-[#D8CBBA]">
         {item.thumbnail_url ? (
           <Image
-            source={{uri: item.thumbnail_url}}
+            // Unique URL per upload, so the cached copy is always current
+            source={{uri: item.thumbnail_url, cache: 'force-cache'}}
             className="w-full h-full"
             resizeMode="cover"
           />
@@ -251,6 +296,13 @@ export default function ExploreScreen() {
               </View>
             </View>
           )
+        }
+        onEndReached={loadMore}
+        onEndReachedThreshold={0.4}
+        ListFooterComponent={
+          isLoadingMore ? (
+            <ActivityIndicator color="#C1A36A" style={{marginTop: 20}} />
+          ) : null
         }
         contentContainerStyle={{paddingBottom: 32}}
         showsVerticalScrollIndicator={false}

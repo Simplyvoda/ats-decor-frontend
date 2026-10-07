@@ -69,8 +69,38 @@ const timeAgo = (isoDate: string) => {
 const BlogPostScreen = () => {
   const navigation = useNavigation();
   const route = useRoute<RouteProp<BlogPostRouteParams, 'BlogPost'>>();
-  const {post} = route.params;
+  const {post: listPost} = route.params;
   const {user} = useUserContext();
+
+  // The blog list sends posts without their article text (it is most of
+  // the download and the list never shows it), so the rest of the post is
+  // fetched here. Title, image and date show straight away from the list.
+  const [post, setPost] = useState(listPost);
+  const [loadingBody, setLoadingBody] = useState(!listPost.body);
+
+  useEffect(() => {
+    if (listPost.body) {
+      return;
+    }
+    let cancelled = false;
+    BlogService.getPost(listPost._id)
+      .then(res => {
+        if (!cancelled) {
+          setPost(res.data);
+        }
+      })
+      .catch(() => {
+        Toast.show({type: 'error', text1: 'Could not load this article'});
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setLoadingBody(false);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [listPost]);
 
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
@@ -250,10 +280,14 @@ const BlogPostScreen = () => {
 
           {/* Body */}
           <View style={styles.body}>
-            <PortableText
-              value={post.body ?? []}
-              components={portableTextComponents}
-            />
+            {loadingBody ? (
+              <ActivityIndicator color="#C1A36A" />
+            ) : (
+              <PortableText
+                value={post.body ?? []}
+                components={portableTextComponents}
+              />
+            )}
           </View>
 
           <View style={styles.divider} />

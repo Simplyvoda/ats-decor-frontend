@@ -4,7 +4,17 @@ import {BlogPost} from '../../interface/blog.interface';
 
 const LIMIT = 15;
 
-export default function useBlogFeed() {
+// `enabled` holds the first request back until the feed is actually on
+// screen. Once started it stays loaded, so leaving the Blog tab and coming
+// back doesn't fetch again.
+export default function useBlogFeed(enabled: boolean = true) {
+  const [started, setStarted] = useState(enabled);
+  useEffect(() => {
+    if (enabled) {
+      setStarted(true);
+    }
+  }, [enabled]);
+
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -60,9 +70,12 @@ export default function useBlogFeed() {
   // Reset to page 1 whenever the search term or sort order changes
   // (also covers the initial load on mount)
   useEffect(() => {
+    if (!started) {
+      return;
+    }
     fetchPage(1, true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedSearch, sort]);
+  }, [debouncedSearch, sort, started]);
 
   const loadMore = useCallback(() => {
     if (loading || loadingMore || page >= totalPages) {

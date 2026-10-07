@@ -140,6 +140,11 @@ export default function ARViewerScreen() {
     useState<FurnitureCategory | null>(null);
   const [showToolsMenu, setShowToolsMenu] = useState(false);
   const [furnitureSelected, setFurnitureSelected] = useState(false);
+  // The room model can take a while to download and read — show progress
+  // until the native view reports it is on screen (see onRoomLoaded).
+  const [roomStatus, setRoomStatus] = useState<'loading' | 'ready' | 'error'>(
+    'loading',
+  );
   const [catalogue, setCatalogue] =
     useState<FurnitureCategory[]>(DEV_CATALOGUE);
 
@@ -461,8 +466,25 @@ export default function ARViewerScreen() {
         onFurnitureSelectionChanged={e =>
           setFurnitureSelected(e.nativeEvent.selected)
         }
+        onRoomLoaded={e =>
+          setRoomStatus(e.nativeEvent.success ? 'ready' : 'error')
+        }
         style={StyleSheet.absoluteFill}
       />
+
+      {/* ── Room loading / failed state ── */}
+      {roomStatus !== 'ready' && (
+        <View style={styles.roomStatusOverlay} pointerEvents="none">
+          {roomStatus === 'loading' && (
+            <ActivityIndicator color="#C4A962" size="large" />
+          )}
+          <Text style={styles.roomStatusText}>
+            {roomStatus === 'loading'
+              ? 'Loading room…'
+              : "This room couldn't be loaded. Go back and try again."}
+          </Text>
+        </View>
+      )}
 
       {/* ── Top overlay ── */}
       <SafeAreaView style={styles.topOverlay} pointerEvents="box-none">
@@ -733,6 +755,20 @@ const ITEM_SIZE = (Dimensions.get('window').width - 48) / 3;
 
 const styles = StyleSheet.create({
   root: {flex: 1, backgroundColor: '#000'},
+
+  roomStatusOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    paddingHorizontal: 40,
+  },
+  roomStatusText: {
+    fontFamily: 'DMSans-Regular',
+    fontSize: 15,
+    color: '#fff',
+    textAlign: 'center',
+  },
 
   // Top overlay
   topOverlay: {

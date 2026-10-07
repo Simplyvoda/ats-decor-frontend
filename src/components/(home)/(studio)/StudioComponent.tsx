@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useState} from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -12,6 +12,7 @@ import {Lightbulb, Trash2} from 'lucide-react-native';
 import {useNavigation} from '@react-navigation/native';
 import DesignService from '../../../services/DesignService';
 import {IDesign} from '../../../../interface/design.interface';
+import useRefetchOnFocus from '../../../hooks/useRefetchOnFocus';
 
 const designTips = [
   {id: 1, text: 'Use the 60-30-10 rule for colour schemes'},
@@ -32,12 +33,20 @@ const StudioComponent = () => {
   const [designs, setDesigns] = useState<IDesign[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    DesignService.getDesigns()
-      .then(res => setDesigns(res.data))
-      .catch(err => console.warn('Failed to load designs:', err?.message ?? err))
-      .finally(() => setLoading(false));
+  const fetchDesigns = useCallback(async () => {
+    try {
+      const res = await DesignService.getDesigns();
+      setDesigns(res.data);
+      return true;
+    } catch (err: any) {
+      console.warn('Failed to load designs:', err?.message ?? err);
+      return false;
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useRefetchOnFocus(fetchDesigns, ['designs'], 5 * 60 * 1000);
 
   const handleDelete = (design: IDesign) => {
     Alert.alert('Delete scan', `Remove "${design.name}"?`, [
@@ -105,7 +114,10 @@ const StudioComponent = () => {
               <View style={styles.designIcon}>
                 {design.thumbnail_url ? (
                   <Image
-                    source={{uri: design.thumbnail_url}}
+                    // Thumbnail URLs are unique per upload (a new
+                    // thumbnail gets a new URL), so the cached copy is
+                    // always the right one.
+                    source={{uri: design.thumbnail_url, cache: 'force-cache'}}
                     style={styles.designThumbnail}
                     resizeMode="cover"
                   />

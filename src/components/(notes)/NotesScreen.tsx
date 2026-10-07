@@ -21,12 +21,13 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
 import NoteService from '../../services/NoteService';
 import {INote} from '../../../interface/note.interface';
 import {navigateTo} from '../../utils/navigation';
 import SharedHeader from '../shared/Header';
+import useRefetchOnFocus from '../../hooks/useRefetchOnFocus';
 
 export const NOTES_LIMIT = 50;
 
@@ -57,22 +58,21 @@ export default function NotesScreen() {
       ]);
       setNotes(active.data);
       setTrashedNotes(trash.data);
+      return true;
     } catch (err: any) {
       Toast.show({
         type: 'error',
         text1: 'Could not load notes',
         text2: err.response?.data?.message || err.message,
       });
+      return false;
     } finally {
       setIsLoading(false);
     }
   }, []);
 
-  useFocusEffect(
-    useCallback(() => {
-      fetchNotes();
-    }, [fetchNotes]),
-  );
+  // 'designs' too: deleting a design can remove the notes attached to it
+  useRefetchOnFocus(fetchNotes, ['notes', 'designs'], 5 * 60 * 1000);
 
   // Tag chips come from the active notes so the filter row stays stable
   const allTags = useMemo(() => {

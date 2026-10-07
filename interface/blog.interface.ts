@@ -20,10 +20,17 @@ export interface BlogPost {
     asset: {_id: string; url: string};
     alt?: string;
   };
-  body: any[];
+  // Absent on posts that came from the list — see BlogService.getPost
+  body?: any[];
   datePosted: string;
   author: string;
   authorBox?: BlogAuthorBox;
+}
+
+export interface BlogPostResponse {
+  status: string;
+  message: string;
+  data: BlogPost;
 }
 
 export interface BlogPostsResponse {
