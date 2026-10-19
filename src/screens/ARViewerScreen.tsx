@@ -40,6 +40,7 @@ import RealityKitNativeView, {
   exportDesignPdfCommand,
   exportFurnitureLayoutCommand,
   loadFurnitureCommand,
+  FurniturePlacement,
   placeFurnitureFromLayoutCommand,
   removeSelectedFurnitureCommand,
   resetCameraCommand,
@@ -75,11 +76,10 @@ type FurnitureItem = {
   name: string;
   thumbnail: any;
   modelUrl: string;
-  // Rugs/mats need a bigger floor-snap offset than furniture with real height
-  // (see floorLift in RealityKitView.swift) — sourced from category rather
-  // than inferred from the model's own bounds, which proved unreliable for
-  // some assets (thin decorative borders etc. throw off a geometry guess).
-  isFlat: boolean;
+  // Where the piece may be placed — sourced from category rather than
+  // inferred from the model's own bounds, which proved unreliable for some
+  // assets (thin decorative borders etc. throw off a geometry guess).
+  placement: FurniturePlacement;
 };
 
 type FurnitureCategory = {
@@ -94,6 +94,18 @@ type FurnitureCategory = {
 // test category can be re-added here easily if offline dev work needs one.
 const DEV_CATALOGUE: FurnitureCategory[] = [];
 
+// Rugs lie flat on the floor; small items such as table lamps may also go
+// on tables and other tops; everything else stands on the floor.
+const placementFor = (category: string): FurniturePlacement => {
+  if (/rug|mat\b/i.test(category)) {
+    return 'flat';
+  }
+  if (/lamp|vase|plant|decor|ornament/i.test(category)) {
+    return 'surface';
+  }
+  return 'floor';
+};
+
 // Group the flat /furniture list into catalogue sections
 const buildCatalogue = (items: IFurniture[]): FurnitureCategory[] => {
   const byCategory = new Map<string, FurnitureItem[]>();
@@ -105,7 +117,7 @@ const buildCatalogue = (items: IFurniture[]): FurnitureCategory[] => {
         ? {uri: f.thumbnail_url}
         : images.scan_room_icon,
       modelUrl: f.model_url,
-      isFlat: /rug/i.test(f.category),
+      placement: placementFor(f.category),
     };
     const list = byCategory.get(f.category) ?? [];
     list.push(entry);
@@ -407,7 +419,7 @@ export default function ARViewerScreen() {
   ).current;
 
   const handleSelectItem = (item: FurnitureItem) => {
-    loadFurnitureCommand(realityKitRef, item.modelUrl, item.isFlat);
+    loadFurnitureCommand(realityKitRef, item.modelUrl, item.placement);
     handleCloseSheet();
   };
 

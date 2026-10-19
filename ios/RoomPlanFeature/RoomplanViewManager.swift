@@ -351,8 +351,10 @@ class RoomplanView: UIView, RoomCaptureSessionDelegate {
                     try capturedRoom.export(to: modelURL, exportOptions: CapturedRoom.USDExportOptions())
                 }
 
-                let metaData = try Data(contentsOf: metadataURL)
-                let metaString = String(data: metaData, encoding: .utf8) ?? "{}"
+                // Only the iOS 17+ export writes the metadata file — on iOS 16
+                // there's nothing to read, and reading anyway failed the scan.
+                let metaString = (try? Data(contentsOf: metadataURL))
+                    .flatMap { String(data: $0, encoding: .utf8) } ?? "{}"
 
                 // Only the file URL and (small) metadata JSON cross the bridge.
                 // The model itself stays on disk — JS passes the URL around and

@@ -50,18 +50,22 @@ const RealityKitNativeView = requireNativeComponent<RealityKitViewProps>('Realit
 //   "bundle://chair.usdz"        → resolves from the app bundle (bundled test assets)
 //   "https://..."                → remote download
 //   "file:///..."                → local file path
-// isFlat: true for rugs/mats — tells native to apply the bigger floor-snap
-// offset directly, rather than trying to infer it from the model's own
-// bounds (unreliable — see the comment on floorLift in RealityKitView.swift).
+// placement tells native where the piece may go (see FurniturePlacement in
+// RealityKitView.swift):
+//   'floor'   → on the floor (default)
+//   'flat'    → rugs/mats: on the floor, lifted just enough to stay visible
+//   'surface' → table lamps etc.: may also sit on tables and other tops
+export type FurniturePlacement = 'floor' | 'flat' | 'surface';
+
 export const loadFurnitureCommand = (
   ref: React.RefObject<any>,
   urlString: string,
-  isFlat: boolean,
+  placement: FurniturePlacement,
 ) => {
   UIManager.dispatchViewManagerCommand(
     findNodeHandle(ref.current),
     UIManager.getViewManagerConfig('RealityKitView').Commands.loadFurniture,
-    [urlString, isFlat],
+    [urlString, placement],
   );
 };
 

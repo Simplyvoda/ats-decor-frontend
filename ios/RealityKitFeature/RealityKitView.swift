@@ -54,6 +54,18 @@ private final class SingleTouchPanGestureRecognizer: UIPanGestureRecognizer {
     }
 }
 
+// Where a furniture piece is allowed to go, sent from JS (from the
+// furniture's catalogue category — see placementFor in ARViewerScreen.tsx).
+enum FurniturePlacement: String {
+    // Stands on the floor, even when the tap lands on a table top
+    case floor
+    // Rugs and mats: on the floor, never stacked on anything
+    case flat
+    // Small pieces (table lamps…) that may also sit on tables, dressers and
+    // other raised tops — of the scanned room or of placed furniture
+    case surface
+}
+
 @objc(RealityKitView)
 class RealityKitView: UIView, UIGestureRecognizerDelegate {
 
@@ -97,16 +109,15 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
 
     private var pendingFurniture: Entity?
     private var pendingFurnitureURL: String?
-    private var pendingFurnitureIsFlat = false
+    private var pendingFurniturePlacement: FurniturePlacement = .floor
     private var placedFurniture: [Entity] = []
     // Entities carry no data of their own about where they were loaded from,
     // so the source URL of each placed piece is tracked here by identity —
     // needed to export/restore a design's furniture layout.
     private var furnitureURLs: [ObjectIdentifier: String] = [:]
-    // Whether each placed piece is a "flat" item (rug/mat) that needs the
-    // bigger floor-snap offset — sourced from JS (furniture category), not
-    // inferred from the model's own bounds. See loadFurniture(isFlat:).
-    private var furnitureIsFlat: [ObjectIdentifier: Bool] = [:]
+    // Where each placed piece may go — sourced from JS (furniture category),
+    // not inferred from the model's own bounds. See FurniturePlacement.
+    private var furniturePlacements: [ObjectIdentifier: FurniturePlacement] = [:]
     private var selectedFurniture: Entity?
     private var draggingFurniture: Entity?
     // XZ offset between the touched floor point and the dragged piece's
@@ -361,8 +372,8 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
             let floorWorldY = anchor.position(relativeTo: nil).y
             let worldBounds = selected.visualBounds(relativeTo: nil)
             if worldBounds.min.y.isFinite {
-                let isFlat = furnitureIsFlat[ObjectIdentifier(selected)] ?? false
-                selected.position.y += floorWorldY - worldBounds.min.y + floorLift(isFlat: isFlat)
+                let placement = furniturePlacements[ObjectIdentifier(selected)] ?? .floor
+                selected.position.y += floorWorldY - worldBounds.min.y + floorLift(for: placement)
             }
         default:
             break
@@ -533,10 +544,15 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
                 anchor.addChild(entity)
                 arView.scene.addAnchor(anchor)
 
-                // Room is shifted by -center, so the floor plane lands here in world space
+                // Room is shifted by -center, so the bottom of the model lands
+                // here in world space. Only a first guess: the bottom of the
+                // model is usually BELOW the floor you see (the floor has
+                // thickness; wall bottoms and stray scan points dip lower), so
+                // it's replaced by the measured floor surface right after.
                 self.floorY = bounds.min.y - bounds.center.y
                 NSLog("🏠 room bounds: min.y=%.4f max.y=%.4f center.y=%.4f → floorY=%.4f",
                       bounds.min.y, bounds.max.y, bounds.center.y, self.floorY ?? .nan)
+                self.refineFloorHeight(roomExtents: bounds.extents, attemptsLeft: 3)
 
                 setupOrbitCamera(bounds: bounds)
                 addLighting()
@@ -605,6 +621,102 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
         arView.scene.addAnchor(anchor)
     }
 
+    // Replaces the first-guess floorY with the height of the floor surface
+    // actually measured from the room's geometry (see measureFloorTop).
+    // Collision shapes added this frame may not be raycastable until the
+    // scene has updated once, so an empty measurement is retried shortly
+    // after; if it never succeeds, the first guess stays.
+    private func refineFloorHeight(roomExtents: SIMD3<Float>, attemptsLeft: Int) {
+        if let measured = measureFloorTop(roomExtents: roomExtents) {
+            NSLog("🏠 floor surface measured: %.4f (bottom of model was %.4f, %.1f cm lower)",
+                  measured, floorY ?? .nan, (measured - (floorY ?? measured)) * 100)
+            floorY = measured
+            return
+        }
+        guard attemptsLeft > 1 else {
+            NSLog("⚠️ floor surface not measurable — keeping bottom of model as floor")
+            return
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { [weak self] in
+            self?.refineFloorHeight(roomExtents: roomExtents, attemptsLeft: attemptsLeft - 1)
+        }
+    }
+
+    // The height of the floor surface you see, measured by looking straight
+    // down at a 15×15 grid of points across the room and collecting every
+    // upward-facing surface each ray passes through (the floor, but also
+    // table tops, beds, the seat of a scanned sofa…). The floor is the one
+    // height that shows up again and again near the bottom of the room —
+    // furniture tops are smaller and higher — so the answer is the most
+    // common 1 cm band among the lowest 40 cm of hits. nil when there's no
+    // clear answer (e.g. collision shapes not ready yet).
+    private func measureFloorTop(roomExtents e: SIMD3<Float>) -> Float? {
+        // The room is centered on the origin (see loadRoom)
+        let halfX = e.x / 2 * 0.9
+        let halfZ = e.z / 2 * 0.9
+        let top = e.y / 2 - 0.01
+        let bottom = -e.y / 2 - 0.1
+        let steps = 15
+
+        var heights: [Float] = []
+        for i in 0..<steps {
+            for j in 0..<steps {
+                let x = -halfX + 2 * halfX * Float(i) / Float(steps - 1)
+                let z = -halfZ + 2 * halfZ * Float(j) / Float(steps - 1)
+                let hits = arView.scene.raycast(
+                    from: [x, top, z], to: [x, bottom, z],
+                    query: .all, mask: Self.floorCollisionGroup, relativeTo: nil
+                )
+                heights += hits.filter { $0.normal.y > 0.7 }.map(\.position.y)
+            }
+        }
+
+        guard let lowest = heights.min() else { return nil }
+        let band = { (h: Float) in Int(((h - lowest) * 100).rounded(.down)) }
+        var counts: [Int: Int] = [:]
+        for h in heights where h - lowest <= 0.4 {
+            counts[band(h), default: 0] += 1
+        }
+        // Several samples must agree, or it isn't a floor
+        guard let best = counts.max(by: { $0.value < $1.value }), best.value >= 5 else {
+            return nil
+        }
+        // Top of that band, so pieces rest ON the floor rather than in it
+        return heights.filter { band($0) == best.key }.max()
+    }
+
+    // How high the surface a piece would stand on is, straight below (x, z).
+    //
+    // Looks straight down rather than along the finger's ray: a vertical ray
+    // gives the same answer whatever the camera angle, which keeps placing
+    // and dragging steady.
+    //
+    // Only `.surface` pieces (allowRaised) can end up on a raised top; every
+    // other piece gets floorY. Hits within a few centimeters of the floor
+    // count as floor too, so small bumps in a scan don't move pieces up and
+    // down. The search starts 1.6 m above the floor so ceilings, shelves high
+    // on a wall and the tops of tall wardrobes are never picked.
+    private func surfaceY(atX x: Float, z: Float, excluding moving: Entity? = nil,
+                          allowRaised: Bool) -> Float? {
+        guard let floor = floorY else { return nil }
+        guard allowRaised else { return floor }
+
+        let hits = arView.scene.raycast(
+            from: [x, floor + 1.6, z], to: [x, floor - 0.1, z],
+            query: .all,
+            mask: [Self.floorCollisionGroup, Self.furnitureCollisionGroup],
+            relativeTo: nil
+        )
+        let highest = hits
+            .filter { $0.normal.y > 0.7 }
+            .filter { hit in moving.map { !isDescendant(hit.entity, of: $0) } ?? true }
+            .map(\.position.y)
+            .max()
+
+        guard let top = highest, top - floor > 0.05 else { return floor }
+        return top
+    }
+
     // Where does a screen tap land on the floor?
     // Collision raycast first; if the scan mesh has no usable collision
     // geometry, fall back to intersecting the ray with the floor plane.
@@ -636,6 +748,22 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
         }
 
         return floorPlanePoint(at: location)
+    }
+
+    // The first upward-facing surface under the finger — of the room or of a
+    // placed piece — for pieces that may sit on tables. floorHit can't be
+    // used for these: it deliberately ignores placed furniture, so tapping
+    // the top of a placed table would give a point on the floor behind it.
+    private func raisedSurfaceHit(at location: CGPoint) -> SIMD3<Float>? {
+        guard let ray = arView.ray(through: location) else { return nil }
+        let hits = arView.scene.raycast(
+            from: ray.origin,
+            to: ray.origin + ray.direction * 100,
+            query: .nearest,
+            mask: [Self.floorCollisionGroup, Self.furnitureCollisionGroup],
+            relativeTo: nil
+        )
+        return hits.first(where: { $0.normal.y > 0.7 })?.position
     }
 
     // Where does the finger's ray cross the flat floor plane (y = floorY)?
@@ -683,24 +811,22 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
         return holder
     }
 
-    // How far above the floor to lift a piece so its bottom doesn't sit
-    // exactly coplanar with the floor mesh (which z-fights and can render
-    // as invisible/buried). Flat pieces — rugs, mats — need a deliberately
-    // bigger lift than everything else: their thickness relative to their
-    // own footprint is tiny, so a fixed millimeter-scale epsilon that's
-    // plenty for a chair or table's floor contact isn't reliably enough
-    // for something that's essentially a decal lying on the ground.
+    // How far above the surface to lift a piece so its bottom doesn't sit
+    // exactly level with the floor mesh, where the two would flicker
+    // through each other on screen.
     //
-    // isFlat is passed in explicitly (from JS, ultimately from furniture
-    // category) rather than inferred from the model's own bounds. An
-    // earlier version tried the bounds-based guess
-    // (extents.y < footprint * 0.03) and it silently never classified at
-    // least one real rug asset as flat, so no matter how large the "flat"
-    // offset was set, that piece kept getting the tiny non-flat one —
-    // looking unfixed across three different constants. Category is ground
-    // truth; a bounding box is not.
-    private func floorLift(isFlat: Bool) -> Float {
-        isFlat ? 0.06 : 0.001
+    // Rugs used to get 6 cm here to make up for floorY being the bottom of
+    // the whole model — several centimeters under the real floor — and even
+    // that wasn't enough to keep some rugs from vanishing into the floor.
+    // floorY is now the measured floor surface (see measureFloorTop), so a
+    // few millimeters is plenty and the rug no longer visibly floats.
+    //
+    // Flat-ness comes from the furniture's category (FurniturePlacement),
+    // not from the model's bounds: an earlier bounds-based guess
+    // (extents.y < footprint * 0.03) silently never classified at least one
+    // real rug asset as flat.
+    private func floorLift(for placement: FurniturePlacement) -> Float {
+        placement == .flat ? 0.005 : 0.001
     }
 
     // Which placed furniture piece (if any) is under this screen point?
@@ -764,7 +890,7 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
         (selected.parent ?? selected).removeFromParent()
         placedFurniture.removeAll { $0 === selected }
         furnitureURLs.removeValue(forKey: ObjectIdentifier(selected))
-        furnitureIsFlat.removeValue(forKey: ObjectIdentifier(selected))
+        furniturePlacements.removeValue(forKey: ObjectIdentifier(selected))
         setSelectedFurniture(nil)
         showToast("Removed")
         print("🗑️ Furniture removed — remaining:", placedFurniture.count)
@@ -1062,7 +1188,7 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
 
     // MARK: - Furniture
 
-    func loadFurniture(urlString: String, isFlat: Bool) {
+    func loadFurniture(urlString: String, placement: FurniturePlacement) {
         guard let resolvedURL = resolveURL(urlString) else {
             print("❌ Could not resolve furniture URL:", urlString)
             DispatchQueue.main.async { self.showToast("Model not available yet") }
@@ -1074,7 +1200,7 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
                 let item = try await self.furnitureTemplate(for: resolvedURL)
                 self.pendingFurniture = item
                 self.pendingFurnitureURL = urlString
-                self.pendingFurnitureIsFlat = isFlat
+                self.pendingFurniturePlacement = placement
                 self.showToast("Tap the floor to place", position: .top, duration: 3.5)
                 print("✅ Furniture ready:", resolvedURL.lastPathComponent)
             } catch {
@@ -1100,13 +1226,15 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
             let pos = entity.position(relativeTo: nil)
             let rot = entity.transform.rotation.vector
             let scale = entity.scale
-            let isFlat = furnitureIsFlat[ObjectIdentifier(entity)] ?? false
+            let placement = furniturePlacements[ObjectIdentifier(entity)] ?? .floor
             return [
                 "modelUrl": url,
                 "position": [pos.x, pos.y, pos.z],
                 "rotation": [rot.x, rot.y, rot.z, rot.w],
                 "scale": [scale.x, scale.y, scale.z],
-                "isFlat": isFlat,
+                "placement": placement.rawValue,
+                // Still written so builds that only know isFlat restore rugs correctly
+                "isFlat": placement == .flat,
             ]
         }
 
@@ -1136,10 +1264,11 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
             print("❌ Could not parse furniture layout item:", itemJson)
             return
         }
-        // Optional, not required: designs saved before this field existed
-        // have no isFlat key at all — default to false (the old behavior)
-        // rather than failing the whole restore over a missing key.
-        let isFlat = obj["isFlat"] as? Bool ?? false
+        // Optional, not required: older designs have no placement key (only
+        // isFlat, or neither) — fall back to those rather than failing the
+        // whole restore over a missing key.
+        let placement = (obj["placement"] as? String).flatMap(FurniturePlacement.init(rawValue:))
+            ?? ((obj["isFlat"] as? Bool ?? false) ? .flat : .floor)
 
         Task { @MainActor in
             do {
@@ -1158,7 +1287,7 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
                 self.tagCollision(placed, group: Self.furnitureCollisionGroup)
                 self.placedFurniture.append(placed)
                 self.furnitureURLs[ObjectIdentifier(placed)] = urlString
-                self.furnitureIsFlat[ObjectIdentifier(placed)] = isFlat
+                self.furniturePlacements[ObjectIdentifier(placed)] = placement
                 print("✅ Restored furniture:", resolvedURL.lastPathComponent)
             } catch {
                 print("❌ placeFurnitureFromLayout failed:", error)
@@ -1232,11 +1361,22 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
             return
         }
 
-        guard let hitPosition = floorHit(at: location) else {
+        let placement = pendingFurniturePlacement
+        // A piece that can stand on tables goes where the finger points,
+        // including on top of placed furniture; others use the floor tap.
+        let tapped = placement == .surface
+            ? (raisedSurfaceHit(at: location) ?? floorHit(at: location))
+            : floorHit(at: location)
+        guard let tapPoint = tapped,
+              let baseY = surfaceY(atX: tapPoint.x, z: tapPoint.z,
+                                   allowRaised: placement == .surface)
+        else {
             print("👆 No floor hit — try tapping the floor")
             showToast("Couldn't find the floor — try again")
             return
         }
+        // Floor height for most pieces; a table top for a lamp tapped onto one
+        let hitPosition = SIMD3<Float>(tapPoint.x, baseY, tapPoint.z)
 
         let placed = pending.clone(recursive: true)
 
@@ -1307,15 +1447,15 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
         // any Y offset baked into the root transform is exactly what's
         // being overridden.
         if localBounds.min.y.isFinite {
-            let lift = floorLift(isFlat: pendingFurnitureIsFlat)
+            let lift = floorLift(for: placement)
             let rot = placed.transform.rotation
             let lowestY = localCorners.map { rot.act($0 * placed.scale).y }.min() ?? 0
             placed.position.y = lift - lowestY
             let rv = rot.vector
-            NSLog("🧭 floor-snap (exact): hitY=%.4f localMinY=%.4f lowestY=%.4f rot=(%.3f,%.3f,%.3f,%.3f) scaleY=%.4f isFlat=%@ posY=%.4f",
+            NSLog("🧭 floor-snap (exact): hitY=%.4f localMinY=%.4f lowestY=%.4f rot=(%.3f,%.3f,%.3f,%.3f) scaleY=%.4f placement=%@ posY=%.4f",
                   hitPosition.y, localBounds.min.y, lowestY,
                   rv.x, rv.y, rv.z, rv.w, placed.scale.y,
-                  String(pendingFurnitureIsFlat), placed.position.y)
+                  placement.rawValue, placed.position.y)
         } else {
             NSLog("⚠️ floor-snap skipped: localBounds.min.y not finite")
         }
@@ -1326,13 +1466,13 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
         if let url = pendingFurnitureURL {
             furnitureURLs[ObjectIdentifier(placed)] = url
         }
-        furnitureIsFlat[ObjectIdentifier(placed)] = pendingFurnitureIsFlat
+        furniturePlacements[ObjectIdentifier(placed)] = placement
         setSelectedFurniture(placed)
 
         // Clear pending so next tap doesn't place again
         pendingFurniture = nil
         pendingFurnitureURL = nil
-        pendingFurnitureIsFlat = false
+        pendingFurniturePlacement = .floor
 
         showToast("Drag to move · Handle to resize · Rotate · Tap 🗑 to remove", duration: 3.5)
         print("🪑 Placed furniture — total:", placedFurniture.count)
@@ -1394,10 +1534,21 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
                 // is converted to or from world space by RealityKit (see
                 // furnitureHolder), so the piece cannot drift vertically no
                 // matter how many updates a drag produces.
+                //
+                // The exception is a piece that may stand on tables: its
+                // height follows whatever surface is straight below its new
+                // spot, so it steps up onto a table and back down to the
+                // floor. That's a vertical look-down (surfaceY), which gives
+                // the same answer whatever the camera angle.
                 if let point = floorPlanePoint(at: location), let holder = dragging.parent {
-                    holder.position = SIMD3<Float>(
-                        point.x + dragOffset.x, dragHeight, point.z + dragOffset.z
-                    )
+                    let x = point.x + dragOffset.x
+                    let z = point.z + dragOffset.z
+                    var y = dragHeight
+                    if furniturePlacements[ObjectIdentifier(dragging)] == .surface,
+                       let surface = surfaceY(atX: x, z: z, excluding: dragging, allowRaised: true) {
+                        y = surface
+                    }
+                    holder.position = SIMD3<Float>(x, y, z)
                 }
                 return
             }

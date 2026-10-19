@@ -59,8 +59,9 @@ class RealityKitViewManager: RCTViewManager {
         }
     }
 
-    @objc func loadFurniture(_ reactTag: NSNumber, urlString: NSString, isFlat: Bool) {
-        withView(reactTag) { $0.loadFurniture(urlString: urlString as String, isFlat: isFlat) }
+    @objc func loadFurniture(_ reactTag: NSNumber, urlString: NSString, placement: NSString) {
+        let kind = FurniturePlacement(rawValue: placement as String) ?? .floor
+        withView(reactTag) { $0.loadFurniture(urlString: urlString as String, placement: kind) }
     }
 
     @objc func toggleTopView(_ reactTag: NSNumber) {
