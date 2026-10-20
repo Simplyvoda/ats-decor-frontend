@@ -22,11 +22,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import UserAvatar from '../../components/molecules/UserAvatar';
 import {useUserContext} from '../../context/UserContext';
 import AuthService from '../../services/AuthService';
+import {useTheme} from '../../theme/useTheme';
 
 const InitialScreen = () => {
   const navigation = useNavigation();
   const {user, logoutUser} = useUserContext();
   const [search, setSearch] = useState('');
+  const {colors} = useTheme();
 
   const iconMap = {
     User,
@@ -108,7 +110,7 @@ const InitialScreen = () => {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-offWhite gap-5">
+    <SafeAreaView className="flex-1 bg-offWhite dark:bg-night gap-5">
       <View className="bg-brand h-32 w-full flex flex-row justify-start  items-center pl-5">
         <ChevronLeft
           className="text-white"
@@ -139,12 +141,12 @@ const InitialScreen = () => {
       </View>
 
       <ScrollView className="py-6 px-5 flex-col space-y-5">
-        <View className="flex flex-row items-center border border-[#2C2C2C1A] bg-white mb-1.5 rounded-md px-2 py-3 font-dm-sans">
-          <Search color="#9ca3af" size={18} />
+        <View className="flex flex-row items-center border border-[#2C2C2C1A] dark:border-night-border bg-white dark:bg-night-surface mb-1.5 rounded-md px-2 py-3 font-dm-sans">
+          <Search color={colors.textMuted} size={18} />
           <TextInput
-            className="w-full ml-2"
+            className="w-full ml-2 text-[#2C2C2C] dark:text-night-text"
             autoCapitalize="none"
-            placeholderTextColor="#9ca3af"
+            placeholderTextColor={colors.textMuted}
             placeholder="Search settings"
             value={search}
             onChangeText={setSearch}
@@ -156,16 +158,16 @@ const InitialScreen = () => {
             <TouchableOpacity
               key={i}
               onPress={() => navigateTo(navigation, section.screen)}
-              className="w-full border-[1px] border-[#2C2C2C33] rounded-[16px] flex flex-row min-h-[196px] p-6">
+              className="w-full border-[1px] border-[#2C2C2C33] dark:border-night-border bg-transparent dark:bg-night-surface rounded-[16px] flex flex-row min-h-[196px] p-6">
               <View className="bg-[#C1A36A26] w-[42px] h-[39px] rounded-md flex items-center justify-center">
-                <Icon color="#C1A36A" size={18} />
+                <Icon color={colors.brand} size={18} />
               </View>
 
               <View className="text-white flex-1 flex flex-col ml-4 space-y-2">
-                <Text className="text-[#2C2C2C] text-2xl font-cormorant">
+                <Text className="text-[#2C2C2C] dark:text-night-text-primary text-2xl font-cormorant">
                   {section.title}
                 </Text>
-                <Text className="text-[#2C2C2C] text-sm font-dm-sans">
+                <Text className="text-[#2C2C2C] dark:text-night-text-secondary text-sm font-dm-sans">
                   {section.subtitle}
                 </Text>
 
@@ -174,8 +176,8 @@ const InitialScreen = () => {
                     return (
                       <View
                         key={idx}
-                        className="bg-[#2C2C2C0D] rounded-[10px] self-start w-auto p-1">
-                        <Text className="text-[#2C2C2C80] text-sm font-dm-sans ">
+                        className="bg-[#2C2C2C0D] dark:bg-night-muted rounded-[10px] self-start w-auto p-1">
+                        <Text className="text-[#2C2C2C80] dark:text-night-text-muted text-sm font-dm-sans ">
                           {each}
                         </Text>
                       </View>
@@ -190,11 +192,11 @@ const InitialScreen = () => {
         {/* Log out */}
         <TouchableOpacity
           onPress={handleLogout}
-          className="w-full border-[1px] border-[#2C2C2C33] rounded-[16px] flex flex-row items-center p-6 mb-10">
+          className="w-full border-[1px] border-[#2C2C2C33] dark:border-night-border dark:bg-night-surface rounded-[16px] flex flex-row items-center p-6 mb-10">
           <View className="bg-[#D216161A] w-[42px] h-[39px] rounded-md flex items-center justify-center">
-            <LogOut color="#D21616" size={18} />
+            <LogOut color={colors.danger} size={18} />
           </View>
-          <Text className="text-[#D21616] text-xl font-cormorant ml-4">
+          <Text className="text-[#D21616] dark:text-[#FF6B6B] text-xl font-cormorant ml-4">
             Log Out
           </Text>
         </TouchableOpacity>

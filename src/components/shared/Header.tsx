@@ -1,5 +1,6 @@
 import React from 'react';
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {Text, TouchableOpacity, View} from 'react-native';
+import {makeStyles} from '../../theme/useTheme';
 
 interface HeaderAction {
   label: string;
@@ -14,6 +15,7 @@ interface HeaderProps {
 }
 
 const SharedHeader = ({title, subtitle, action}: HeaderProps) => {
+  const styles = useStyles();
   return (
     <View
       className="bg-brand px-5 pt-6 pb-2 h-[160px] relative flex flex-col"
@@ -43,12 +45,12 @@ const SharedHeader = ({title, subtitle, action}: HeaderProps) => {
   );
 };
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles(c => ({
   container: {
     zIndex: 1,
   },
   actionCard: {
-    backgroundColor: '#fff',
+    backgroundColor: c.surface,
     borderRadius: 14,
     padding: 16,
     position: 'absolute',
@@ -57,7 +59,7 @@ const styles = StyleSheet.create({
     width: '100%',
     alignSelf: 'center',
     marginTop: 20,
-    shadowColor: '#000',
+    shadowColor: c.shadow,
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -65,7 +67,7 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   actionBtn: {
-    backgroundColor: '#C1A36A',
+    backgroundColor: c.brand,
     borderRadius: 10,
     paddingVertical: 16,
     flexDirection: 'row',
@@ -78,8 +80,8 @@ const styles = StyleSheet.create({
     fontFamily: 'DMSans-Regular',
     fontSize: 16,
     fontWeight: '500',
-    color: '#fff',
+    color: c.onBrand,
   },
-});
+}));
 
 export default SharedHeader;

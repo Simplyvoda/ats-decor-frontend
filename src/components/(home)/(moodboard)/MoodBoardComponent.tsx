@@ -1,9 +1,12 @@
 import React from 'react';
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {Text, TouchableOpacity, View} from 'react-native';
 import {Heart} from 'lucide-react-native';
+import {makeStyles, useTheme} from '../../../theme/useTheme';
 // import {useNavigation} from '@react-navigation/native';
 
 const MoodBoardComponent = () => {
+  const styles = useStyles();
+  const {colors} = useTheme();
   // const navigation = useNavigation();
 
   // const navigateToMoodBoards = () => {
@@ -13,11 +16,11 @@ const MoodBoardComponent = () => {
   return (
     <View style={styles.card}>
       <Text style={styles.title}>
-        <Heart color={'#C1A36A'} size={20} /> Mood Board
+        <Heart color={colors.brand} size={20} /> Mood Board
       </Text>
 
       <View style={styles.emptyState}>
-        <Heart size={40} />
+        <Heart size={40} color={colors.icon} />
         <Text style={styles.subtext}>
           See your favourite designs {'\n'} and inspirations
         </Text>
@@ -30,21 +33,21 @@ const MoodBoardComponent = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles(c => ({
   card: {
     marginHorizontal: 20,
     marginBottom: 20,
     paddingHorizontal: 20,
     paddingVertical: 40,
     borderRadius: 16,
-    borderColor: '#2C2C2C33',
+    borderColor: c.border,
     borderWidth: 1,
   },
   title: {
     fontFamily: 'CormorantGaramond-SemiBold',
     fontSize: 24,
     fontWeight: '600',
-    color: '#333',
+    color: c.textPrimary,
     marginBottom: 8,
   },
   emptyState: {
@@ -57,12 +60,12 @@ const styles = StyleSheet.create({
   subtext: {
     fontSize: 16,
     fontFamily: 'DMSans-Regular',
-    color: '#666',
+    color: c.textSecondary,
     marginBottom: 20,
     textAlign: 'center',
   },
   ctaButton: {
-    backgroundColor: '#C1A36A',
+    backgroundColor: c.brand,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -72,10 +75,10 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   ctaButtonText: {
-    color: '#fff',
+    color: c.onBrand,
     fontSize: 16,
     fontWeight: '500',
   },
-});
+}));
 
 export default MoodBoardComponent;

@@ -3,7 +3,6 @@ import {
   ActivityIndicator,
   Alert,
   Image,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -13,6 +12,7 @@ import {useNavigation} from '@react-navigation/native';
 import DesignService from '../../../services/DesignService';
 import {IDesign} from '../../../../interface/design.interface';
 import useRefetchOnFocus from '../../../hooks/useRefetchOnFocus';
+import {makeStyles, useTheme} from '../../../theme/useTheme';
 
 const designTips = [
   {id: 1, text: 'Use the 60-30-10 rule for colour schemes'},
@@ -30,6 +30,8 @@ function formatDate(iso: string) {
 
 const StudioComponent = () => {
   const navigation = useNavigation();
+  const styles = useStyles();
+  const {colors} = useTheme();
   const [designs, setDesigns] = useState<IDesign[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -77,7 +79,7 @@ const StudioComponent = () => {
         <View style={styles.tipsContainer}>
           {designTips.map(tip => (
             <View style={styles.tipItem} key={tip.id}>
-              <Lightbulb size={16} color="#D4A574" style={styles.tipIcon} />
+              <Lightbulb size={16} color={colors.brand} style={styles.tipIcon} />
               <Text style={styles.tipText}>{tip.text}</Text>
             </View>
           ))}
@@ -89,7 +91,7 @@ const StudioComponent = () => {
         <Text style={styles.sectionTitle}>Recent Design</Text>
 
         {loading ? (
-          <ActivityIndicator color="#C1A36A" style={{marginVertical: 20}} />
+          <ActivityIndicator color={colors.brand} style={styles.loader} />
         ) : designs.length === 0 ? (
           <Text style={styles.emptyText}>
             No saved scans yet — scan a room to get started.
@@ -136,7 +138,7 @@ const StudioComponent = () => {
               <TouchableOpacity
                 onPress={() => handleDelete(design)}
                 hitSlop={{top: 8, bottom: 8, left: 8, right: 8}}>
-                <Trash2 size={18} color="#ccc" />
+                <Trash2 size={18} color={colors.iconMuted} />
               </TouchableOpacity>
             </TouchableOpacity>
           ))
@@ -146,27 +148,27 @@ const StudioComponent = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles(c => ({
   welcomeCard: {
     marginHorizontal: 20,
     marginBottom: 20,
     paddingHorizontal: 20,
     paddingVertical: 40,
     borderRadius: 16,
-    borderColor: '#2C2C2C33',
+    borderColor: c.border,
     borderWidth: 1,
   },
   cardTitle: {
     fontFamily: 'CormorantGaramond-SemiBold',
     fontSize: 24,
     fontWeight: '600',
-    color: '#333',
+    color: c.textPrimary,
     marginBottom: 8,
   },
   cardSubtitle: {
     fontSize: 16,
     fontFamily: 'DMSans-Regular',
-    color: '#666',
+    color: c.textSecondary,
     marginBottom: 20,
   },
   tipsContainer: {
@@ -182,7 +184,7 @@ const styles = StyleSheet.create({
   },
   tipText: {
     fontSize: 14,
-    color: '#666',
+    color: c.textSecondary,
     flex: 1,
     lineHeight: 20,
   },
@@ -191,19 +193,22 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     padding: 20,
     borderRadius: 16,
-    borderColor: '#2C2C2C33',
+    borderColor: c.border,
     borderWidth: 1,
   },
   sectionTitle: {
     fontFamily: 'CormorantGaramond-SemiBold',
     fontSize: 24,
     fontWeight: '600',
-    color: '#333',
+    color: c.textPrimary,
     marginBottom: 20,
+  },
+  loader: {
+    marginVertical: 20,
   },
   emptyText: {
     fontSize: 14,
-    color: '#999',
+    color: c.textMuted,
     fontFamily: 'DMSans-Regular',
     textAlign: 'center',
     paddingVertical: 16,
@@ -218,7 +223,7 @@ const styles = StyleSheet.create({
     height: 80,
     borderRadius: 10,
     marginRight: 16,
-    backgroundColor: '#f3f4f6',
+    backgroundColor: c.surfaceMuted,
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
@@ -230,7 +235,7 @@ const styles = StyleSheet.create({
   designIconText: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#C1A36A',
+    color: c.brand,
   },
   designInfo: {
     flex: 1,
@@ -238,13 +243,13 @@ const styles = StyleSheet.create({
   designTitle: {
     fontSize: 16,
     fontWeight: '500',
-    color: '#333',
+    color: c.textPrimary,
     marginBottom: 4,
   },
   designStyle: {
     fontSize: 14,
-    color: '#999',
+    color: c.textMuted,
   },
-});
+}));
 
 export default StudioComponent;

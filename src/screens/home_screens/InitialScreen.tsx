@@ -2,7 +2,6 @@ import React, {useState} from 'react';
 import {
   ActivityIndicator,
   FlatList,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -16,6 +15,7 @@ import {navigateTo} from '../../utils/navigation';
 import {useNavigation} from '@react-navigation/native';
 import useBlogFeed from '../../hooks/useBlogFeed';
 import {BlogPost} from '../../../interface/blog.interface';
+import {makeStyles, useTheme} from '../../theme/useTheme';
 
 type Tab = 'Studio' | 'MoodBoard' | 'Blog';
 
@@ -29,6 +29,8 @@ const HomeScreen = () => {
   const [activeTab, setActiveTab] = useState<Tab>('Studio');
   const navigation = useNavigation();
   const isBlogTab = activeTab === 'Blog';
+  const styles = useStyles();
+  const {colors} = useTheme();
 
   const {
     posts,
@@ -47,7 +49,7 @@ const HomeScreen = () => {
         subtitle="Design your dream home"
         action={{
           label: 'Start New Design',
-          icon: <Plus size={16} color="#fff" />,
+          icon: <Plus size={16} color={colors.onBrand} />,
           onPress: () => navigateTo(navigation, 'Design'),
         }}
       />
@@ -108,7 +110,7 @@ const HomeScreen = () => {
       onEndReachedThreshold={0.4}
       ListFooterComponent={
         isBlogTab && (loading || loadingMore) ? (
-          <ActivityIndicator color="#C1A36A" style={styles.loader} />
+          <ActivityIndicator color={colors.brand} style={styles.loader} />
         ) : null
       }
       ListEmptyComponent={
@@ -120,10 +122,10 @@ const HomeScreen = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles(c => ({
   root: {
     flex: 1,
-    backgroundColor: '#FAF9F6',
+    backgroundColor: c.background,
   },
   content: {
     paddingBottom: 24,
@@ -136,7 +138,7 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     marginTop: 70,
     marginBottom: 16,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: c.surface,
     gap: 24,
     borderRadius: 12,
     width: '90%',
@@ -152,18 +154,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   activeTab: {
-    backgroundColor: '#2C2C2C08',
+    backgroundColor: c.highlight,
     paddingHorizontal: 8,
     borderRadius: 6,
   },
   tabText: {
     fontFamily: 'DMSans-Regular',
     fontSize: 15,
-    color: '#999',
+    color: c.textMuted,
     paddingHorizontal: 15,
   },
   activeTabText: {
-    color: '#1a1a1a',
+    color: c.textPrimary,
     fontWeight: '600',
   },
   // Content
@@ -178,11 +180,11 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     textAlign: 'center',
-    color: '#999',
+    color: c.textMuted,
     fontFamily: 'DMSans-Regular',
     fontSize: 14,
     marginTop: 24,
   },
-});
+}));
 
 export default HomeScreen;

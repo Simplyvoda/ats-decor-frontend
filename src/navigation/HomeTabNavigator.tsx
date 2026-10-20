@@ -3,13 +3,7 @@ import {StatusBar, Text, TouchableOpacity, View} from 'react-native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {useNavigation} from '@react-navigation/native';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import {
-  Compass,
-  FileText,
-  Home,
-  PenTool,
-  Settings,
-} from 'lucide-react-native';
+import {Compass, FileText, Home, PenTool, Settings} from 'lucide-react-native';
 
 import DesignScreen from '../components/(design)/DesignScreen';
 import ExploreScreen from '../components/(explore)/ExploreScreen';
@@ -17,16 +11,21 @@ import HomeScreen from '../screens/home_screens/InitialScreen';
 import NotesScreen from '../components/(notes)/NotesScreen';
 import UserAvatar from '../components/molecules/UserAvatar';
 import {useUserContext} from '../context/UserContext';
+import {useTheme} from '../theme/useTheme';
 
 const Tab = createBottomTabNavigator();
 
 function TabHeader() {
   const navigation = useNavigation<any>();
   const {user} = useUserContext();
+  const {isDark, colors} = useTheme();
 
   return (
-    <SafeAreaView edges={['top']} style={{backgroundColor: 'white'}}>
-      <StatusBar barStyle="dark-content" backgroundColor="transparent" />
+    <SafeAreaView edges={['top']} style={{backgroundColor: colors.surface}}>
+      <StatusBar
+        barStyle={isDark ? 'light-content' : 'dark-content'}
+        backgroundColor="transparent"
+      />
       <View
         style={{
           flexDirection: 'row',
@@ -34,11 +33,13 @@ function TabHeader() {
           alignItems: 'center',
           paddingHorizontal: 20,
           paddingVertical: 8,
-          backgroundColor: 'white',
+          backgroundColor: colors.surface,
         }}>
         <TouchableOpacity
           style={{flexDirection: 'row', alignItems: 'center'}}
-          onPress={() => navigation.navigate('Settings', {screen: 'ProfilePreferences'})}
+          onPress={() =>
+            navigation.navigate('Settings', {screen: 'ProfilePreferences'})
+          }
           hitSlop={{top: 8, bottom: 8, left: 8, right: 8}}>
           <View style={{marginRight: 12}}>
             <UserAvatar
@@ -50,11 +51,18 @@ function TabHeader() {
             />
           </View>
           <View>
-            <Text style={{color: '#6b7280', fontSize: 12}}>Welcome!</Text>
-            <Text style={{color: '#1f2937', fontSize: 14, fontWeight: '600'}}>
+            <Text style={{color: colors.textMuted, fontSize: 12}}>
+              Welcome!
+            </Text>
+            <Text
+              style={{
+                color: colors.textPrimary,
+                fontSize: 14,
+                fontWeight: '600',
+              }}>
               {user?.first_name && user?.last_name
                 ? `${user.first_name} ${user.last_name}`
-                : user?.email ?? ''}
+                : (user?.email ?? '')}
             </Text>
           </View>
         </TouchableOpacity>
@@ -62,7 +70,7 @@ function TabHeader() {
         <TouchableOpacity
           hitSlop={{top: 8, bottom: 8, left: 8, right: 8}}
           onPress={() => navigation.navigate('Settings')}>
-          <Settings size={24} color="#333" />
+          <Settings size={24} color={colors.icon} />
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -70,15 +78,16 @@ function TabHeader() {
 }
 
 export default function HomeTabNavigator() {
+  const {colors} = useTheme();
   return (
     <Tab.Navigator
       screenOptions={({route}) => ({
         header: () => <TabHeader />,
-        tabBarActiveTintColor: '#C4A962',
-        tabBarInactiveTintColor: '#999',
+        tabBarActiveTintColor: colors.brand,
+        tabBarInactiveTintColor: colors.textMuted,
         tabBarStyle: {
-          backgroundColor: 'white',
-          borderTopColor: '#e5e7eb',
+          backgroundColor: colors.surface,
+          borderTopColor: colors.border,
           borderTopWidth: 1,
         },
         tabBarLabelStyle: {

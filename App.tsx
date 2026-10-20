@@ -1,7 +1,10 @@
 import React, {useEffect, useRef} from 'react';
 import {Linking} from 'react-native';
 import {
+  DarkTheme,
+  DefaultTheme,
   NavigationContainer,
+  Theme,
   useNavigationContainerRef,
 } from '@react-navigation/native';
 import AppNavigator from './src/navigation/AppNavigator';
@@ -14,6 +17,27 @@ import {
   extractVerifiedSession,
 } from './src/utils/deepLinking';
 import * as Sentry from '@sentry/react-native';
+import {useTheme} from './src/theme/useTheme';
+import {ThemeColors} from './src/theme/colors';
+
+// React Navigation's own colours (screen backgrounds during transitions,
+// default header/tab colours) built from the app's theme, so nothing
+// flashes white between screens in dark mode.
+const navigationTheme = (isDark: boolean, c: ThemeColors): Theme => {
+  const base = isDark ? DarkTheme : DefaultTheme;
+  return {
+    ...base,
+    colors: {
+      ...base.colors,
+      primary: c.brand,
+      background: c.background,
+      card: c.surface,
+      text: c.textPrimary,
+      border: c.border,
+      notification: c.brand,
+    },
+  };
+};
 
 // Confirmed via the build 66/67/68 tests that neither Sentry.init() nor the
 // double Sentry.wrap() were the launch-crash cause — that was a broken JS
@@ -46,6 +70,7 @@ function AppContent() {
   const navigationRef = useNavigationContainerRef();
   const pendingUrlRef = useRef<string | null>(null);
   const {signInFromSession} = useUserContext();
+  const {isDark, colors} = useTheme();
 
   const handleDeepLink = async (url: string | null) => {
     const verified = extractVerifiedSession(url);
@@ -102,6 +127,7 @@ function AppContent() {
   return (
     <NavigationContainer
       ref={navigationRef}
+      theme={navigationTheme(isDark, colors)}
       onReady={() => {
         if (pendingUrlRef.current) {
           handleDeepLink(pendingUrlRef.current);

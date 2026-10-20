@@ -6,6 +6,7 @@ import {useNavigation} from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
 import PrimaryButton from '../../components/molecules/PrimaryButton';
 import SecondaryButton from '../../components/molecules/SecondaryButton';
+import {useTheme} from '../../theme/useTheme';
 
 const comingSoon = () =>
   Toast.show({type: 'info', text1: 'Payments & subscriptions coming soon'});
@@ -20,32 +21,33 @@ const SUBSCRIPTIONS_ENABLED = false;
 
 const ShoppingScreen = () => {
   const navigation = useNavigation();
+  const {colors} = useTheme();
   return (
     <ScrollView
-      className="flex-1 bg-[#FFFDF8] px-5 pt-[70px]"
+      className="flex-1 bg-[#FFFDF8] dark:bg-night px-5 pt-[70px]"
       showsVerticalScrollIndicator={false}>
       {/* HEADER */}
       <View className="flex-row items-center mb-6">
         <ChevronLeft
-          className="text-[#2C2C2C]"
+          className="text-[#2C2C2C] dark:text-night-text"
           size={24}
           onPress={() => goBack(navigation)}
         />
-        <Text className="text-[20px] ml-5 font-semibold text-[#1A1A1A] font-cormorant">
+        <Text className="text-[20px] ml-5 font-semibold text-[#1A1A1A] dark:text-night-text-primary font-cormorant">
           Shopping
         </Text>
       </View>
 
       {/* EARLY ACCESS — shown while subscriptions are off */}
       {!SUBSCRIPTIONS_ENABLED && (
-        <View className="border border-[#E5DFCE] rounded-2xl p-6 mb-6">
+        <View className="border border-[#E5DFCE] dark:border-night-border rounded-2xl p-6 mb-6">
           <View className="flex-row items-center gap-2 mb-3">
-            <Crown size={18} color="#C4A663" />
-            <Text className="text-lg font-semibold font-cormorant text-[#1A1A1A]">
+            <Crown size={18} color={colors.brand} />
+            <Text className="text-lg font-semibold font-cormorant text-[#1A1A1A] dark:text-night-text-primary">
               Early Access
             </Text>
           </View>
-          <Text className="text-[#444] font-dm-sans text-[14px] leading-6">
+          <Text className="text-[#444] dark:text-night-text-secondary font-dm-sans text-[14px] leading-6">
             PlaDomus is completely free for our first 300 users. As an early
             user, you’ll get full access while we’re in early access, plus a
             special benefit when paid plans launch.
@@ -55,10 +57,10 @@ const ShoppingScreen = () => {
 
       {/* SUBSCRIPTION PLANS */}
       {SUBSCRIPTIONS_ENABLED && (
-        <View className="border border-[#E5DFCE] rounded-2xl p-4 mb-6">
+        <View className="border border-[#E5DFCE] dark:border-night-border rounded-2xl p-4 mb-6">
           <View className="flex-row items-center gap-2 mb-3">
-            <Crown size={18} color="#C4A663" />
-            <Text className="text-lg font-semibold font-cormorant text-[#1A1A1A]">
+            <Crown size={18} color={colors.brand} />
+            <Text className="text-lg font-semibold font-cormorant text-[#1A1A1A] dark:text-night-text-primary">
               Subscription Plans
             </Text>
           </View>
@@ -67,7 +69,7 @@ const ShoppingScreen = () => {
             {/* HOBBYIST PLAN */}
             <View className="border bg-[#C1A36A1A] border-[#C4A663] rounded-xl px-5 py-7 mb-4">
               <View className="flex-row justify-between items-center">
-                <Text className="text-xl font-semibold font-cormorant text-[#1A1A1A]">
+                <Text className="text-xl font-semibold font-cormorant text-[#1A1A1A] dark:text-night-text-primary">
                   Hobbyist Plan
                 </Text>
                 <Text className="bg-brand text-white font-dm-sans text-xs px-3 py-1 rounded-full">
@@ -95,7 +97,7 @@ const ShoppingScreen = () => {
                 ].map((item, i) => (
                   <Text
                     key={i}
-                    className="text-[#444] font-dm-sans text-[13px]">
+                    className="text-[#444] dark:text-night-text-secondary font-dm-sans text-[13px]">
                     • {item}
                   </Text>
                 ))}
@@ -103,8 +105,8 @@ const ShoppingScreen = () => {
             </View>
 
             {/* CASUAL PLAN */}
-            <View className="border border-[#E5DFCE] rounded-xl px-5 py-7 ">
-              <Text className="text-xl font-semibold font-cormorant text-[#1A1A1A] mb-1">
+            <View className="border border-[#E5DFCE] dark:border-night-border rounded-xl px-5 py-7">
+              <Text className="text-xl font-semibold font-cormorant text-[#1A1A1A] dark:text-night-text-primary mb-1">
                 Casual Plan
               </Text>
               <Text className="text-[#C4A663] text-[18px] font-bold mb-3 font-dm-sans">
@@ -125,7 +127,7 @@ const ShoppingScreen = () => {
                 ].map((item, i) => (
                   <Text
                     key={i}
-                    className="text-[#444] font-dm-sans text-[13px]">
+                    className="text-[#444] dark:text-night-text-secondary font-dm-sans text-[13px]">
                     • {item}
                   </Text>
                 ))}
@@ -139,10 +141,10 @@ const ShoppingScreen = () => {
 
       {/* PAYMENT METHODS */}
       {SUBSCRIPTIONS_ENABLED && (
-        <View className="border border-[#E5DFCE] rounded-2xl p-4 mb-6">
+        <View className="border border-[#E5DFCE] dark:border-night-border rounded-2xl p-4 mb-6">
           <View className="flex-row items-center gap-2 mb-3">
-            <CreditCard size={18} color="#C4A663" />
-            <Text className="text-xl font-semibold font-cormorant text-[#1A1A1A]">
+            <CreditCard size={18} color={colors.brand} />
+            <Text className="text-xl font-semibold font-cormorant text-[#1A1A1A] dark:text-night-text-primary">
               Payment Methods
             </Text>
           </View>
@@ -160,12 +162,12 @@ const ShoppingScreen = () => {
             ].map((card, i) => (
               <View
                 key={i}
-                className="border border-[#E5DFCE] rounded-lg px-4 py-3 mb-3 flex-row justify-between items-center">
+                className="border border-[#E5DFCE] dark:border-night-border rounded-lg px-4 py-3 mb-3 flex-row justify-between items-center">
                 <View>
-                  <Text className="text-[#1A1A1A] font-medium font-dm-sans">
+                  <Text className="text-[#1A1A1A] dark:text-night-text-primary font-medium font-dm-sans">
                     {card.brand} •••• {card.digits}
                   </Text>
-                  <Text className="text-[#777] text-xs font-dm-sans">
+                  <Text className="text-[#777] dark:text-night-text-muted text-xs font-dm-sans">
                     Expires {card.exp}
                   </Text>
                 </View>
@@ -184,10 +186,10 @@ const ShoppingScreen = () => {
 
       {/* PURCHASE HISTORY */}
       {SUBSCRIPTIONS_ENABLED && (
-        <View className="border border-[#E5DFCE] rounded-2xl p-4 mb-8">
+        <View className="border border-[#E5DFCE] dark:border-night-border rounded-2xl p-4 mb-8">
           <View className="flex-row items-center gap-2 mb-3">
-            <FileText size={18} color="#C4A663" />
-            <Text className="text-xl font-semibold font-cormorant text-[#1A1A1A]">
+            <FileText size={18} color={colors.brand} />
+            <Text className="text-xl font-semibold font-cormorant text-[#1A1A1A] dark:text-night-text-primary">
               Purchase History
             </Text>
           </View>
@@ -196,19 +198,21 @@ const ShoppingScreen = () => {
             {[1, 2, 3].map((_, i) => (
               <View
                 key={i}
-                className="border border-[#E5DFCE] rounded-lg px-4 py-3 mb-3 flex-row justify-between items-center">
+                className="border border-[#E5DFCE] dark:border-night-border rounded-lg px-4 py-3 mb-3 flex-row justify-between items-center">
                 <View>
-                  <Text className="text-[#1A1A1A] font-medium font-dm-sans ">
+                  <Text className="text-[#1A1A1A] dark:text-night-text-primary font-medium font-dm-sans">
                     Hobbyist Subscription
                   </Text>
-                  <Text className="text-[#777] text-xs">2024-01-15</Text>
+                  <Text className="text-[#777] dark:text-night-text-muted text-xs">
+                    2024-01-15
+                  </Text>
                 </View>
                 <View className="items-end">
-                  <Text className="text-[#1A1A1A] font-dm-sans font-semibold">
+                  <Text className="text-[#1A1A1A] dark:text-night-text-primary font-dm-sans font-semibold">
                     $19.99
                   </Text>
 
-                  <Text className="text-[#1D590F] bg-[#34C51726] px-2 py-1 rounded-full font-dm-sans text-xs font-medium">
+                  <Text className="text-[#1D590F] dark:text-[#4ADE80] bg-[#34C51726] px-2 py-1 rounded-full font-dm-sans text-xs font-medium">
                     Paid
                   </Text>
                 </View>

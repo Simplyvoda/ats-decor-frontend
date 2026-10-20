@@ -22,9 +22,11 @@ import {
   isStrongPassword,
   PASSWORD_REQUIREMENTS_MESSAGE,
 } from '../../utils/passwordValidation';
+import {useTheme} from '../../theme/useTheme';
 
 const SecurityPrivacy = () => {
   const navigation = useNavigation();
+  const {colors} = useTheme();
   const {logoutUser} = useUserContext();
 
   const [currentPassword, setCurrentPassword] = useState('');
@@ -137,70 +139,70 @@ const SecurityPrivacy = () => {
       style={{flex: 1}}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView
-        className="flex-1 bg-offWhite px-5 pt-[70px]"
+        className="flex-1 bg-offWhite dark:bg-night px-5 pt-[70px]"
         contentContainerStyle={{paddingBottom: 40}}
         showsVerticalScrollIndicator={false}>
         {/* HEADER */}
         <View className="flex-row items-center mb-6 gap-3">
           <ChevronLeft
-            className="text-[#2C2C2C]"
+            className="text-[#2C2C2C] dark:text-night-text"
             size={24}
             onPress={() => goBack(navigation)}
           />
-          <Text className="text-[20px] ml-5 font-semibold text-[#1A1A1A] font-cormorant">
+          <Text className="text-[20px] ml-5 font-semibold text-[#1A1A1A] dark:text-night-text-primary font-cormorant">
             Security & Privacy
           </Text>
         </View>
 
         {/* PASSWORD */}
-        <View className="bg-transparent  border-[1px] border-[#2C2C2C33]  rounded-2xl p-4 mb-5">
+        <View className="bg-transparent border-[1px] border-[#2C2C2C33] dark:border-night-border rounded-2xl p-4 mb-5">
           <View className="flex-row items-center gap-2 mb-5">
-            <User size={18} color="#C4A663" />
-            <Text className="text-[20px] font-semibold text-[#1A1A1A] font-cormorant">
+            <User size={18} color={colors.brand} />
+            <Text className="text-[20px] font-semibold text-[#1A1A1A] dark:text-night-text-primary font-cormorant">
               Password & Security
             </Text>
           </View>
 
-          <Text className="text-[14px] font-medium font-dm-sans mb-1 text-[#444]">
+          <Text className="text-[14px] font-medium font-dm-sans mb-1 text-[#444] dark:text-night-text-secondary">
             Current Password
           </Text>
           <TextInput
-            className="border border-[#F1EADC]  rounded-lg py-2.5 px-3 mb-3 text-[14px] text-[#333]"
+            className="border border-[#F1EADC] dark:border-night-border rounded-lg py-2.5 px-3 mb-3 text-[14px] text-[#333] dark:text-night-text"
             value={currentPassword}
             onChangeText={setCurrentPassword}
             placeholder="Enter current password"
-            placeholderTextColor="#2C2C2C80"
+            placeholderTextColor={colors.textMuted}
             secureTextEntry
             autoCapitalize="none"
           />
-          <Text className="text-[14px] font-medium font-dm-sans mb-1 text-[#444]">
+          <Text className="text-[14px] font-medium font-dm-sans mb-1 text-[#444] dark:text-night-text-secondary">
             New Password
           </Text>
           <TextInput
-            className="border border-[#F1EADC]  rounded-lg py-2.5 px-3 mb-3 text-[14px] text-[#333]"
+            className="border border-[#F1EADC] dark:border-night-border rounded-lg py-2.5 px-3 mb-3 text-[14px] text-[#333] dark:text-night-text"
             value={newPassword}
             onChangeText={setNewPassword}
             placeholder="Enter new password"
-            placeholderTextColor="#2C2C2C80"
+            placeholderTextColor={colors.textMuted}
             secureTextEntry
             autoCapitalize="none"
           />
 
-          <Text className="text-[14px] font-medium font-dm-sans mb-1 text-[#444]">
+          <Text className="text-[14px] font-medium font-dm-sans mb-1 text-[#444] dark:text-night-text-secondary">
             Confirm Password
           </Text>
           <TextInput
-            className="border border-[#F1EADC]  rounded-lg py-2.5 px-3 mb-3 text-[14px] text-[#333]"
+            className="border border-[#F1EADC] dark:border-night-border rounded-lg py-2.5 px-3 mb-3 text-[14px] text-[#333] dark:text-night-text"
             value={confirmPassword}
             onChangeText={setConfirmPassword}
             placeholder="Re-enter new password"
-            placeholderTextColor="#2C2C2C80"
+            placeholderTextColor={colors.textMuted}
             secureTextEntry
             autoCapitalize="none"
           />
 
           <View className="flex-row justify-between items-center mb-3">
-            <Text className="text-[14px] text-[#333] font-dm-sans">
+            <Text className="text-[14px] text-[#333] dark:text-night-text font-dm-sans">
               Two-factor authentication
             </Text>
             <AppSwitch
@@ -220,16 +222,16 @@ const SecurityPrivacy = () => {
         </View>
 
         {/* PRIVACY SETTINGS */}
-        <View className="bg-transparent border-[1px] border-[#2C2C2C33] rounded-2xl p-4 mb-5">
+        <View className="bg-transparent border-[1px] border-[#2C2C2C33] dark:border-night-border rounded-2xl p-4 mb-5">
           <View className="flex-row items-center gap-2 mb-3">
-            <Bell size={18} color="#C4A663" />
-            <Text className="text-[20px] font-semibold font-cormorant text-[#1A1A1A]">
+            <Bell size={18} color={colors.brand} />
+            <Text className="text-[20px] font-semibold font-cormorant text-[#1A1A1A] dark:text-night-text-primary">
               Privacy Settings
             </Text>
           </View>
 
           <View className="flex-row justify-between items-center mb-3">
-            <Text className="text-[14px] text-[#333] font-dm-sans">
+            <Text className="text-[14px] text-[#333] dark:text-night-text font-dm-sans">
               Marketing Emails
             </Text>
             <AppSwitch
@@ -243,8 +245,8 @@ const SecurityPrivacy = () => {
           <TouchableOpacity
             className="flex-row justify-center items-center gap-3"
             onPress={handleDeleteAccount}>
-            <Trash size={18} color="#D21616" />
-            <Text className="text-[#D21616] font-semibold text-[16px]">
+            <Trash size={18} color={colors.danger} />
+            <Text className="text-[#D21616] dark:text-[#FF6B6B] font-semibold text-[16px]">
               Delete My Account
             </Text>
           </TouchableOpacity>

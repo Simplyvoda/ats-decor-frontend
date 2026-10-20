@@ -19,9 +19,11 @@ import {goBack} from '../../utils/navigation';
 import UserService from '../../services/UserService';
 import {useUserContext} from '../../context/UserContext';
 import {launchImageLibrary} from 'react-native-image-picker';
+import {useTheme} from '../../theme/useTheme';
 
 const ProfilePreference = () => {
   const navigation = useNavigation();
+  const {colors} = useTheme();
   const {updateUser} = useUserContext();
 
   const [isLoading, setIsLoading] = useState(true);
@@ -140,38 +142,38 @@ const ProfilePreference = () => {
   };
 
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: '#FAF9F6'}}>
+    <SafeAreaView style={{flex: 1, backgroundColor: colors.background}}>
       <KeyboardAvoidingView
         style={{flex: 1}}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}>
         <ScrollView
-          className="flex-1 bg-offWhite px-5 pt-[70px]"
+          className="flex-1 bg-offWhite dark:bg-night px-5 pt-[70px]"
           contentContainerStyle={{paddingBottom: 24}}
           showsVerticalScrollIndicator={false}>
           {/* HEADER */}
           <View className="flex-row items-center mb-6 gap-3">
             <ChevronLeft
-              className="text-[#2C2C2C]"
+              className="text-[#2C2C2C] dark:text-night-text"
               size={24}
               onPress={() => goBack(navigation)}
             />
-            <Text className="text-[20px] ml-5 font-semibold text-[#1A1A1A] font-cormorant">
+            <Text className="text-[20px] ml-5 font-semibold text-[#1A1A1A] dark:text-night-text-primary font-cormorant">
               Profile & Preferences
             </Text>
           </View>
 
           {isLoading ? (
             <View className="items-center py-16">
-              <ActivityIndicator size="large" color="#C1A36A" />
+              <ActivityIndicator size="large" color={colors.brand} />
             </View>
           ) : (
             <>
               {/* PROFILE INFO */}
-              <View className="bg-transparent  border-[1px] border-[#2C2C2C33]  rounded-2xl p-4 mb-5">
+              <View className="bg-transparent border-[1px] border-[#2C2C2C33] dark:border-night-border rounded-2xl p-4 mb-5">
                 <View className="flex-row items-center gap-2 mb-3">
-                  <User size={18} color="#C4A663" />
-                  <Text className="text-[20px] font-semibold text-[#1A1A1A] font-cormorant">
+                  <User size={18} color={colors.brand} />
+                  <Text className="text-[20px] font-semibold text-[#1A1A1A] dark:text-night-text-primary font-cormorant">
                     Profile Information
                   </Text>
                 </View>
@@ -200,61 +202,61 @@ const ProfilePreference = () => {
                   )}
                 </TouchableOpacity>
 
-                <Text className="text-[14px] font-medium font-dm-sans mb-1 text-[#444]">
+                <Text className="text-[14px] font-medium font-dm-sans mb-1 text-[#444] dark:text-night-text-secondary">
                   First Name
                 </Text>
                 <TextInput
-                  className="border border-[#F1EADC]  rounded-lg py-2.5 px-3 mb-3 text-[14px] text-[#333]"
+                  className="border border-[#F1EADC] dark:border-night-border rounded-lg py-2.5 px-3 mb-3 text-[14px] text-[#333] dark:text-night-text"
                   value={firstName}
                   onChangeText={setFirstName}
                   placeholder="First name"
-                  placeholderTextColor="#2C2C2C80"
+                  placeholderTextColor={colors.textMuted}
                 />
 
-                <Text className="text-[14px] font-medium font-dm-sans mb-1 text-[#444]">
+                <Text className="text-[14px] font-medium font-dm-sans mb-1 text-[#444] dark:text-night-text-secondary">
                   Last Name
                 </Text>
                 <TextInput
-                  className="border border-[#F1EADC]  rounded-lg py-2.5 px-3 mb-3 text-[14px] text-[#333]"
+                  className="border border-[#F1EADC] dark:border-night-border rounded-lg py-2.5 px-3 mb-3 text-[14px] text-[#333] dark:text-night-text"
                   value={lastName}
                   onChangeText={setLastName}
                   placeholder="Last name"
-                  placeholderTextColor="#2C2C2C80"
+                  placeholderTextColor={colors.textMuted}
                 />
 
-                <Text className="text-[14px] font-medium font-dm-sans mb-1 text-[#444]">
+                <Text className="text-[14px] font-medium font-dm-sans mb-1 text-[#444] dark:text-night-text-secondary">
                   Email
                 </Text>
                 <TextInput
-                  className="border border-[#F1EADC] bg-[#F5F1E8] rounded-lg py-2.5 px-3 mb-3 text-[14px] text-[#888]"
+                  className="border border-[#F1EADC] dark:border-night-border bg-[#F5F1E8] dark:bg-night-muted rounded-lg py-2.5 px-3 mb-3 text-[14px] text-[#888] dark:text-night-text-muted"
                   value={email}
                   editable={false}
                 />
 
-                <Text className="text-[14px] font-medium font-dm-sans mb-1 text-[#444]">
+                <Text className="text-[14px] font-medium font-dm-sans mb-1 text-[#444] dark:text-night-text-secondary">
                   Bio
                 </Text>
                 <TextInput
-                  className="border border-[#F1EADC]  rounded-lg py-2.5 px-3 mb-3 text-[14px] text-[#333]"
+                  className="border border-[#F1EADC] dark:border-night-border rounded-lg py-2.5 px-3 mb-3 text-[14px] text-[#333] dark:text-night-text"
                   value={bio}
                   onChangeText={setBio}
                   placeholder="Interior design enthusiast"
-                  placeholderTextColor="#2C2C2C80"
+                  placeholderTextColor={colors.textMuted}
                   multiline
                 />
               </View>
 
               {/* APPEARANCE */}
-              {/* <View className="bg-transparent border-[1px] border-[#2C2C2C33]  rounded-2xl p-4 mb-5">
+              {/* <View className="bg-transparent border-[1px] border-[#2C2C2C33] dark:border-night-border rounded-2xl p-4 mb-5">
                 <View className="flex-row items-center gap-2 mb-3">
-                  <Sun size={18} color="#C4A663" />
-                  <Text className="text-[20px] font-semibold font-cormorant text-[#1A1A1A]">
+                  <Sun size={18} color={colors.brand} />
+                  <Text className="text-[20px] font-semibold font-cormorant text-[#1A1A1A] dark:text-night-text-primary">
                     Appearance
                   </Text>
                 </View>
 
                 <View className="flex-row justify-between items-center">
-                  <Text className="text-[14px] text-[#333] font-dm-sans">
+                  <Text className="text-[14px] text-[#333] dark:text-night-text font-dm-sans">
                     Dark Mode
                   </Text>
                   <AppSwitch value={darkMode} onValueChange={setDarkMode} />
@@ -262,23 +264,23 @@ const ProfilePreference = () => {
               </View> */}
 
               {/* DESIGN STYLE */}
-              <View className="bg-transparent border-[1px] border-[#2C2C2C33] rounded-2xl p-4 mb-20">
+              <View className="bg-transparent border-[1px] border-[#2C2C2C33] dark:border-night-border rounded-2xl p-4 mb-20">
                 <View className="flex-row items-center gap-2 mb-3">
-                  <Palette size={18} color="#C4A663" />
-                  <Text className="text-[20px] font-semibold font-cormorant text-[#1A1A1A]">
+                  <Palette size={18} color={colors.brand} />
+                  <Text className="text-[20px] font-semibold font-cormorant text-[#1A1A1A] dark:text-night-text-primary">
                     Design Style
                   </Text>
                 </View>
 
-                <Text className="text-[14px] font-dm-sans font-medium mt-1 mb-2 text-[#444]">
+                <Text className="text-[14px] font-dm-sans font-medium mt-1 mb-2 text-[#444] dark:text-night-text-secondary">
                   Add Personal Design Style
                 </Text>
                 <TextInput
-                  className="border border-[#F1EADC] bg-[#FFFDF8] rounded-lg py-2.5 px-3 text-[14px]"
+                  className="border border-[#F1EADC] dark:border-night-border bg-[#FFFDF8] dark:bg-night-muted rounded-lg py-2.5 px-3 text-[14px] text-[#333] dark:text-night-text"
                   value={designStyle}
                   onChangeText={setDesignStyle}
                   placeholder="e.g. tech minimalist, bohemian, Scandinavian..."
-                  placeholderTextColor="#2C2C2C80"
+                  placeholderTextColor={colors.textMuted}
                 />
               </View>
             </>
