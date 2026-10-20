@@ -11,16 +11,16 @@ export default function TermsOfServiceScreen() {
 
   return (
     <ScrollView
-      className="flex-1 bg-offWhite px-5 pt-[70px]"
+      className="flex-1 bg-offWhite dark:bg-night px-5 pt-[70px]"
       contentContainerStyle={{paddingBottom: 40}}
       showsVerticalScrollIndicator={false}>
       <View className="flex-row items-center mb-6">
         <ChevronLeft
-          className="text-[#2C2C2C]"
+          className="text-[#2C2C2C] dark:text-night-text"
           size={24}
           onPress={() => goBack(navigation)}
         />
-        <Text className="text-[20px] ml-5 font-semibold text-[#1A1A1A] font-cormorant">
+        <Text className="text-[20px] ml-5 font-semibold text-[#1A1A1A] dark:text-night-text-primary font-cormorant">
           Terms of Service
         </Text>
       </View>

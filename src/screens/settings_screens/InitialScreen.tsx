@@ -46,7 +46,7 @@ const InitialScreen = () => {
         'Profile Information',
         'Design Style Preferences',
         // 'Language & Region', // not implemented on Profile & Preferences
-        // '+1 more', // was Appearance/Dark Mode — removed from that screen
+        'Light & Dark Mode',
       ],
       screen: 'ProfilePreferences',
     },
@@ -113,7 +113,7 @@ const InitialScreen = () => {
     <SafeAreaView className="flex-1 bg-offWhite dark:bg-night gap-5">
       <View className="bg-brand h-32 w-full flex flex-row justify-start  items-center pl-5">
         <ChevronLeft
-          className="text-white"
+          className="text-white dark:text-night"
           size={24}
           onPress={() => goBack(navigation)}
         />
@@ -128,14 +128,16 @@ const InitialScreen = () => {
             size={48}
           />
           {/* flex with text */}
-          <View className="text-white flex flex-col ml-4">
-            <Text className="text-white text-md font-cormorant">
+          <View className="text-white dark:text-night flex flex-col ml-4">
+            <Text className="text-white dark:text-night text-md font-cormorant">
               {displayName}
             </Text>
-            <Text className="text-white text-sm font-dm-sans">
+            <Text className="text-white dark:text-night text-sm font-dm-sans">
               Manage your PlaDomus
             </Text>
-            <Text className="text-white text-sm font-dm-sans">experience</Text>
+            <Text className="text-white dark:text-night text-sm font-dm-sans">
+              experience
+            </Text>
           </View>
         </View>
       </View>

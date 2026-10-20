@@ -26,6 +26,7 @@ import CreateNoteScreen from '../components/(notes)/CreateNoteScreen';
 import DesignNotesScreen from '../components/(notes)/DesignNotesScreen';
 import HomeTabNavigator from './HomeTabNavigator';
 import {useUserContext} from '../context/UserContext';
+import {useTheme} from '../theme/useTheme';
 
 const Stack = createNativeStackNavigator();
 const SettingsStack = createNativeStackNavigator();
@@ -58,13 +59,17 @@ function AuthNavigator() {
       <AuthStack.Screen name="SetPassword" component={SetPassword} />
       <AuthStack.Screen name="ForgotPassword" component={ForgotPassword} />
       <AuthStack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
-      <AuthStack.Screen name="TermsOfService" component={TermsOfServiceScreen} />
+      <AuthStack.Screen
+        name="TermsOfService"
+        component={TermsOfServiceScreen}
+      />
     </AuthStack.Navigator>
   );
 }
 
 function AppNavigator(): React.JSX.Element {
   const {user, isLoadingUser} = useUserContext();
+  const {colors} = useTheme();
 
   useEffect(() => {
     if (!isLoadingUser) {
@@ -73,7 +78,7 @@ function AppNavigator(): React.JSX.Element {
   }, [isLoadingUser]);
 
   if (isLoadingUser) {
-    return <View style={{flex: 1, backgroundColor: '#FAF9F6'}} />;
+    return <View style={{flex: 1, backgroundColor: colors.background}} />;
   }
 
   return (

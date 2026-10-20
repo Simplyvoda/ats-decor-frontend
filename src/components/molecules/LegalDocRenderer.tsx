@@ -16,12 +16,13 @@ const isHeading = (block: string) => {
 };
 
 const isList = (block: string) =>
-  block
-    .split('\n')
-    .every(line => line.trim().startsWith('- '));
+  block.split('\n').every(line => line.trim().startsWith('- '));
 
 export default function LegalDocRenderer({text}: {text: string}) {
-  const blocks = text.split(/\n{2,}/).map(b => b.trim()).filter(Boolean);
+  const blocks = text
+    .split(/\n{2,}/)
+    .map(b => b.trim())
+    .filter(Boolean);
 
   return (
     <>
@@ -30,7 +31,7 @@ export default function LegalDocRenderer({text}: {text: string}) {
           return (
             <Text
               key={i}
-              className="text-[18px] font-semibold font-cormorant text-[#1A1A1A] mt-6 mb-2">
+              className="text-[18px] font-semibold font-cormorant text-[#1A1A1A] dark:text-night-text-primary mt-6 mb-2">
               {block}
             </Text>
           );
@@ -42,8 +43,10 @@ export default function LegalDocRenderer({text}: {text: string}) {
             <View key={i} className="mb-3">
               {items.map((item, j) => (
                 <View key={j} className="flex-row mb-1.5">
-                  <Text className="text-[14px] font-dm-sans text-[#444] mr-2">•</Text>
-                  <Text className="flex-1 text-[14px] font-dm-sans text-[#444] leading-5">
+                  <Text className="text-[14px] font-dm-sans text-[#444] dark:text-night-text-secondary mr-2">
+                    •
+                  </Text>
+                  <Text className="flex-1 text-[14px] font-dm-sans text-[#444] dark:text-night-text-secondary leading-5">
                     {item}
                   </Text>
                 </View>
@@ -55,7 +58,7 @@ export default function LegalDocRenderer({text}: {text: string}) {
         return (
           <Text
             key={i}
-            className="text-[14px] font-dm-sans text-[#444] leading-5 mb-3">
+            className="text-[14px] font-dm-sans text-[#444] dark:text-night-text-secondary leading-5 mb-3">
             {block.replace(/\n/g, ' ')}
           </Text>
         );

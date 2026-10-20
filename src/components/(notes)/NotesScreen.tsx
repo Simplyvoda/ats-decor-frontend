@@ -28,6 +28,7 @@ import {INote} from '../../../interface/note.interface';
 import {navigateTo} from '../../utils/navigation';
 import SharedHeader from '../shared/Header';
 import useRefetchOnFocus from '../../hooks/useRefetchOnFocus';
+import {useTheme} from '../../theme/useTheme';
 
 export const NOTES_LIMIT = 50;
 
@@ -39,6 +40,7 @@ const formatDate = (iso: string) => {
 };
 
 export default function NotesScreen() {
+  const {colors} = useTheme();
   const navigation = useNavigation();
 
   const [activeTab, setActiveTab] = useState<'active' | 'trash'>('active');
@@ -207,8 +209,6 @@ export default function NotesScreen() {
     navigateTo(navigation, 'CreateNote');
   };
 
-
-
   const renderHeader = () => (
     <View>
       <SharedHeader
@@ -216,24 +216,24 @@ export default function NotesScreen() {
         subtitle="Keep Your Thoughts in One Place"
         action={{
           label: 'New Notes',
-          icon: <Plus size={16} color="#fff" />,
+          icon: <Plus size={16} color={colors.onBrand} />,
           onPress: goToCreate,
         }}
       />
 
       {/* mt clears the action card hanging below the shared header */}
       <View className="px-4 mt-16">
-        <View className="flex-row items-center bg-white border border-[#E5E0D5] rounded-[12px] px-4">
-          <Search size={18} color="#999" />
+        <View className="flex-row items-center bg-white dark:bg-night-surface border border-[#E5E0D5] dark:border-night-border rounded-[12px] px-4">
+          <Search size={18} color={colors.textMuted} />
           <TextInput
             value={search}
             onChangeText={setSearch}
             placeholder="Search notes..."
-            placeholderTextColor="#999"
-            className="flex-1 ml-2 py-3 font-dm-sans text-[15px] text-gray-primary"
+            placeholderTextColor={colors.textMuted}
+            className="flex-1 ml-2 py-3 font-dm-sans text-[15px] text-gray-primary dark:text-night-text"
           />
         </View>
-        <Text className="font-dm-sans text-[#7A7A7A] text-[14px] mt-3">
+        <Text className="font-dm-sans text-[#7A7A7A] dark:text-night-text-muted text-[14px] mt-3">
           {notes.length}/{NOTES_LIMIT} notes used
         </Text>
       </View>
@@ -246,11 +246,13 @@ export default function NotesScreen() {
             className={`px-4 py-2 rounded-[8px] ${
               activeTag === null
                 ? 'bg-brand'
-                : 'bg-white border border-[#E5E0D5]'
+                : 'bg-white dark:bg-night-surface border border-[#E5E0D5] dark:border-night-border'
             }`}>
             <Text
               className={`font-dm-sans text-[14px] ${
-                activeTag === null ? 'text-white' : 'text-gray-primary'
+                activeTag === null
+                  ? 'text-white dark:text-night'
+                  : 'text-gray-primary dark:text-night-text'
               }`}>
               All
             </Text>
@@ -262,15 +264,17 @@ export default function NotesScreen() {
               className={`px-4 py-2 rounded-[8px] flex-row items-center ${
                 activeTag === tag.id
                   ? 'bg-brand'
-                  : 'bg-white border border-[#E5E0D5]'
+                  : 'bg-white dark:bg-night-surface border border-[#E5E0D5] dark:border-night-border'
               }`}>
               <TagIcon
                 size={14}
-                color={activeTag === tag.id ? 'white' : '#2C2C2C'}
+                color={activeTag === tag.id ? colors.onBrand : colors.text}
               />
               <Text
                 className={`font-dm-sans text-[14px] ml-1 capitalize ${
-                  activeTag === tag.id ? 'text-white' : 'text-gray-primary'
+                  activeTag === tag.id
+                    ? 'text-white dark:text-night'
+                    : 'text-gray-primary dark:text-night-text'
                 }`}>
                 {tag.name}
               </Text>
@@ -281,7 +285,7 @@ export default function NotesScreen() {
 
       {/* Active / Trash tabs */}
       <View className="px-4 mt-4">
-        <View className="flex-row bg-white rounded-[12px] p-1">
+        <View className="flex-row bg-white dark:bg-night-surface rounded-[12px] p-1">
           {(['active', 'trash'] as const).map(tab => (
             <TouchableOpacity
               key={tab}
@@ -291,13 +295,13 @@ export default function NotesScreen() {
                 setMenuNoteId(null);
               }}
               className={`flex-1 py-3 rounded-[10px] items-center ${
-                activeTab === tab ? 'bg-offWhite' : ''
+                activeTab === tab ? 'bg-offWhite dark:bg-night-muted' : ''
               }`}>
               <Text
                 className={`font-dm-sans text-[15px] ${
                   activeTab === tab
-                    ? 'text-gray-primary font-semibold'
-                    : 'text-[#999]'
+                    ? 'text-gray-primary dark:text-night-text-primary font-semibold'
+                    : 'text-[#999] dark:text-night-text-muted'
                 }`}>
                 {tab === 'active' ? 'Active Notes' : 'Trash'}
               </Text>
@@ -309,18 +313,18 @@ export default function NotesScreen() {
       {/* Multi-select bar */}
       {inSelectMode && (
         <View className="px-4 mt-3">
-          <View className="flex-row items-center bg-white rounded-[12px] px-4 py-3">
-            <Text className="font-dm-sans text-[#999] text-[14px] flex-1">
+          <View className="flex-row items-center bg-white dark:bg-night-surface rounded-[12px] px-4 py-3">
+            <Text className="font-dm-sans text-[#999] dark:text-night-text-muted text-[14px] flex-1">
               {selectedIds.length} Selected
             </Text>
             <TouchableOpacity onPress={handleDeleteSelected} hitSlop={10}>
-              <Trash2 size={20} color="#D92D20" />
+              <Trash2 size={20} color={colors.danger} />
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => setSelectedIds([])}
               hitSlop={10}
               className="ml-6">
-              <Text className="font-dm-sans text-gray-primary text-[16px]">
+              <Text className="font-dm-sans text-gray-primary dark:text-night-text text-[16px]">
                 Cancel
               </Text>
             </TouchableOpacity>
@@ -334,38 +338,42 @@ export default function NotesScreen() {
     if (isLoading) {
       return (
         <View className="items-center py-16">
-          <ActivityIndicator size="large" color="#C1A36A" />
+          <ActivityIndicator size="large" color={colors.brand} />
         </View>
       );
     }
     return (
       <View className="px-4 mt-4">
-        <View className="bg-white border border-[#E5E0D5] rounded-[16px] items-center py-14 px-6">
+        <View className="bg-white dark:bg-night-surface border border-[#E5E0D5] dark:border-night-border rounded-[16px] items-center py-14 px-6">
           {activeTab === 'active' ? (
             <>
-              <ClipboardList size={44} color="#8A8A8A" strokeWidth={1.4} />
-              <Text className="font-cormorant text-[20px] text-gray-primary mt-4">
+              <ClipboardList
+                size={44}
+                color={colors.textMuted}
+                strokeWidth={1.4}
+              />
+              <Text className="font-cormorant text-[20px] text-gray-primary dark:text-night-text mt-4">
                 No notes yet
               </Text>
-              <Text className="font-dm-sans text-[#7A7A7A] text-[14px] mt-2 text-center">
+              <Text className="font-dm-sans text-[#7A7A7A] dark:text-night-text-muted text-[14px] mt-2 text-center">
                 Create your first note to get started
               </Text>
               <TouchableOpacity
                 onPress={goToCreate}
                 className="bg-brand rounded-[12px] px-6 py-3 flex-row items-center mt-6">
-                <Plus color="white" size={18} />
-                <Text className="font-dm-sans text-white text-[15px] font-semibold ml-2">
+                <Plus color={colors.onBrand} size={18} />
+                <Text className="font-dm-sans text-white dark:text-night text-[15px] font-semibold ml-2">
                   Create Note
                 </Text>
               </TouchableOpacity>
             </>
           ) : (
             <>
-              <Trash2 size={44} color="#8A8A8A" strokeWidth={1.4} />
-              <Text className="font-cormorant text-[20px] text-gray-primary mt-4">
+              <Trash2 size={44} color={colors.textMuted} strokeWidth={1.4} />
+              <Text className="font-cormorant text-[20px] text-gray-primary dark:text-night-text mt-4">
                 Trash is empty
               </Text>
-              <Text className="font-dm-sans text-[#7A7A7A] text-[14px] mt-2 text-center">
+              <Text className="font-dm-sans text-[#7A7A7A] dark:text-night-text-muted text-[14px] mt-2 text-center">
                 Deleted notes will appear here for 30 days
               </Text>
             </>
@@ -385,7 +393,7 @@ export default function NotesScreen() {
           activeOpacity={0.75}
           onPress={() => (menuOpen ? setMenuNoteId(null) : openNote(item))}
           onLongPress={() => activeTab === 'active' && toggleSelect(item.id)}
-          className="bg-white border border-[#E5E0D5] rounded-[16px] p-4">
+          className="bg-white dark:bg-night-surface border border-[#E5E0D5] dark:border-night-border rounded-[16px] p-4">
           <View className="flex-row items-start">
             {/* Selection circle (active tab) */}
             {activeTab === 'active' && (
@@ -396,22 +404,24 @@ export default function NotesScreen() {
                   isSelected ? 'bg-brand border-brand' : 'border-brand'
                 }`}>
                 {isSelected && (
-                  <Text className="text-white text-[11px] font-bold">✓</Text>
+                  <Text className="text-white dark:text-night text-[11px] font-bold">
+                    ✓
+                  </Text>
                 )}
               </TouchableOpacity>
             )}
 
             <View className="flex-1">
-              <Text className="font-cormorant text-[20px] text-gray-primary">
+              <Text className="font-cormorant text-[20px] text-gray-primary dark:text-night-text">
                 {item.title}
               </Text>
               <View className="flex-row items-center mt-1 flex-wrap">
-                <Calendar size={14} color="#C1A36A" />
-                <Text className="font-dm-sans text-[#7A7A7A] text-[13px] ml-1">
+                <Calendar size={14} color={colors.brand} />
+                <Text className="font-dm-sans text-[#7A7A7A] dark:text-night-text-muted text-[13px] ml-1">
                   {formatDate(item.createdAt)}
                 </Text>
                 {item.project_id ? (
-                  <Text className="font-dm-sans text-[#7A7A7A] text-[13px] ml-2">
+                  <Text className="font-dm-sans text-[#7A7A7A] dark:text-night-text-muted text-[13px] ml-2">
                     • Attached to project
                   </Text>
                 ) : null}
@@ -419,7 +429,7 @@ export default function NotesScreen() {
               {item.description ? (
                 <Text
                   numberOfLines={2}
-                  className="font-dm-sans text-[#9A9A9A] text-[13px] mt-1">
+                  className="font-dm-sans text-[#9A9A9A] dark:text-night-text-muted text-[13px] mt-1">
                   {item.description}
                 </Text>
               ) : null}
@@ -429,8 +439,8 @@ export default function NotesScreen() {
                   {item.tags.map(tag => (
                     <View
                       key={tag.id}
-                      className="bg-[#EFEAE0] rounded-[8px] px-3 py-1">
-                      <Text className="font-dm-sans text-[12px] text-gray-primary capitalize">
+                      className="bg-[#EFEAE0] dark:bg-night-muted rounded-[8px] px-3 py-1">
+                      <Text className="font-dm-sans text-[12px] text-gray-primary dark:text-night-text capitalize">
                         {tag.name}
                       </Text>
                     </View>
@@ -445,14 +455,14 @@ export default function NotesScreen() {
                 onPress={() => setMenuNoteId(menuOpen ? null : item.id)}
                 hitSlop={10}
                 className="ml-2 mt-1">
-                <MoreVertical size={20} color="#2C2C2C" />
+                <MoreVertical size={20} color={colors.text} />
               </TouchableOpacity>
             ) : (
               <TouchableOpacity
                 onPress={() => handleRestore(item)}
                 hitSlop={10}
                 className="ml-2 mt-1">
-                <RotateCcw size={20} color="#C1A36A" />
+                <RotateCcw size={20} color={colors.brand} />
               </TouchableOpacity>
             )}
           </View>
@@ -461,9 +471,9 @@ export default function NotesScreen() {
         {/* Popover menu */}
         {menuOpen && (
           <View
-            className="absolute right-8 top-12 bg-white rounded-[14px] px-4 py-2 z-50"
+            className="absolute right-8 top-12 bg-white dark:bg-night-surface rounded-[14px] px-4 py-2 z-50"
             style={{
-              shadowColor: '#000',
+              shadowColor: colors.shadow,
               shadowOffset: {width: 0, height: 4},
               shadowOpacity: 0.15,
               shadowRadius: 12,
@@ -472,24 +482,24 @@ export default function NotesScreen() {
             <TouchableOpacity
               onPress={() => handleShare(item)}
               className="flex-row items-center py-2">
-              <Share2 size={18} color="#2C2C2C" />
-              <Text className="font-dm-sans text-[15px] text-gray-primary ml-3">
+              <Share2 size={18} color={colors.text} />
+              <Text className="font-dm-sans text-[15px] text-gray-primary dark:text-night-text ml-3">
                 Share
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => handleExport(item)}
               className="flex-row items-center py-2">
-              <Upload size={18} color="#2C2C2C" />
-              <Text className="font-dm-sans text-[15px] text-gray-primary ml-3">
+              <Upload size={18} color={colors.text} />
+              <Text className="font-dm-sans text-[15px] text-gray-primary dark:text-night-text ml-3">
                 Export
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => handleSoftDelete(item)}
               className="flex-row items-center py-2">
-              <Trash2 size={18} color="#D92D20" />
-              <Text className="font-dm-sans text-[15px] text-[#D92D20] ml-3">
+              <Trash2 size={18} color={colors.danger} />
+              <Text className="font-dm-sans text-[15px] text-[#D92D20] dark:text-[#FF6B6B] ml-3">
                 Delete
               </Text>
             </TouchableOpacity>
@@ -500,7 +510,7 @@ export default function NotesScreen() {
   };
 
   return (
-    <View className="flex-1 bg-offWhite">
+    <View className="flex-1 bg-offWhite dark:bg-night">
       <FlatList
         data={visibleNotes}
         keyExtractor={item => item.id}

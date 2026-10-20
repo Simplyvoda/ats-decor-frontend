@@ -1,5 +1,6 @@
 import React from 'react';
-import {StyleSheet, Text, View} from 'react-native';
+import {Text, View} from 'react-native';
+import {makeStyles} from '../../theme/useTheme';
 
 type Props = {
   firstName?: string | null;
@@ -27,7 +28,13 @@ const getInitials = (
   return '?';
 };
 
-export default function InitialsAvatar({firstName, lastName, email, size = 40}: Props) {
+export default function InitialsAvatar({
+  firstName,
+  lastName,
+  email,
+  size = 40,
+}: Props) {
+  const styles = useStyles();
   const initials = getInitials(firstName, lastName, email);
   return (
     <View
@@ -40,11 +47,11 @@ export default function InitialsAvatar({firstName, lastName, email, size = 40}: 
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles(c => ({
   circle: {
-    backgroundColor: '#D9D9D9',
+    backgroundColor: c.surfaceMuted,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  text: {color: '#000', fontWeight: '600'},
-});
+  text: {color: c.textPrimary, fontWeight: '600'},
+}));

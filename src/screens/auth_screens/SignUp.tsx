@@ -33,6 +33,7 @@ import {
   isStrongPassword,
   PASSWORD_REQUIREMENTS_MESSAGE,
 } from '../../utils/passwordValidation';
+import {useTheme} from '../../theme/useTheme';
 
 type FormData = {
   first_name: string;
@@ -43,6 +44,7 @@ type FormData = {
 };
 
 const SignUp = () => {
+  const {colors} = useTheme();
   const {
     control,
     handleSubmit,
@@ -153,25 +155,27 @@ const SignUp = () => {
   const password = watch('password');
 
   return (
-    <SafeAreaView className="h-screen p-6 bg-offWhite">
+    <SafeAreaView className="h-screen p-6 bg-offWhite dark:bg-night">
       <KeyboardAvoidingView
         className="flex-1"
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView className="w-full">
           <View className="relative flex items-center justify-center my-2">
             <ChevronLeft
-              className="absolute left-0 text-gray-primary"
+              className="absolute left-0 text-gray-primary dark:text-night-text"
               size={24}
               onPress={() => goBack(navigation)}
             />
-            <Text className="text-xl font-semibold text-gray-primary">
+            <Text className="text-xl font-semibold text-gray-primary dark:text-night-text">
               Sign Up
             </Text>
           </View>
 
           <View className="my-5">
-            <Text className="cormorant text-2xl">Create Account</Text>
-            <Text className="text-left text-light-gray text-lg">
+            <Text className="cormorant text-2xl text-black dark:text-night-text-primary">
+              Create Account
+            </Text>
+            <Text className="text-left text-light-gray dark:text-night-text-muted text-lg">
               Please enter your details to create account.
             </Text>
 
@@ -183,12 +187,12 @@ const SignUp = () => {
                   rules={{required: 'First name is required'}}
                   render={({field: {onChange, onBlur, value}}) => (
                     <View
-                      className={`flex flex-row items-center border ${errors.first_name ? 'border-red-600' : 'border-[#ccc]'} bg-white mb-1.5 rounded-md px-2 py-3`}>
-                      <User color="#9ca3af" size={18} />
+                      className={`flex flex-row items-center border ${errors.first_name ? 'border-red-600' : 'border-[#ccc] dark:border-night-border'} bg-white dark:bg-night-surface mb-1.5 rounded-md px-2 py-3`}>
+                      <User color={colors.textMuted} size={18} />
                       <TextInput
-                        className="w-full ml-2"
+                        className="w-full ml-2 text-black dark:text-night-text"
                         autoCapitalize="none"
-                        placeholderTextColor="#9ca3af"
+                        placeholderTextColor={colors.textMuted}
                         placeholder="First name"
                         value={value}
                         onBlur={onBlur}
@@ -198,7 +202,7 @@ const SignUp = () => {
                   )}
                 />
                 {errors.first_name && (
-                  <Text className="text-red-600">
+                  <Text className="text-red-600 dark:text-red-400">
                     {errors.first_name.message}
                   </Text>
                 )}
@@ -211,12 +215,12 @@ const SignUp = () => {
                   rules={{required: 'Last name is required'}}
                   render={({field: {onChange, onBlur, value}}) => (
                     <View
-                      className={`flex flex-row items-center border ${errors.last_name ? 'border-red-600' : 'border-[#ccc]'} bg-white mb-1.5 rounded-md px-2 py-3`}>
-                      <User color="#9ca3af" size={18} />
+                      className={`flex flex-row items-center border ${errors.last_name ? 'border-red-600' : 'border-[#ccc] dark:border-night-border'} bg-white dark:bg-night-surface mb-1.5 rounded-md px-2 py-3`}>
+                      <User color={colors.textMuted} size={18} />
                       <TextInput
-                        className="w-full ml-2"
+                        className="w-full ml-2 text-black dark:text-night-text"
                         autoCapitalize="none"
-                        placeholderTextColor="#9ca3af"
+                        placeholderTextColor={colors.textMuted}
                         placeholder="Last name"
                         value={value}
                         onBlur={onBlur}
@@ -226,7 +230,7 @@ const SignUp = () => {
                   )}
                 />
                 {errors.last_name && (
-                  <Text className="text-red-600">
+                  <Text className="text-red-600 dark:text-red-400">
                     {errors.last_name.message}
                   </Text>
                 )}
@@ -245,12 +249,12 @@ const SignUp = () => {
                   }}
                   render={({field: {onChange, onBlur, value}}) => (
                     <View
-                      className={`flex flex-row items-center border ${errors.email ? 'border-red-600' : 'border-[#ccc]'} bg-white mb-1.5 rounded-md px-2 py-3`}>
-                      <Mail color="#9ca3af" size={18} />
+                      className={`flex flex-row items-center border ${errors.email ? 'border-red-600' : 'border-[#ccc] dark:border-night-border'} bg-white dark:bg-night-surface mb-1.5 rounded-md px-2 py-3`}>
+                      <Mail color={colors.textMuted} size={18} />
                       <TextInput
-                        className="w-full ml-2"
+                        className="w-full ml-2 text-black dark:text-night-text"
                         autoCapitalize="none"
-                        placeholderTextColor="#9ca3af"
+                        placeholderTextColor={colors.textMuted}
                         placeholder="Email"
                         keyboardType="email-address"
                         value={value}
@@ -261,7 +265,9 @@ const SignUp = () => {
                   )}
                 />
                 {errors.email && (
-                  <Text className="text-red-600">{errors.email.message}</Text>
+                  <Text className="text-red-600 dark:text-red-400">
+                    {errors.email.message}
+                  </Text>
                 )}
               </View>
 
@@ -276,12 +282,12 @@ const SignUp = () => {
                   }}
                   render={({field: {onChange, onBlur, value}}) => (
                     <View
-                      className={`flex flex-row items-center border ${errors.password ? 'border-red-600' : 'border-[#ccc]'} bg-white mb-1.5 rounded-md px-2 py-3`}>
-                      <LockKeyhole color="#9ca3af" size={18} />
+                      className={`flex flex-row items-center border ${errors.password ? 'border-red-600' : 'border-[#ccc] dark:border-night-border'} bg-white dark:bg-night-surface mb-1.5 rounded-md px-2 py-3`}>
+                      <LockKeyhole color={colors.textMuted} size={18} />
                       <TextInput
-                        className="flex-1 ml-2"
+                        className="flex-1 ml-2 text-black dark:text-night-text"
                         autoCapitalize="none"
-                        placeholderTextColor="#9ca3af"
+                        placeholderTextColor={colors.textMuted}
                         placeholder="Password"
                         secureTextEntry={!showPassword}
                         value={value}
@@ -292,16 +298,16 @@ const SignUp = () => {
                         onPress={() => setShowPassword(s => !s)}
                         hitSlop={{top: 8, bottom: 8, left: 8, right: 8}}>
                         {showPassword ? (
-                          <EyeOff color="#9ca3af" size={18} />
+                          <EyeOff color={colors.textMuted} size={18} />
                         ) : (
-                          <Eye color="#9ca3af" size={18} />
+                          <Eye color={colors.textMuted} size={18} />
                         )}
                       </TouchableOpacity>
                     </View>
                   )}
                 />
                 {errors.password && (
-                  <Text className="text-red-600">
+                  <Text className="text-red-600 dark:text-red-400">
                     {errors.password.message}
                   </Text>
                 )}
@@ -318,12 +324,12 @@ const SignUp = () => {
                   }}
                   render={({field: {onChange, onBlur, value}}) => (
                     <View
-                      className={`flex flex-row items-center border ${errors.first_name ? 'border-red-600' : 'border-[#ccc]'} bg-white mb-1.5 rounded-md px-2 py-3`}>
-                      <LockKeyhole color="#9ca3af" size={18} />
+                      className={`flex flex-row items-center border ${errors.first_name ? 'border-red-600' : 'border-[#ccc] dark:border-night-border'} bg-white dark:bg-night-surface mb-1.5 rounded-md px-2 py-3`}>
+                      <LockKeyhole color={colors.textMuted} size={18} />
                       <TextInput
-                        className="flex-1 ml-2"
+                        className="flex-1 ml-2 text-black dark:text-night-text"
                         autoCapitalize="none"
-                        placeholderTextColor="#9ca3af"
+                        placeholderTextColor={colors.textMuted}
                         placeholder="Confirm Password"
                         secureTextEntry={!showConfirmPassword}
                         value={value}
@@ -334,22 +340,22 @@ const SignUp = () => {
                         onPress={() => setShowConfirmPassword(s => !s)}
                         hitSlop={{top: 8, bottom: 8, left: 8, right: 8}}>
                         {showConfirmPassword ? (
-                          <EyeOff color="#9ca3af" size={18} />
+                          <EyeOff color={colors.textMuted} size={18} />
                         ) : (
-                          <Eye color="#9ca3af" size={18} />
+                          <Eye color={colors.textMuted} size={18} />
                         )}
                       </TouchableOpacity>
                     </View>
                   )}
                 />
                 {errors.confirm_password && (
-                  <Text className="text-red-600">
+                  <Text className="text-red-600 dark:text-red-400">
                     {errors.confirm_password.message}
                   </Text>
                 )}
               </View>
             </View>
-            <Text className="w-full">
+            <Text className="w-full text-black dark:text-night-text">
               By signing up, you agree to our{' '}
               <Text
                 className="text-brand"
@@ -371,7 +377,7 @@ const SignUp = () => {
               isSubmitting={isSubmitting}
             />
 
-            <Text className="text-center text-light-gray text-sm">
+            <Text className="text-center text-light-gray dark:text-night-text-muted text-sm">
               Or Sign Up with
             </Text>
 
@@ -379,14 +385,14 @@ const SignUp = () => {
               {/* Google and Facebook sign-up disabled for MVP — Apple only for now */}
               {/*
             <View className="flex flex-row justify-center items-center space-x-6">
-              <Pressable className="flex flex-row items-center justify-center bg-white border border-gray-300 rounded-full p-3 w-20 h-20">
+              <Pressable className="flex flex-row items-center justify-center bg-white dark:bg-night-surface border border-gray-300 dark:border-night-border rounded-full p-3 w-20 h-20">
                 <Image
                   source={images.google_icon}
                   style={{width: 20, height: 20}}
                 />
               </Pressable>
 
-              <Pressable className="flex flex-row items-center justify-center bg-white border border-gray-300 rounded-full p-3 w-20 h-20">
+              <Pressable className="flex flex-row items-center justify-center bg-white dark:bg-night-surface border border-gray-300 dark:border-night-border rounded-full p-3 w-20 h-20">
                 <Image source={images.fb_icon} style={{width: 20, height: 20}} />
               </Pressable>
             </View>
@@ -406,7 +412,7 @@ const SignUp = () => {
               </Pressable>
             </View>
 
-            <Text className="w-full text-center self-end items-center">
+            <Text className="w-full text-center self-end items-center text-black dark:text-night-text">
               Already have an account?
               <Text
                 className="text-brand"

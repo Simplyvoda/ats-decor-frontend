@@ -26,6 +26,7 @@ import {
 } from '../../../interface/auth_user.interface';
 import AuthService from '../../services/AuthService';
 import {useUserContext} from '../../context/UserContext';
+import {useTheme} from '../../theme/useTheme';
 
 type FormData = {
   email: string;
@@ -33,6 +34,7 @@ type FormData = {
 };
 
 const Login = () => {
+  const {colors} = useTheme();
   const {signInUser} = useUserContext();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -128,25 +130,27 @@ const Login = () => {
   };
 
   return (
-    <SafeAreaView className="h-screen p-6 bg-offWhite">
+    <SafeAreaView className="h-screen p-6 bg-offWhite dark:bg-night">
       <KeyboardAvoidingView
         className="flex-1"
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView className="w-full">
           <View className="relative flex items-center justify-center my-2">
             <ChevronLeft
-              className="absolute left-0 text-gray-primary"
+              className="absolute left-0 text-gray-primary dark:text-night-text"
               size={24}
               onPress={() => goBack(navigation)}
             />
-            <Text className="text-xl font-semibold text-gray-primary">
+            <Text className="text-xl font-semibold text-gray-primary dark:text-night-text">
               Log In
             </Text>
           </View>
 
           <View className="my-5">
-            <Text className="cormorant text-2xl">Welcome Back!</Text>
-            <Text className="text-left text-light-gray text-lg">
+            <Text className="cormorant text-2xl text-black dark:text-night-text-primary">
+              Welcome Back!
+            </Text>
+            <Text className="text-left text-light-gray dark:text-night-text-muted text-lg">
               Please enter your details to proceed.
             </Text>
 
@@ -164,12 +168,12 @@ const Login = () => {
                   }}
                   render={({field: {onChange, onBlur, value}}) => (
                     <View
-                      className={`flex flex-row items-center border ${errors.email ? 'border-red-600' : 'border-[#ccc]'} bg-white mb-1.5 rounded-md px-2 py-3`}>
-                      <Mail color="#9ca3af" size={18} />
+                      className={`flex flex-row items-center border ${errors.email ? 'border-red-600' : 'border-[#ccc] dark:border-night-border'} bg-white dark:bg-night-surface mb-1.5 rounded-md px-2 py-3`}>
+                      <Mail color={colors.textMuted} size={18} />
                       <TextInput
-                        className="w-full ml-2"
+                        className="w-full ml-2 text-black dark:text-night-text"
                         autoCapitalize="none"
-                        placeholderTextColor="#9ca3af"
+                        placeholderTextColor={colors.textMuted}
                         placeholder="Email"
                         keyboardType="email-address"
                         value={value}
@@ -180,7 +184,9 @@ const Login = () => {
                   )}
                 />
                 {errors.email && (
-                  <Text className="text-red-600">{errors.email.message}</Text>
+                  <Text className="text-red-600 dark:text-red-400">
+                    {errors.email.message}
+                  </Text>
                 )}
               </View>
 
@@ -194,12 +200,12 @@ const Login = () => {
                   }}
                   render={({field: {onChange, onBlur, value}}) => (
                     <View
-                      className={`flex flex-row items-center border ${errors.password ? 'border-red-600' : 'border-[#ccc]'} bg-white mb-1.5 rounded-md px-2 py-3`}>
-                      <LockKeyhole color="#9ca3af" size={18} />
+                      className={`flex flex-row items-center border ${errors.password ? 'border-red-600' : 'border-[#ccc] dark:border-night-border'} bg-white dark:bg-night-surface mb-1.5 rounded-md px-2 py-3`}>
+                      <LockKeyhole color={colors.textMuted} size={18} />
                       <TextInput
-                        className="flex-1 ml-2"
+                        className="flex-1 ml-2 text-black dark:text-night-text"
                         autoCapitalize="none"
-                        placeholderTextColor="#9ca3af"
+                        placeholderTextColor={colors.textMuted}
                         placeholder="Password"
                         secureTextEntry={!showPassword}
                         value={value}
@@ -210,16 +216,16 @@ const Login = () => {
                         onPress={() => setShowPassword(s => !s)}
                         hitSlop={{top: 8, bottom: 8, left: 8, right: 8}}>
                         {showPassword ? (
-                          <EyeOff color="#9ca3af" size={18} />
+                          <EyeOff color={colors.textMuted} size={18} />
                         ) : (
-                          <Eye color="#9ca3af" size={18} />
+                          <Eye color={colors.textMuted} size={18} />
                         )}
                       </TouchableOpacity>
                     </View>
                   )}
                 />
                 {errors.password && (
-                  <Text className="text-red-600">
+                  <Text className="text-red-600 dark:text-red-400">
                     {errors.password.message}
                   </Text>
                 )}
@@ -252,7 +258,9 @@ const Login = () => {
             </Pressable>
 
             <View className="w-full flex-row justify-center items-center">
-              <Text>Don't have an account?</Text>
+              <Text className="text-black dark:text-night-text">
+                Don't have an account?
+              </Text>
               <Pressable onPress={() => navigateTo(navigation, 'SignUp')}>
                 <Text className="text-brand ml-2">Sign Up</Text>
               </Pressable>

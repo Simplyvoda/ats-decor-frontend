@@ -1,5 +1,13 @@
 import {useNavigation} from '@react-navigation/native';
-import {Camera, ChevronLeft, Palette, User} from 'lucide-react-native';
+import {
+  Camera,
+  ChevronLeft,
+  Moon,
+  Palette,
+  Smartphone,
+  Sun,
+  User,
+} from 'lucide-react-native';
 import React, {useEffect, useState} from 'react';
 import {
   ActivityIndicator,
@@ -20,10 +28,23 @@ import UserService from '../../services/UserService';
 import {useUserContext} from '../../context/UserContext';
 import {launchImageLibrary} from 'react-native-image-picker';
 import {useTheme} from '../../theme/useTheme';
+import {ThemePreference, useThemePreference} from '../../theme/ThemePreference';
+
+const THEME_OPTIONS: {
+  value: ThemePreference;
+  label: string;
+  Icon: typeof Sun;
+}[] = [
+  {value: 'system', label: 'System', Icon: Smartphone},
+  {value: 'light', label: 'Light', Icon: Sun},
+  {value: 'dark', label: 'Dark', Icon: Moon},
+];
 
 const ProfilePreference = () => {
   const navigation = useNavigation();
   const {colors} = useTheme();
+  const {preference: themePreference, setPreference: setThemePreference} =
+    useThemePreference();
   const {updateUser} = useUserContext();
 
   const [isLoading, setIsLoading] = useState(true);
@@ -246,22 +267,47 @@ const ProfilePreference = () => {
                 />
               </View>
 
-              {/* APPEARANCE */}
-              {/* <View className="bg-transparent border-[1px] border-[#2C2C2C33] dark:border-night-border rounded-2xl p-4 mb-5">
-                <View className="flex-row items-center gap-2 mb-3">
+              {/* APPEARANCE — applies straight away, separate from Save Changes */}
+              <View className="bg-transparent border-[1px] border-[#2C2C2C33] dark:border-night-border rounded-2xl p-4 mb-5">
+                <View className="flex-row items-center gap-2 mb-1">
                   <Sun size={18} color={colors.brand} />
                   <Text className="text-[20px] font-semibold font-cormorant text-[#1A1A1A] dark:text-night-text-primary">
                     Appearance
                   </Text>
                 </View>
+                <Text className="text-[13px] font-dm-sans text-[#777] dark:text-night-text-muted mb-3">
+                  System matches your phone's Light/Dark setting
+                </Text>
 
-                <View className="flex-row justify-between items-center">
-                  <Text className="text-[14px] text-[#333] dark:text-night-text font-dm-sans">
-                    Dark Mode
-                  </Text>
-                  <AppSwitch value={darkMode} onValueChange={setDarkMode} />
+                <View className="flex-row bg-[#2C2C2C0D] dark:bg-night-muted rounded-xl p-1">
+                  {THEME_OPTIONS.map(({value, label, Icon}) => {
+                    const selected = themePreference === value;
+                    return (
+                      <TouchableOpacity
+                        key={value}
+                        onPress={() => setThemePreference(value)}
+                        accessibilityRole="button"
+                        accessibilityState={{selected}}
+                        className={`flex-1 flex-row items-center justify-center py-2.5 rounded-lg ${
+                          selected ? 'bg-white dark:bg-night-surface' : ''
+                        }`}>
+                        <Icon
+                          size={15}
+                          color={selected ? colors.brand : colors.textMuted}
+                        />
+                        <Text
+                          className={`ml-1.5 text-[14px] font-dm-sans ${
+                            selected
+                              ? 'text-[#1A1A1A] dark:text-night-text-primary font-semibold'
+                              : 'text-[#777] dark:text-night-text-muted'
+                          }`}>
+                          {label}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
                 </View>
-              </View> */}
+              </View>
 
               {/* DESIGN STYLE */}
               <View className="bg-transparent border-[1px] border-[#2C2C2C33] dark:border-night-border rounded-2xl p-4 mb-20">

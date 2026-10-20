@@ -18,10 +18,12 @@ import {IDesign} from '../../../interface/design.interface';
 import {navigateTo} from '../../utils/navigation';
 import SharedHeader from '../shared/Header';
 import useRefetchOnFocus from '../../hooks/useRefetchOnFocus';
+import {useTheme} from '../../theme/useTheme';
 
 const PAGE_SIZE = 12;
 
 export default function ExploreScreen() {
+  const {colors} = useTheme();
   const navigation = useNavigation();
 
   const [designs, setDesigns] = useState<IDesign[]>([]);
@@ -184,16 +186,16 @@ export default function ExploreScreen() {
     <TouchableOpacity
       activeOpacity={0.85}
       onPress={() => openDesign(item)}
-      className="bg-white rounded-[18px] mx-4 mt-5 overflow-hidden"
+      className="bg-white dark:bg-night-surface rounded-[18px] mx-4 mt-5 overflow-hidden"
       style={{
-        shadowColor: '#000',
+        shadowColor: colors.shadow,
         shadowOffset: {width: 0, height: 3},
         shadowOpacity: 0.08,
         shadowRadius: 8,
         elevation: 4,
       }}>
       {/* Thumbnail */}
-      <View className="w-full aspect-[4/3] bg-[#D8CBBA]">
+      <View className="w-full aspect-[4/3] bg-[#D8CBBA] dark:bg-night-muted">
         {item.thumbnail_url ? (
           <Image
             // Unique URL per upload, so the cached copy is always current
@@ -241,7 +243,7 @@ export default function ExploreScreen() {
 
       {/* Footer */}
       <View className="px-4 pt-3 pb-4">
-        <Text className="font-cormorant text-[22px] text-gray-primary">
+        <Text className="font-cormorant text-[22px] text-gray-primary dark:text-night-text">
           {item.name}
         </Text>
         {item.style ? (
@@ -254,8 +256,8 @@ export default function ExploreScreen() {
             {item.tags.map(tag => (
               <View
                 key={tag.id}
-                className="bg-[#F0EEE9] rounded-full px-3 py-1">
-                <Text className="font-dm-sans text-[13px] text-gray-primary capitalize">
+                className="bg-[#F0EEE9] dark:bg-night-muted rounded-full px-3 py-1">
+                <Text className="font-dm-sans text-[13px] text-gray-primary dark:text-night-text capitalize">
                   {tag.name}
                 </Text>
               </View>
@@ -267,7 +269,7 @@ export default function ExploreScreen() {
   );
 
   return (
-    <View className="flex-1 bg-offWhite">
+    <View className="flex-1 bg-offWhite dark:bg-night">
       <FlatList
         data={designs}
         keyExtractor={item => item.id}
@@ -281,16 +283,16 @@ export default function ExploreScreen() {
         ListEmptyComponent={
           isLoading ? (
             <View className="items-center py-16">
-              <ActivityIndicator size="large" color="#C1A36A" />
+              <ActivityIndicator size="large" color={colors.brand} />
             </View>
           ) : (
             <View className="px-4 mt-6">
-              <View className="bg-white border border-[#E5E0D5] rounded-[16px] items-center py-14 px-6">
-                <Compass size={44} color="#8A8A8A" strokeWidth={1.4} />
-                <Text className="font-cormorant text-[20px] text-gray-primary mt-4">
+              <View className="bg-white dark:bg-night-surface border border-[#E5E0D5] dark:border-night-border rounded-[16px] items-center py-14 px-6">
+                <Compass size={44} color={colors.textMuted} strokeWidth={1.4} />
+                <Text className="font-cormorant text-[20px] text-gray-primary dark:text-night-text mt-4">
                   Nothing here yet
                 </Text>
-                <Text className="font-dm-sans text-[#7A7A7A] text-[14px] mt-2 text-center">
+                <Text className="font-dm-sans text-[#7A7A7A] dark:text-night-text-muted text-[14px] mt-2 text-center">
                   Publish your first design and it will show up here
                 </Text>
               </View>
@@ -301,7 +303,7 @@ export default function ExploreScreen() {
         onEndReachedThreshold={0.4}
         ListFooterComponent={
           isLoadingMore ? (
-            <ActivityIndicator color="#C1A36A" style={{marginTop: 20}} />
+            <ActivityIndicator color={colors.brand} style={{marginTop: 20}} />
           ) : null
         }
         contentContainerStyle={{paddingBottom: 32}}
@@ -310,7 +312,7 @@ export default function ExploreScreen() {
           <RefreshControl
             refreshing={isRefreshing}
             onRefresh={onRefresh}
-            tintColor="#C1A36A"
+            tintColor={colors.brand}
           />
         }
       />

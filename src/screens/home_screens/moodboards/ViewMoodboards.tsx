@@ -5,7 +5,6 @@ import {
   Image,
   SafeAreaView,
   ScrollView,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -18,10 +17,13 @@ import MoodboardService from '../../../services/MoodboardService';
 import DesignService from '../../../services/DesignService';
 import {IMoodboardItem} from '../../../../interface/design.interface';
 import useRefetchOnFocus from '../../../hooks/useRefetchOnFocus';
+import {makeStyles, useTheme} from '../../../theme/useTheme';
 
 type ViewMode = 'grid' | 'list';
 
 const ViewMoodboards = () => {
+  const styles = useStyles();
+  const {colors} = useTheme();
   const navigation = useNavigation();
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [activeFilter, setActiveFilter] = useState<string>('All');
@@ -102,7 +104,7 @@ const ViewMoodboards = () => {
           style={styles.heartBtn}
           activeOpacity={0.8}
           onPress={() => handleUnlike(item)}>
-          <Heart size={16} color="#C1A36A" fill="#C1A36A" />
+          <Heart size={16} color={colors.brand} fill={colors.brand} />
         </TouchableOpacity>
       </View>
       <View style={grid ? styles.gridItemInfo : styles.itemInfo}>
@@ -126,11 +128,15 @@ const ViewMoodboards = () => {
       {/* Gold header */}
       <View style={styles.header}>
         <View style={styles.headerContent}>
-          <TouchableOpacity style={styles.backRow} onPress={() => goBack(navigation)}>
-            <ChevronLeft size={22} color="#fff" />
+          <TouchableOpacity
+            style={styles.backRow}
+            onPress={() => goBack(navigation)}>
+            <ChevronLeft size={22} color={colors.onBrand} />
             <Text style={styles.headerTitle}>Mood Board</Text>
           </TouchableOpacity>
-          <Text style={styles.headerSubtitle}>Your saved inspirations and Ideas</Text>
+          <Text style={styles.headerSubtitle}>
+            Your saved inspirations and Ideas
+          </Text>
         </View>
 
         {/* Overlapping white info card */}
@@ -141,14 +147,26 @@ const ViewMoodboards = () => {
             </Text>
             <View style={styles.viewToggle}>
               <TouchableOpacity
-                style={[styles.toggleBtn, viewMode === 'grid' && styles.toggleBtnActive]}
+                style={[
+                  styles.toggleBtn,
+                  viewMode === 'grid' && styles.toggleBtnActive,
+                ]}
                 onPress={() => setViewMode('grid')}>
-                <Grid3x3 size={18} color={viewMode === 'grid' ? '#fff' : '#2C2C2C'} />
+                <Grid3x3
+                  size={18}
+                  color={viewMode === 'grid' ? colors.onBrand : colors.text}
+                />
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.toggleBtn, viewMode === 'list' && styles.toggleBtnActive]}
+                style={[
+                  styles.toggleBtn,
+                  viewMode === 'list' && styles.toggleBtnActive,
+                ]}
                 onPress={() => setViewMode('list')}>
-                <AlignJustify size={18} color={viewMode === 'list' ? '#fff' : '#2C2C2C'} />
+                <AlignJustify
+                  size={18}
+                  color={viewMode === 'list' ? colors.onBrand : colors.text}
+                />
               </TouchableOpacity>
             </View>
           </View>
@@ -158,9 +176,16 @@ const ViewMoodboards = () => {
               {filters.map(f => (
                 <TouchableOpacity
                   key={f}
-                  style={[styles.filterChip, activeFilter === f && styles.filterChipActive]}
+                  style={[
+                    styles.filterChip,
+                    activeFilter === f && styles.filterChipActive,
+                  ]}
                   onPress={() => setActiveFilter(f)}>
-                  <Text style={[styles.filterChipText, activeFilter === f && styles.filterChipTextActive]}>
+                  <Text
+                    style={[
+                      styles.filterChipText,
+                      activeFilter === f && styles.filterChipTextActive,
+                    ]}>
                     {f}
                   </Text>
                 </TouchableOpacity>
@@ -177,11 +202,11 @@ const ViewMoodboards = () => {
         showsVerticalScrollIndicator={false}>
         {isLoading ? (
           <View style={styles.centered}>
-            <ActivityIndicator size="large" color="#C1A36A" />
+            <ActivityIndicator size="large" color={colors.brand} />
           </View>
         ) : visibleItems.length === 0 ? (
           <View style={styles.emptyCard}>
-            <Heart size={40} color="#8A8A8A" strokeWidth={1.4} />
+            <Heart size={40} color={colors.textMuted} strokeWidth={1.4} />
             <Text style={styles.emptyTitle}>No saved items yet</Text>
             <Text style={styles.emptyText}>
               Tap the heart on designs in Explore to save them here
@@ -202,13 +227,13 @@ const ViewMoodboards = () => {
 const CARD_HEIGHT = 128;
 const CARD_OVERLAP = 56;
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles(c => ({
   root: {
     flex: 1,
-    backgroundColor: '#FAF9F6',
+    backgroundColor: c.background,
   },
   header: {
-    backgroundColor: '#C1A36A',
+    backgroundColor: c.brand,
     paddingTop: 16,
     height: 160,
     zIndex: 1,
@@ -225,17 +250,17 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontFamily: 'CormorantGaramond-SemiBold',
     fontSize: 22,
-    color: '#fff',
+    color: c.onBrand,
     fontWeight: '600',
   },
   headerSubtitle: {
     fontFamily: 'DMSans-Regular',
     fontSize: 14,
-    color: '#fff',
+    color: c.onBrand,
     opacity: 0.9,
   },
   infoCard: {
-    backgroundColor: '#fff',
+    backgroundColor: c.surface,
     borderRadius: 16,
     position: 'absolute',
     bottom: -CARD_OVERLAP,
@@ -244,7 +269,7 @@ const styles = StyleSheet.create({
     height: CARD_HEIGHT,
     paddingHorizontal: 16,
     paddingVertical: 14,
-    shadowColor: '#000',
+    shadowColor: c.shadow,
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.08,
     shadowRadius: 6,
@@ -260,7 +285,7 @@ const styles = StyleSheet.create({
   itemCount: {
     fontFamily: 'CormorantGaramond-SemiBold',
     fontSize: 20,
-    color: '#2C2C2C',
+    color: c.text,
     fontWeight: '600',
   },
   viewToggle: {
@@ -270,12 +295,12 @@ const styles = StyleSheet.create({
   toggleBtn: {
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#2C2C2C20',
+    borderColor: c.border,
     padding: 8,
   },
   toggleBtnActive: {
-    backgroundColor: '#C1A36A',
-    borderColor: '#C1A36A',
+    backgroundColor: c.brand,
+    borderColor: c.brand,
   },
   filterRow: {
     flexDirection: 'row',
@@ -285,23 +310,23 @@ const styles = StyleSheet.create({
   filterChip: {
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#2C2C2C33',
+    borderColor: c.border,
     paddingHorizontal: 14,
     paddingVertical: 6,
     justifyContent: 'center',
     alignItems: 'center',
   },
   filterChipActive: {
-    backgroundColor: '#C1A36A',
-    borderColor: '#C1A36A',
+    backgroundColor: c.brand,
+    borderColor: c.brand,
   },
   filterChipText: {
     fontFamily: 'DMSans-Regular',
     fontSize: 13,
-    color: '#2C2C2C',
+    color: c.text,
   },
   filterChipTextActive: {
-    color: '#fff',
+    color: c.onBrand,
   },
   list: {
     marginTop: CARD_OVERLAP + 8,
@@ -318,9 +343,9 @@ const styles = StyleSheet.create({
   },
   emptyCard: {
     borderWidth: 1,
-    borderColor: '#E5E0D5',
+    borderColor: c.border,
     borderRadius: 16,
-    backgroundColor: '#fff',
+    backgroundColor: c.surface,
     alignItems: 'center',
     paddingVertical: 48,
     paddingHorizontal: 24,
@@ -328,23 +353,23 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontFamily: 'CormorantGaramond-SemiBold',
     fontSize: 20,
-    color: '#2C2C2C',
+    color: c.text,
     marginTop: 12,
   },
   emptyText: {
     fontFamily: 'DMSans-Regular',
     fontSize: 14,
-    color: '#7A7A7A',
+    color: c.textMuted,
     marginTop: 6,
     textAlign: 'center',
   },
   itemCard: {
     flexDirection: 'row',
     borderWidth: 1,
-    borderColor: '#2C2C2C20',
+    borderColor: c.border,
     borderRadius: 16,
     overflow: 'hidden',
-    backgroundColor: '#fff',
+    backgroundColor: c.surface,
     height: 110,
   },
   gridWrap: {
@@ -355,10 +380,10 @@ const styles = StyleSheet.create({
   gridCard: {
     width: '48%',
     borderWidth: 1,
-    borderColor: '#2C2C2C20',
+    borderColor: c.border,
     borderRadius: 16,
     overflow: 'hidden',
-    backgroundColor: '#fff',
+    backgroundColor: c.surface,
     marginBottom: 12,
   },
   imageWrapper: {
@@ -377,7 +402,7 @@ const styles = StyleSheet.create({
   imagePlaceholder: {
     width: '100%',
     height: '100%',
-    backgroundColor: '#D8CBBA',
+    backgroundColor: c.surfaceMuted,
   },
   heartBtn: {
     position: 'absolute',
@@ -402,19 +427,19 @@ const styles = StyleSheet.create({
     fontFamily: 'DMSans-Regular',
     fontSize: 15,
     fontWeight: '600',
-    color: '#2C2C2C',
+    color: c.text,
     marginBottom: 2,
   },
   itemStyle: {
     fontFamily: 'DMSans-Regular',
     fontSize: 13,
-    color: '#888',
+    color: c.textMuted,
   },
   itemDesc: {
     fontFamily: 'DMSans-Regular',
     fontSize: 13,
-    color: '#BDBDBD',
+    color: c.textMuted,
   },
-});
+}));
 
 export default ViewMoodboards;

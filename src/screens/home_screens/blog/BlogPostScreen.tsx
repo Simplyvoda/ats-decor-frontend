@@ -8,7 +8,6 @@ import {
   SafeAreaView,
   ScrollView,
   Share,
-  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
@@ -27,7 +26,8 @@ import {PortableText} from '@portabletext/react-native';
 import Toast from 'react-native-toast-message';
 import {goBack} from '../../../utils/navigation';
 import {BlogComment, BlogPost} from '../../../../interface/blog.interface';
-import {portableTextComponents} from '../../../components/(home)/(blog)/BlogRenderer';
+import {usePortableTextComponents} from '../../../components/(home)/(blog)/BlogRenderer';
+import {makeStyles, useTheme} from '../../../theme/useTheme';
 import InitialsAvatar from '../../../components/molecules/InitialsAvatar';
 import UserAvatar from '../../../components/molecules/UserAvatar';
 import BlogService from '../../../services/BlogService';
@@ -68,6 +68,9 @@ const timeAgo = (isoDate: string) => {
 
 const BlogPostScreen = () => {
   const navigation = useNavigation();
+  const styles = useStyles();
+  const {colors} = useTheme();
+  const portableTextComponents = usePortableTextComponents();
   const route = useRoute<RouteProp<BlogPostRouteParams, 'BlogPost'>>();
   const {post: listPost} = route.params;
   const {user} = useUserContext();
@@ -237,7 +240,7 @@ const BlogPostScreen = () => {
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => goBack(navigation)} hitSlop={8}>
-            <ChevronLeft size={22} color="#2C2C2C" />
+            <ChevronLeft size={22} color={colors.text} />
           </TouchableOpacity>
           <Text style={styles.headerTitle} numberOfLines={1}>
             {post.title}
@@ -281,7 +284,7 @@ const BlogPostScreen = () => {
           {/* Body */}
           <View style={styles.body}>
             {loadingBody ? (
-              <ActivityIndicator color="#C1A36A" />
+              <ActivityIndicator color={colors.brand} />
             ) : (
               <PortableText
                 value={post.body ?? []}
@@ -300,14 +303,14 @@ const BlogPostScreen = () => {
               disabled={isLiking}>
               <Heart
                 size={20}
-                color="#2C2C2C"
-                fill={liked ? '#2C2C2C' : 'transparent'}
+                color={colors.text}
+                fill={liked ? colors.text : 'transparent'}
               />
               <Text style={styles.engagementCount}>{likeCount}</Text>
             </TouchableOpacity>
 
             <View style={styles.engagementItem}>
-              <MessageCircle size={20} color="#2C2C2C" />
+              <MessageCircle size={20} color={colors.text} />
               <Text style={styles.engagementCount}>
                 {commentsTotal +
                   comments.reduce(
@@ -318,7 +321,7 @@ const BlogPostScreen = () => {
             </View>
 
             <TouchableOpacity onPress={handleShare}>
-              <Share2 size={20} color="#2C2C2C" />
+              <Share2 size={20} color={colors.text} />
             </TouchableOpacity>
           </View>
 
@@ -355,7 +358,7 @@ const BlogPostScreen = () => {
                           onPress={() =>
                             Linking.openURL(link.url).catch(() => {})
                           }>
-                          <Globe size={14} color="#C1A36A" />
+                          <Globe size={14} color={colors.brand} />
                           <Text style={styles.socialLinkText}>
                             {link.platform}
                           </Text>
@@ -371,7 +374,10 @@ const BlogPostScreen = () => {
 
           {/* Comments */}
           {loadingComments ? (
-            <ActivityIndicator color="#C1A36A" style={styles.commentsLoader} />
+            <ActivityIndicator
+              color={colors.brand}
+              style={styles.commentsLoader}
+            />
           ) : comments.length === 0 ? (
             <Text style={styles.noComments}>
               No comments yet — be the first to comment.
@@ -443,7 +449,7 @@ const BlogPostScreen = () => {
                   disabled={loadingMoreComments}>
                   {loadingMoreComments ? (
                     <ActivityIndicator
-                      color="#C1A36A"
+                      color={colors.brand}
                       style={styles.commentsLoader}
                     />
                   ) : (
@@ -461,7 +467,7 @@ const BlogPostScreen = () => {
                 Replying to {replyingTo.authorName}
               </Text>
               <TouchableOpacity onPress={() => setReplyingTo(null)} hitSlop={8}>
-                <X size={16} color="#666" />
+                <X size={16} color={colors.textSecondary} />
               </TouchableOpacity>
             </View>
           )}
@@ -480,7 +486,7 @@ const BlogPostScreen = () => {
                   ? `Reply to ${replyingTo.authorName}...`
                   : 'Add a comment...'
               }
-              placeholderTextColor="#999"
+              placeholderTextColor={colors.textMuted}
               value={comment}
               onChangeText={setComment}
               multiline
@@ -496,7 +502,7 @@ const BlogPostScreen = () => {
             onPress={handlePostComment}
             disabled={!comment.trim() || isPosting}>
             {isPosting ? (
-              <ActivityIndicator size="small" color="#fff" />
+              <ActivityIndicator size="small" color={colors.onBrand} />
             ) : (
               <Text style={styles.commentBtnText}>Comment</Text>
             )}
@@ -507,10 +513,10 @@ const BlogPostScreen = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles(c => ({
   root: {
     flex: 1,
-    backgroundColor: '#FAF9F6',
+    backgroundColor: c.background,
   },
   header: {
     flexDirection: 'row',
@@ -523,7 +529,7 @@ const styles = StyleSheet.create({
     fontFamily: 'DMSans-Regular',
     fontSize: 17,
     fontWeight: '600',
-    color: '#2C2C2C',
+    color: c.text,
     flex: 1,
   },
   content: {
@@ -533,13 +539,13 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     height: 220,
     borderRadius: 16,
-    backgroundColor: '#D8CBBA',
+    backgroundColor: c.surfaceMuted,
     marginBottom: 20,
   },
   postMeta: {
     fontFamily: 'DMSans-Regular',
     fontSize: 13,
-    color: '#999',
+    color: c.textMuted,
     paddingHorizontal: 20,
     marginBottom: 12,
   },
@@ -549,7 +555,7 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: '#2C2C2C15',
+    backgroundColor: c.border,
     marginHorizontal: 20,
     marginBottom: 20,
   },
@@ -568,7 +574,7 @@ const styles = StyleSheet.create({
   engagementCount: {
     fontFamily: 'DMSans-Regular',
     fontSize: 15,
-    color: '#2C2C2C',
+    color: c.text,
   },
   authorBox: {
     flexDirection: 'row',
@@ -588,18 +594,18 @@ const styles = StyleSheet.create({
     fontFamily: 'DMSans-Regular',
     fontSize: 16,
     fontWeight: '600',
-    color: '#2C2C2C',
+    color: c.text,
   },
   authorBoxTitle: {
     fontFamily: 'DMSans-Regular',
     fontSize: 13,
-    color: '#C1A36A',
+    color: c.brand,
     marginTop: 2,
   },
   authorBoxBio: {
     fontFamily: 'DMSans-Regular',
     fontSize: 13,
-    color: '#666',
+    color: c.textSecondary,
     lineHeight: 19,
     marginTop: 8,
   },
@@ -617,7 +623,7 @@ const styles = StyleSheet.create({
   socialLinkText: {
     fontFamily: 'DMSans-Regular',
     fontSize: 12,
-    color: '#C1A36A',
+    color: c.brand,
     textTransform: 'capitalize',
   },
   commentsLoader: {
@@ -626,7 +632,7 @@ const styles = StyleSheet.create({
   noComments: {
     fontFamily: 'DMSans-Regular',
     fontSize: 13,
-    color: '#999',
+    color: c.textMuted,
     paddingHorizontal: 20,
     marginBottom: 20,
   },
@@ -634,7 +640,7 @@ const styles = StyleSheet.create({
     fontFamily: 'DMSans-Regular',
     fontSize: 13,
     fontWeight: '600',
-    color: '#C1A36A',
+    color: c.brand,
     textAlign: 'center',
     marginBottom: 20,
   },
@@ -663,24 +669,24 @@ const styles = StyleSheet.create({
     fontFamily: 'DMSans-Regular',
     fontSize: 14,
     fontWeight: '600',
-    color: '#2C2C2C',
+    color: c.text,
   },
   commentTime: {
     fontFamily: 'DMSans-Regular',
     fontSize: 12,
-    color: '#999',
+    color: c.textMuted,
   },
   commentText: {
     fontFamily: 'DMSans-Regular',
     fontSize: 14,
-    color: '#2C2C2C',
+    color: c.text,
     lineHeight: 20,
   },
   replyAction: {
     fontFamily: 'DMSans-Regular',
     fontSize: 12,
     fontWeight: '600',
-    color: '#999',
+    color: c.textMuted,
     marginTop: 6,
   },
   reply: {
@@ -700,7 +706,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#2C2C2C0D',
+    backgroundColor: c.surfaceMuted,
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 8,
@@ -710,7 +716,7 @@ const styles = StyleSheet.create({
   replyingToText: {
     fontFamily: 'DMSans-Regular',
     fontSize: 13,
-    color: '#666',
+    color: c.textSecondary,
   },
   inputRow: {
     flexDirection: 'row',
@@ -721,19 +727,19 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     borderWidth: 1,
-    borderColor: '#2C2C2C20',
+    borderColor: c.border,
     borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 12,
     fontFamily: 'DMSans-Regular',
     fontSize: 14,
-    color: '#2C2C2C',
+    color: c.text,
     minHeight: 80,
     textAlignVertical: 'top',
   },
   commentBtn: {
     marginHorizontal: 20,
-    backgroundColor: '#C1A36A',
+    backgroundColor: c.brand,
     borderRadius: 12,
     paddingVertical: 14,
     alignItems: 'center',
@@ -745,8 +751,8 @@ const styles = StyleSheet.create({
     fontFamily: 'DMSans-Regular',
     fontSize: 15,
     fontWeight: '600',
-    color: '#fff',
+    color: c.onBrand,
   },
-});
+}));
 
 export default BlogPostScreen;

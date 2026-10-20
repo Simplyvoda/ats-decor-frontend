@@ -1,14 +1,9 @@
 /* eslint-disable react-native/no-inline-styles */
-import { useNavigation } from '@react-navigation/native';
-import React, { useState } from 'react';
-import {
-  Image,
-  SafeAreaView,
-  Text,
-  View
-} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
+import React, {useState} from 'react';
+import {Image, SafeAreaView, Text, View} from 'react-native';
 import PrimaryButton from '../components/molecules/PrimaryButton';
-import { navigateTo } from '../utils/navigation';
+import {navigateTo} from '../utils/navigation';
 
 const stepsData = [
   {
@@ -41,17 +36,17 @@ export default function StepsScreen() {
     if (step < stepsData.length - 1) {
       setStep(step + 1);
     } else {
-      navigateTo(navigation, 'Auth', { screen: 'GetReady' });
+      navigateTo(navigation, 'Auth', {screen: 'GetReady'});
     }
   };
 
   const {image, title, subtitle, buttonText} = stepsData[step];
 
   return (
-    <SafeAreaView className="flex-1 bg-[#FAF9F6]">
+    <SafeAreaView className="flex-1 bg-[#FAF9F6] dark:bg-night">
       <View className="relative flex-1 flex-col justify-start items-center px-3 pt-20 space-y-5">
         {/* Image container */}
-        <View className="w-[90%] min-h-[300px] justify-center items-center rounded-lg overflow-hidden bg-[#D9D9D9]">
+        <View className="w-[90%] min-h-[300px] justify-center items-center rounded-lg overflow-hidden bg-[#D9D9D9] dark:bg-night-muted">
           <Image
             source={image}
             className="w-full h-[350px] rounded-lg"
@@ -60,16 +55,14 @@ export default function StepsScreen() {
         </View>
 
         {/* Title */}
-        <Text className="text-center text-[25px] leading-[25px] font-bold font-cormorant max-w-[80%] my-2">
+        <Text className="text-center text-[25px] leading-[25px] font-bold font-cormorant text-black dark:text-night-text-primary max-w-[80%] my-2">
           {title}
         </Text>
 
         {/* Subtitle */}
-        <Text className="text-center text-[16px] leading-[16px] font-normal font-dm-sans text-[#2C2C2C80] max-w-[80%]">
+        <Text className="text-center text-[16px] leading-[16px] font-normal font-dm-sans text-[#2C2C2C80] dark:text-night-text-muted max-w-[80%]">
           {subtitle}
         </Text>
-
-
 
         <View className="absolute bottom-4 w-[90%] flex-row items-center justify-between">
           {/* Slide indicator */}
@@ -80,7 +73,7 @@ export default function StepsScreen() {
                 className={
                   i === step
                     ? 'w-7 h-2 rounded-full bg-[#C1A36A]'
-                    : 'w-2 h-2 rounded-full bg-[#E5DFCE]'
+                    : 'w-2 h-2 rounded-full bg-[#E5DFCE] dark:bg-night-muted'
                 }
               />
             ))}

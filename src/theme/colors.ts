@@ -13,6 +13,8 @@ export type ThemeColors = {
   surfaceMuted: string;
   // Very light tint for a selected/pressed row or tab
   highlight: string;
+  // Highlighter-pen background behind marked words in blog posts
+  marker: string;
 
   // Headings and the most important text
   textPrimary: string;
@@ -32,7 +34,8 @@ export type ThemeColors = {
   brand: string;
   // Faint gold wash behind brand-coloured icons/labels
   brandSoft: string;
-  // Text and icons drawn ON a brand-gold background
+  // Text and icons drawn ON a brand-gold background (white in light
+  // mode, near-black in dark mode, where white on gold looks harsh)
   onBrand: string;
 
   // Standard icon colour (settings cog, chevrons…)
@@ -54,6 +57,7 @@ export const lightColors: ThemeColors = {
   surface: '#FFFFFF',
   surfaceMuted: '#F3F1EC',
   highlight: '#2C2C2C08',
+  marker: '#FEF3C7',
 
   textPrimary: '#1A1A1A',
   text: '#2C2C2C',
@@ -82,6 +86,7 @@ export const darkColors: ThemeColors = {
   surface: '#1F1D1A',
   surfaceMuted: '#2A2723',
   highlight: '#FFFFFF12',
+  marker: '#5C4A1F',
 
   textPrimary: '#F5F2EC',
   text: '#E8E4DC',
@@ -93,7 +98,7 @@ export const darkColors: ThemeColors = {
 
   brand: '#C1A36A',
   brandSoft: '#C1A36A26',
-  onBrand: '#FFFFFF',
+  onBrand: '#141311',
 
   icon: '#E5E1DA',
   iconMuted: '#5C574F',

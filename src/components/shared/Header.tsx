@@ -20,12 +20,12 @@ const SharedHeader = ({title, subtitle, action}: HeaderProps) => {
     <View
       className="bg-brand px-5 pt-6 pb-2 h-[160px] relative flex flex-col"
       style={styles.container}>
-      <Text className="font-cormorant text-[36px] text-white mb-1.5">
+      <Text className="font-cormorant text-[36px] text-white dark:text-night mb-1.5">
         {title ? title : 'PlaDomus'}
       </Text>
 
       {subtitle && (
-        <Text className="font-dm-sans text-[15px] text-white opacity-90 mb-5">
+        <Text className="font-dm-sans text-[15px] text-white dark:text-night opacity-90 mb-5">
           {subtitle}
         </Text>
       )}

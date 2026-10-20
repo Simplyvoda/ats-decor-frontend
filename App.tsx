@@ -10,6 +10,7 @@ import {
 import AppNavigator from './src/navigation/AppNavigator';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
+import ThemedToast from './src/components/molecules/ThemedToast';
 import {UserProvider, useUserContext} from './src/context/UserContext';
 import {
   extractAuthError,
@@ -19,6 +20,7 @@ import {
 import * as Sentry from '@sentry/react-native';
 import {useTheme} from './src/theme/useTheme';
 import {ThemeColors} from './src/theme/colors';
+import {ThemePreferenceProvider} from './src/theme/ThemePreference';
 
 // React Navigation's own colours (screen backgrounds during transitions,
 // default header/tab colours) built from the app's theme, so nothing
@@ -142,10 +144,12 @@ function AppContent() {
 export default Sentry.wrap(function App() {
   return (
     <SafeAreaProvider>
-      <UserProvider>
-        <AppContent />
-        <Toast />
-      </UserProvider>
+      <ThemePreferenceProvider>
+        <UserProvider>
+          <AppContent />
+          <ThemedToast />
+        </UserProvider>
+      </ThemePreferenceProvider>
     </SafeAreaProvider>
   );
 });

@@ -5,7 +5,6 @@ import {
   Dimensions,
   FlatList,
   Image,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -15,6 +14,7 @@ import {useNavigation} from '@react-navigation/native';
 import {goBack, navigateTo} from '../utils/navigation';
 import DesignTemplateService from '../services/DesignTemplateService';
 import {IDesignTemplate} from '../../interface/design-template.interface';
+import {makeStyles, useTheme} from '../theme/useTheme';
 
 // Explicit pixel size (not a % width) so the Image has a size to resolve
 // against inside the FlatList's numColumns grid — matches the furniture
@@ -39,6 +39,8 @@ type ModelCardItem = {
 };
 
 export default function ChooseModelScreen() {
+  const styles = useStyles();
+  const {colors} = useTheme();
   const navigation = useNavigation();
 
   const [templates, setTemplates] = useState<IDesignTemplate[]>([]);
@@ -54,9 +56,7 @@ export default function ChooseModelScreen() {
       setTemplates(res.data);
     } catch (err: any) {
       setError(
-        err.response?.data?.message ||
-          err.message ||
-          'Failed to load models',
+        err.response?.data?.message || err.message || 'Failed to load models',
       );
     } finally {
       setIsLoading(false);
@@ -104,7 +104,7 @@ export default function ChooseModelScreen() {
     <SafeAreaView style={styles.root}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => goBack(navigation)} hitSlop={12}>
-          <ChevronLeft size={24} color="#1a1a1a" />
+          <ChevronLeft size={24} color={colors.textPrimary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Choose a model</Text>
         <View style={{width: 24}} />
@@ -112,7 +112,7 @@ export default function ChooseModelScreen() {
 
       {isLoading ? (
         <View style={styles.centered}>
-          <ActivityIndicator size="large" color="#C4A962" />
+          <ActivityIndicator size="large" color={colors.brand} />
         </View>
       ) : (
         <>
@@ -144,8 +144,8 @@ export default function ChooseModelScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: {flex: 1, backgroundColor: '#FAF9F6'},
+const useStyles = makeStyles(c => ({
+  root: {flex: 1, backgroundColor: c.background},
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -153,7 +153,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
-  headerTitle: {fontSize: 17, fontWeight: '600', color: '#1a1a1a'},
+  headerTitle: {fontSize: 17, fontWeight: '600', color: c.textPrimary},
   centered: {
     flex: 1,
     alignItems: 'center',
@@ -164,16 +164,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#FBEAEA',
+    backgroundColor: c.surfaceMuted,
     marginHorizontal: 16,
     marginBottom: 4,
     paddingHorizontal: 14,
     paddingVertical: 10,
     borderRadius: 10,
   },
-  errorText: {color: '#b00020', flex: 1, marginRight: 12},
-  retryText: {color: '#b00020', fontWeight: '700'},
-  emptyText: {color: '#999', fontSize: 14, textAlign: 'center', paddingVertical: 40},
+  errorText: {color: c.danger, flex: 1, marginRight: 12},
+  retryText: {color: c.danger, fontWeight: '700'},
+  emptyText: {
+    color: c.textMuted,
+    fontSize: 14,
+    textAlign: 'center',
+    paddingVertical: 40,
+  },
   grid: {paddingHorizontal: GRID_PADDING, paddingTop: 8, paddingBottom: 24},
   card: {width: CARD_WIDTH, margin: CARD_MARGIN, alignItems: 'center'},
   thumbnail: {
@@ -186,11 +191,21 @@ const styles = StyleSheet.create({
     width: CARD_WIDTH,
     height: CARD_WIDTH,
     borderRadius: 14,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: c.surfaceMuted,
     resizeMode: 'cover',
     overflow: 'hidden',
   },
-  placeholderInitial: {fontSize: 40, fontWeight: '700', color: '#C4A962'},
-  title: {marginTop: 8, fontSize: 14, color: '#1a1a1a', textAlign: 'center'},
-  typeTag: {fontSize: 11, color: '#999', marginTop: 2, textTransform: 'capitalize'},
-});
+  placeholderInitial: {fontSize: 40, fontWeight: '700', color: c.brand},
+  title: {
+    marginTop: 8,
+    fontSize: 14,
+    color: c.textPrimary,
+    textAlign: 'center',
+  },
+  typeTag: {
+    fontSize: 11,
+    color: c.textMuted,
+    marginTop: 2,
+    textTransform: 'capitalize',
+  },
+}));

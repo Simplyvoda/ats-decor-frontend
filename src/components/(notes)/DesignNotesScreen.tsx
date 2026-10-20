@@ -14,6 +14,7 @@ import NoteService from '../../services/NoteService';
 import {IDraftNote, INote} from '../../../interface/note.interface';
 import {goBack, navigateTo} from '../../utils/navigation';
 import useRefetchOnFocus from '../../hooks/useRefetchOnFocus';
+import {useTheme} from '../../theme/useTheme';
 
 const formatDate = (iso: string) => {
   const d = new Date(iso);
@@ -27,6 +28,7 @@ type ListItem =
   | {kind: 'draft'; key: string; draft: IDraftNote};
 
 export default function DesignNotesScreen() {
+  const {colors} = useTheme();
   const navigation = useNavigation();
   const route = useRoute<any>();
   const designId: string | undefined = route.params?.designId;
@@ -88,25 +90,25 @@ export default function DesignNotesScreen() {
     if (isLoading) {
       return (
         <View className="items-center py-16">
-          <ActivityIndicator size="large" color="#C1A36A" />
+          <ActivityIndicator size="large" color={colors.brand} />
         </View>
       );
     }
     return (
       <View className="px-4 mt-6">
-        <View className="bg-white border border-[#E5E0D5] rounded-[16px] items-center py-14 px-6">
-          <ClipboardList size={44} color="#8A8A8A" strokeWidth={1.4} />
-          <Text className="font-cormorant text-[20px] text-gray-primary mt-4">
+        <View className="bg-white dark:bg-night-surface border border-[#E5E0D5] dark:border-night-border rounded-[16px] items-center py-14 px-6">
+          <ClipboardList size={44} color={colors.textMuted} strokeWidth={1.4} />
+          <Text className="font-cormorant text-[20px] text-gray-primary dark:text-night-text mt-4">
             No notes yet
           </Text>
-          <Text className="font-dm-sans text-[#7A7A7A] text-[14px] mt-2 text-center">
+          <Text className="font-dm-sans text-[#7A7A7A] dark:text-night-text-muted text-[14px] mt-2 text-center">
             Create a note to keep track of ideas for this design
           </Text>
           <TouchableOpacity
             onPress={goToCreate}
             className="bg-brand rounded-[12px] px-6 py-3 flex-row items-center mt-6">
-            <Plus color="white" size={18} />
-            <Text className="font-dm-sans text-white text-[15px] font-semibold ml-2">
+            <Plus color={colors.onBrand} size={18} />
+            <Text className="font-dm-sans text-white dark:text-night text-[15px] font-semibold ml-2">
               Create Note
             </Text>
           </TouchableOpacity>
@@ -118,7 +120,9 @@ export default function DesignNotesScreen() {
   const renderItem = ({item}: {item: ListItem}) => {
     const isDraft = item.kind === 'draft';
     const title = isDraft ? item.draft.title : item.note.title;
-    const description = isDraft ? item.draft.description : item.note.description;
+    const description = isDraft
+      ? item.draft.description
+      : item.note.description;
     const createdAt = isDraft ? item.draft.createdAt : item.note.createdAt;
 
     return (
@@ -126,15 +130,15 @@ export default function DesignNotesScreen() {
         <TouchableOpacity
           activeOpacity={0.75}
           onPress={() => openItem(item)}
-          className="bg-white border border-[#E5E0D5] rounded-[16px] p-4">
+          className="bg-white dark:bg-night-surface border border-[#E5E0D5] dark:border-night-border rounded-[16px] p-4">
           <View className="flex-row items-start justify-between">
             <Text
-              className="font-cormorant text-[20px] text-gray-primary flex-1"
+              className="font-cormorant text-[20px] text-gray-primary dark:text-night-text flex-1"
               numberOfLines={1}>
               {title}
             </Text>
             {isDraft && (
-              <View className="bg-[#F2E9D8] rounded-full px-3 py-1 ml-2">
+              <View className="bg-[#F2E9D8] dark:bg-night-muted rounded-full px-3 py-1 ml-2">
                 <Text className="font-dm-sans text-[11px] text-brand font-semibold">
                   Draft
                 </Text>
@@ -142,15 +146,15 @@ export default function DesignNotesScreen() {
             )}
           </View>
           <View className="flex-row items-center mt-1">
-            <Calendar size={14} color="#C1A36A" />
-            <Text className="font-dm-sans text-[#7A7A7A] text-[13px] ml-1">
+            <Calendar size={14} color={colors.brand} />
+            <Text className="font-dm-sans text-[#7A7A7A] dark:text-night-text-muted text-[13px] ml-1">
               {formatDate(createdAt)}
             </Text>
           </View>
           {description ? (
             <Text
               numberOfLines={2}
-              className="font-dm-sans text-[#9A9A9A] text-[13px] mt-1">
+              className="font-dm-sans text-[#9A9A9A] dark:text-night-text-muted text-[13px] mt-1">
               {description}
             </Text>
           ) : null}
@@ -160,20 +164,20 @@ export default function DesignNotesScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-offWhite" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-offWhite dark:bg-night" edges={['top']}>
       <View className="px-5 pt-2 pb-4 flex-row items-center">
         <ChevronLeft
-          color="#2C2C2C"
+          color={colors.text}
           size={24}
           onPress={() => goBack(navigation)}
         />
         <View className="ml-4 flex-1">
-          <Text className="font-cormorant text-gray-primary text-[24px]">
+          <Text className="font-cormorant text-gray-primary dark:text-night-text text-[24px]">
             Notes
           </Text>
           {designName ? (
             <Text
-              className="font-dm-sans text-[#7A7A7A] text-[13px]"
+              className="font-dm-sans text-[#7A7A7A] dark:text-night-text-muted text-[13px]"
               numberOfLines={1}>
               {designName}
             </Text>
@@ -182,8 +186,8 @@ export default function DesignNotesScreen() {
         <TouchableOpacity
           onPress={goToCreate}
           className="bg-brand rounded-[12px] px-4 py-2 flex-row items-center">
-          <Plus color="white" size={16} />
-          <Text className="font-dm-sans text-white text-[13px] font-semibold ml-1">
+          <Plus color={colors.onBrand} size={16} />
+          <Text className="font-dm-sans text-white dark:text-night text-[13px] font-semibold ml-1">
             Add Notes
           </Text>
         </TouchableOpacity>

@@ -20,6 +20,7 @@ import {
   isStrongPassword,
   PASSWORD_REQUIREMENTS_MESSAGE,
 } from '../../utils/passwordValidation';
+import {useTheme} from '../../theme/useTheme';
 
 type SetPasswordRouteParams = {
   SetPassword: {accessToken?: string};
@@ -31,6 +32,7 @@ type FormData = {
 };
 
 const SetPassword = () => {
+  const {colors} = useTheme();
   const navigation = useNavigation();
   const route = useRoute<RouteProp<SetPasswordRouteParams, 'SetPassword'>>();
   const accessToken = route.params?.accessToken;
@@ -80,20 +82,22 @@ const SetPassword = () => {
   };
 
   return (
-    <SafeAreaView className="h-screen p-6 bg-offWhite">
+    <SafeAreaView className="h-screen p-6 bg-offWhite dark:bg-night">
       <KeyboardAvoidingView
         className="flex-1"
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView className="w-full">
           <View className="relative flex items-center justify-center my-2">
-            <Text className="text-xl font-semibold text-gray-primary">
+            <Text className="text-xl font-semibold text-gray-primary dark:text-night-text">
               Set New Password
             </Text>
           </View>
 
           <View className="my-5">
-            <Text className="cormorant text-2xl">Choose a new password</Text>
-            <Text className="text-left text-light-gray text-lg">
+            <Text className="cormorant text-2xl text-black dark:text-night-text-primary">
+              Choose a new password
+            </Text>
+            <Text className="text-left text-light-gray dark:text-night-text-muted text-lg">
               Please enter and confirm your new password below.
             </Text>
 
@@ -109,12 +113,12 @@ const SetPassword = () => {
                   }}
                   render={({field: {onChange, onBlur, value}}) => (
                     <View
-                      className={`flex flex-row items-center border ${errors.password ? 'border-red-600' : 'border-[#ccc]'} bg-white mb-1.5 rounded-md px-2 py-3`}>
-                      <LockKeyhole color="#9ca3af" size={18} />
+                      className={`flex flex-row items-center border ${errors.password ? 'border-red-600' : 'border-[#ccc] dark:border-night-border'} bg-white dark:bg-night-surface mb-1.5 rounded-md px-2 py-3`}>
+                      <LockKeyhole color={colors.textMuted} size={18} />
                       <TextInput
-                        className="flex-1 ml-2"
+                        className="flex-1 ml-2 text-black dark:text-night-text"
                         autoCapitalize="none"
-                        placeholderTextColor="#9ca3af"
+                        placeholderTextColor={colors.textMuted}
                         placeholder="New password"
                         secureTextEntry={!showPassword}
                         value={value}
@@ -125,16 +129,16 @@ const SetPassword = () => {
                         onPress={() => setShowPassword(s => !s)}
                         hitSlop={{top: 8, bottom: 8, left: 8, right: 8}}>
                         {showPassword ? (
-                          <EyeOff color="#9ca3af" size={18} />
+                          <EyeOff color={colors.textMuted} size={18} />
                         ) : (
-                          <Eye color="#9ca3af" size={18} />
+                          <Eye color={colors.textMuted} size={18} />
                         )}
                       </TouchableOpacity>
                     </View>
                   )}
                 />
                 {errors.password && (
-                  <Text className="text-red-600">
+                  <Text className="text-red-600 dark:text-red-400">
                     {errors.password.message}
                   </Text>
                 )}
@@ -151,12 +155,12 @@ const SetPassword = () => {
                   }}
                   render={({field: {onChange, onBlur, value}}) => (
                     <View
-                      className={`flex flex-row items-center border ${errors.confirmPassword ? 'border-red-600' : 'border-[#ccc]'} bg-white mb-1.5 rounded-md px-2 py-3`}>
-                      <LockKeyhole color="#9ca3af" size={18} />
+                      className={`flex flex-row items-center border ${errors.confirmPassword ? 'border-red-600' : 'border-[#ccc] dark:border-night-border'} bg-white dark:bg-night-surface mb-1.5 rounded-md px-2 py-3`}>
+                      <LockKeyhole color={colors.textMuted} size={18} />
                       <TextInput
-                        className="flex-1 ml-2"
+                        className="flex-1 ml-2 text-black dark:text-night-text"
                         autoCapitalize="none"
-                        placeholderTextColor="#9ca3af"
+                        placeholderTextColor={colors.textMuted}
                         placeholder="Confirm new password"
                         secureTextEntry={!showConfirmPassword}
                         value={value}
@@ -167,16 +171,16 @@ const SetPassword = () => {
                         onPress={() => setShowConfirmPassword(s => !s)}
                         hitSlop={{top: 8, bottom: 8, left: 8, right: 8}}>
                         {showConfirmPassword ? (
-                          <EyeOff color="#9ca3af" size={18} />
+                          <EyeOff color={colors.textMuted} size={18} />
                         ) : (
-                          <Eye color="#9ca3af" size={18} />
+                          <Eye color={colors.textMuted} size={18} />
                         )}
                       </TouchableOpacity>
                     </View>
                   )}
                 />
                 {errors.confirmPassword && (
-                  <Text className="text-red-600">
+                  <Text className="text-red-600 dark:text-red-400">
                     {errors.confirmPassword.message}
                   </Text>
                 )}

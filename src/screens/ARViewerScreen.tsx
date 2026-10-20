@@ -52,6 +52,7 @@ import NoteService from '../services/NoteService';
 import {IFurniture} from '../../interface/furniture.interface';
 import {IPlacedFurniture} from '../../interface/design.interface';
 import {images} from '../../assets/constants/images';
+import {makeStyles, useTheme} from '../theme/useTheme';
 
 const STYLE_PRESETS = [
   'Minimalist',
@@ -133,6 +134,8 @@ const buildCatalogue = (items: IFurniture[]): FurnitureCategory[] => {
 // ─── Component ────────────────────────────────────────────────────────────
 
 export default function ARViewerScreen() {
+  const styles = useStyles();
+  const {colors} = useTheme();
   const navigation = useNavigation();
   const route = useRoute<any>();
   const justSavedRef = useRef(false);
@@ -460,7 +463,7 @@ export default function ARViewerScreen() {
       <ChevronLeft
         style={{transform: [{rotate: '180deg'}]}}
         size={18}
-        color="#999"
+        color={colors.textMuted}
       />
     </TouchableOpacity>
   );
@@ -488,7 +491,7 @@ export default function ARViewerScreen() {
       {roomStatus !== 'ready' && (
         <View style={styles.roomStatusOverlay} pointerEvents="none">
           {roomStatus === 'loading' && (
-            <ActivityIndicator color="#C4A962" size="large" />
+            <ActivityIndicator color={colors.brand} size="large" />
           )}
           <Text style={styles.roomStatusText}>
             {roomStatus === 'loading'
@@ -514,13 +517,13 @@ export default function ARViewerScreen() {
               <TouchableOpacity
                 style={styles.toolBtn}
                 onPress={() => toggleTopViewCommand(realityKitRef)}>
-                <Eye color="#C4A962" size={20} />
+                <Eye color={colors.brand} size={20} />
               </TouchableOpacity>
               <View style={styles.toolDivider} />
               <TouchableOpacity
                 style={styles.toolBtn}
                 onPress={() => setShowToolsMenu(v => !v)}>
-                <MoreVertical color="#C4A962" size={20} />
+                <MoreVertical color={colors.brand} size={20} />
               </TouchableOpacity>
             </View>
 
@@ -539,7 +542,7 @@ export default function ARViewerScreen() {
                         designName: route.params?.designName,
                       });
                     }}>
-                    <NotebookPen color="#C4A962" size={18} />
+                    <NotebookPen color={colors.brand} size={18} />
                     <Text style={styles.toolsMenuText}>Notes</Text>
                   </TouchableOpacity>
                 )}
@@ -550,7 +553,7 @@ export default function ARViewerScreen() {
                       setShowToolsMenu(false);
                       setShowPublishModal(true);
                     }}>
-                    <Save color="#C4A962" size={18} />
+                    <Save color={colors.brand} size={18} />
                     <Text style={styles.toolsMenuText}>
                       {currentDesignId ? 'Update Design' : 'Save design'}
                     </Text>
@@ -559,7 +562,7 @@ export default function ARViewerScreen() {
                 <TouchableOpacity
                   style={styles.toolsMenuItem}
                   onPress={handleExportPdf}>
-                  <FileDown color="#C4A962" size={18} />
+                  <FileDown color={colors.brand} size={18} />
                   <Text style={styles.toolsMenuText}>
                     {isExporting ? 'Exporting…' : 'Export PDF'}
                   </Text>
@@ -570,7 +573,7 @@ export default function ARViewerScreen() {
             <TouchableOpacity
               style={styles.resetBtn}
               onPress={() => resetCameraCommand(realityKitRef)}>
-              <RotateCcw color="#333" size={18} />
+              <RotateCcw color={colors.icon} size={18} />
             </TouchableOpacity>
 
             {/* Delete selected furniture */}
@@ -578,7 +581,7 @@ export default function ARViewerScreen() {
               <TouchableOpacity
                 style={styles.deleteBtn}
                 onPress={() => removeSelectedFurnitureCommand(realityKitRef)}>
-                <Trash2 color="#D21616" size={18} />
+                <Trash2 color={colors.danger} size={18} />
               </TouchableOpacity>
             )}
           </View>
@@ -600,13 +603,13 @@ export default function ARViewerScreen() {
                 <TouchableOpacity
                   onPress={handleBackFromCategory}
                   hitSlop={{top: 12, bottom: 12, left: 12, right: 12}}>
-                  <ChevronLeft color="#333" size={22} />
+                  <ChevronLeft color={colors.icon} size={22} />
                 </TouchableOpacity>
                 <Text style={styles.sheetTitle}>{activeCategory.name}</Text>
                 <TouchableOpacity
                   onPress={handleCloseSheet}
                   hitSlop={{top: 12, bottom: 12, left: 12, right: 12}}>
-                  <X color="#333" size={22} />
+                  <X color={colors.icon} size={22} />
                 </TouchableOpacity>
               </View>
 
@@ -627,7 +630,7 @@ export default function ARViewerScreen() {
                 <TouchableOpacity
                   onPress={handleCloseSheet}
                   hitSlop={{top: 12, bottom: 12, left: 12, right: 12}}>
-                  <X color="#333" size={22} />
+                  <X color={colors.icon} size={22} />
                 </TouchableOpacity>
               </View>
               {catalogue.length === 0 ? (
@@ -661,7 +664,7 @@ export default function ARViewerScreen() {
               <TouchableOpacity
                 onPress={() => setShowPublishModal(false)}
                 hitSlop={10}>
-                <X color="#333" size={22} />
+                <X color={colors.icon} size={22} />
               </TouchableOpacity>
             </View>
 
@@ -669,7 +672,7 @@ export default function ARViewerScreen() {
               value={pubName}
               onChangeText={setPubName}
               placeholder="Design name..."
-              placeholderTextColor="#999"
+              placeholderTextColor={colors.textMuted}
               style={styles.modalInput}
             />
 
@@ -680,8 +683,16 @@ export default function ARViewerScreen() {
               value={pubStyle}
               onChange={item => setPubStyle(item.value)}
               placeholder="Style (Optional)"
-              placeholderStyle={{color: '#999', fontSize: 14}}
-              selectedTextStyle={{color: '#2C2C2C', fontSize: 14}}
+              placeholderStyle={{color: colors.textMuted, fontSize: 14}}
+              selectedTextStyle={{color: colors.text, fontSize: 14}}
+              // The dropdown's pop-up list is white with black text
+              // unless told otherwise
+              containerStyle={{
+                backgroundColor: colors.surface,
+                borderColor: colors.border,
+              }}
+              itemTextStyle={{color: colors.text}}
+              activeColor={colors.highlight}
               style={styles.modalDropdown}
             />
 
@@ -693,7 +704,7 @@ export default function ARViewerScreen() {
                     onPress={() => setPubTags(pubTags.filter(t => t !== tag))}
                     style={styles.tagChip}>
                     <Text style={styles.tagChipText}>{tag}</Text>
-                    <X size={12} color="#7A7A7A" />
+                    <X size={12} color={colors.textMuted} />
                   </TouchableOpacity>
                 ))}
               </View>
@@ -704,7 +715,7 @@ export default function ARViewerScreen() {
               onSubmitEditing={addPubTag}
               onBlur={addPubTag}
               placeholder="Add a tag and press return"
-              placeholderTextColor="#999"
+              placeholderTextColor={colors.textMuted}
               autoCapitalize="none"
               style={styles.modalInput}
             />
@@ -721,7 +732,8 @@ export default function ARViewerScreen() {
               <Switch
                 value={pubIsPublic}
                 onValueChange={setPubIsPublic}
-                trackColor={{true: '#C4A962', false: '#E5E0D5'}}
+                trackColor={{true: colors.brand, false: colors.border}}
+                ios_backgroundColor={colors.border}
                 thumbColor="white"
               />
             </View>
@@ -734,11 +746,11 @@ export default function ARViewerScreen() {
                 (!pubName.trim() || isPublishing) && styles.publishBtnDisabled,
               ]}>
               {isPublishing ? (
-                <ActivityIndicator size="small" color="white" />
+                <ActivityIndicator size="small" color={colors.onBrand} />
               ) : pubIsPublic ? (
-                <Globe color="white" size={18} />
+                <Globe color={colors.onBrand} size={18} />
               ) : (
-                <Save color="white" size={18} />
+                <Save color={colors.onBrand} size={18} />
               )}
               <Text style={styles.publishBtnText}>
                 {currentDesignId
@@ -765,7 +777,7 @@ export default function ARViewerScreen() {
 
 const ITEM_SIZE = (Dimensions.get('window').width - 48) / 3;
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles(c => ({
   root: {flex: 1, backgroundColor: '#000'},
 
   roomStatusOverlay: {
@@ -804,10 +816,10 @@ const styles = StyleSheet.create({
   },
   rightSide: {alignItems: 'center', gap: 10},
   toolCard: {
-    backgroundColor: 'white',
+    backgroundColor: c.surface,
     borderRadius: 14,
     paddingVertical: 4,
-    shadowColor: '#000',
+    shadowColor: c.shadow,
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.12,
     shadowRadius: 6,
@@ -819,13 +831,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  toolDivider: {height: 1, backgroundColor: '#f0f0f0', marginHorizontal: 8},
+  toolDivider: {height: 1, backgroundColor: c.border, marginHorizontal: 8},
   toolsMenu: {
-    backgroundColor: 'white',
+    backgroundColor: c.surface,
     borderRadius: 14,
     paddingVertical: 4,
     paddingHorizontal: 4,
-    shadowColor: '#000',
+    shadowColor: c.shadow,
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.15,
     shadowRadius: 10,
@@ -837,7 +849,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 10,
   },
-  toolsMenuText: {fontSize: 15, color: '#333', marginLeft: 10},
+  toolsMenuText: {fontSize: 15, color: c.text, marginLeft: 10},
 
   // Publish modal
   modalBackdrop: {
@@ -847,7 +859,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   modalCard: {
-    backgroundColor: 'white',
+    backgroundColor: c.surface,
     borderRadius: 18,
     padding: 20,
   },
@@ -857,20 +869,20 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 16,
   },
-  modalTitle: {fontSize: 19, fontWeight: '600', color: '#1a1a1a'},
+  modalTitle: {fontSize: 19, fontWeight: '600', color: c.textPrimary},
   modalInput: {
     borderWidth: 1,
-    borderColor: '#E5E0D5',
+    borderColor: c.border,
     borderRadius: 10,
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 14,
-    color: '#2C2C2C',
+    color: c.text,
     marginBottom: 12,
   },
   modalDropdown: {
     borderWidth: 1,
-    borderColor: '#E5E0D5',
+    borderColor: c.border,
     borderRadius: 10,
     paddingHorizontal: 12,
     paddingVertical: 10,
@@ -886,22 +898,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: '#EFEAE0',
+    backgroundColor: c.surfaceMuted,
     borderRadius: 8,
     paddingHorizontal: 10,
     paddingVertical: 4,
   },
-  tagChipText: {fontSize: 13, color: '#2C2C2C', textTransform: 'capitalize'},
+  tagChipText: {fontSize: 13, color: c.text, textTransform: 'capitalize'},
   publicRow: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 18,
     marginTop: 4,
   },
-  publicLabel: {fontSize: 15, fontWeight: '500', color: '#1a1a1a'},
-  publicHint: {fontSize: 12, color: '#999', marginTop: 2},
+  publicLabel: {fontSize: 15, fontWeight: '500', color: c.textPrimary},
+  publicHint: {fontSize: 12, color: c.textMuted, marginTop: 2},
   publishBtn: {
-    backgroundColor: '#C4A962',
+    backgroundColor: c.brand,
     borderRadius: 12,
     paddingVertical: 14,
     flexDirection: 'row',
@@ -910,15 +922,15 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   publishBtnDisabled: {opacity: 0.5},
-  publishBtnText: {color: 'white', fontSize: 16, fontWeight: '600'},
+  publishBtnText: {color: c.onBrand, fontSize: 16, fontWeight: '600'},
   resetBtn: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: 'white',
+    backgroundColor: c.surface,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
+    shadowColor: c.shadow,
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.12,
     shadowRadius: 6,
@@ -928,10 +940,10 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: 'white',
+    backgroundColor: c.surface,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
+    shadowColor: c.shadow,
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.12,
     shadowRadius: 6,
@@ -944,10 +956,10 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: 'white',
+    backgroundColor: c.surface,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    shadowColor: '#000',
+    shadowColor: c.shadow,
     shadowOffset: {width: 0, height: -3},
     shadowOpacity: 0.1,
     shadowRadius: 10,
@@ -962,7 +974,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 4,
     borderRadius: 2,
-    backgroundColor: '#e0e0e0',
+    backgroundColor: c.borderStrong,
   },
   sheetHeader: {
     flexDirection: 'row',
@@ -974,7 +986,7 @@ const styles = StyleSheet.create({
   sheetTitle: {
     fontSize: 17,
     fontWeight: '600',
-    color: '#1a1a1a',
+    color: c.textPrimary,
     flex: 1,
     textAlign: 'center',
   },
@@ -986,13 +998,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: '#f5f5f5',
+    borderBottomColor: c.border,
   },
-  categoryName: {fontSize: 15, color: '#1a1a1a', flex: 1},
-  categoryCount: {fontSize: 13, color: '#999', marginRight: 8},
+  categoryName: {fontSize: 15, color: c.textPrimary, flex: 1},
+  categoryCount: {fontSize: 13, color: c.textMuted, marginRight: 8},
   emptyCatalogue: {
     textAlign: 'center',
-    color: '#999',
+    color: c.textMuted,
     fontSize: 14,
     paddingVertical: 24,
   },
@@ -1008,13 +1020,13 @@ const styles = StyleSheet.create({
     width: ITEM_SIZE - 8,
     height: ITEM_SIZE - 8,
     borderRadius: 12,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: c.surfaceMuted,
     resizeMode: 'contain',
   },
   furnitureName: {
     fontSize: 11,
-    color: '#444',
+    color: c.textSecondary,
     textAlign: 'center',
     marginTop: 4,
   },
-});
+}));
