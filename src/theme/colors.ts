@@ -22,6 +22,8 @@ export type ThemeColors = {
   text: string;
   // Supporting text: subtitles, descriptions
   textSecondary: string;
+  // Softer subtitle grey from the room builder designs (#2C2C2C at 60%)
+  textSoft: string;
   // Hints, dates, placeholders, inactive tabs
   textMuted: string;
 
@@ -62,6 +64,7 @@ export const lightColors: ThemeColors = {
   textPrimary: '#1A1A1A',
   text: '#2C2C2C',
   textSecondary: '#555555',
+  textSoft: '#2C2C2C99',
   textMuted: '#999999',
 
   border: '#2C2C2C33',
@@ -91,6 +94,7 @@ export const darkColors: ThemeColors = {
   textPrimary: '#F5F2EC',
   text: '#E8E4DC',
   textSecondary: '#BDB7AC',
+  textSoft: '#F5F2EC99',
   textMuted: '#8C867C',
 
   border: '#FFFFFF1F',

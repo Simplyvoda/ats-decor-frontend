@@ -1,14 +1,16 @@
 import React, {useEffect, useState} from 'react';
 import {ActivityIndicator, Text, TouchableOpacity, View} from 'react-native';
-import Svg, {Line, Path} from 'react-native-svg';
+import Svg, {Path, Rect} from 'react-native-svg';
 import RealityKitView from '../../components/RoomScanner/RealityKitView.native';
 import {makeStyles, useTheme} from '../../theme/useTheme';
 import FloorPlan from './FloorPlan';
 import {Opening, RoomShape, formatShort, roomPoints} from './roomGeometry';
 import {SANS, Segmented, useStyles as useSharedStyles} from './ui';
 
-const OPENING_BLUE = '#3B6FE0';
-const VIEW_HEIGHT = 260;
+// "Room preview" frames in the PlaDomus Figma file (nodes 4126:2628 and
+// 4126:2725): 333 × 211 card, door/window legend in #306CFE
+const OPENING_BLUE = '#306CFE';
+const VIEW_HEIGHT = 211;
 
 export default function PreviewStep({
   shape,
@@ -58,6 +60,7 @@ export default function PreviewStep({
             key={modelUrl}
             modelUrl={modelUrl}
             editingEnabled={false}
+            startFromAbove
             style={{flex: 1}}
             onRoomLoaded={e => {
               if (e.nativeEvent.success) {
@@ -105,9 +108,6 @@ export default function PreviewStep({
           <FloorPlan points={roomPoints(shape, lengths)} lengths={lengths} openings={openings} height={VIEW_HEIGHT} />
         )}
       </View>
-      {mode === '3d' && roomLoaded && (
-        <Text style={styles.gestureHint}>Drag to look around · pinch to zoom</Text>
-      )}
 
       {openings.length === 0 ? (
         <Text style={styles.noOpenings}>No doors or windows added</Text>
@@ -135,14 +135,15 @@ function LegendRow({label, kind, width}: {label: string; kind: 'door' | 'window'
     <View style={styles.legendRow}>
       <Text style={styles.legendText}>{label}</Text>
       {kind === 'door' ? (
-        <Svg width={26} height={26}>
-          <Line x1={2} y1={2} x2={2} y2={24} stroke={OPENING_BLUE} strokeWidth={1.5} />
-          <Path d="M 2 24 A 22 22 0 0 0 24 2" stroke={OPENING_BLUE} strokeWidth={1.5} fill="none" />
+        // Quarter circle: straight top and left edges, curved swing
+        <Svg width={27} height={29}>
+          <Path d="M 1 1 L 26 1 A 25 27 0 0 1 1 28 Z" stroke={OPENING_BLUE} strokeWidth={1.5} fill="#FFFFFF" />
         </Svg>
       ) : (
-        <Svg width={52} height={10}>
-          <Line x1={2} y1={3} x2={50} y2={3} stroke={OPENING_BLUE} strokeWidth={1.5} />
-          <Line x1={2} y1={7} x2={50} y2={7} stroke={OPENING_BLUE} strokeWidth={1.5} />
+        // Rounded pane with a thin bar through the middle
+        <Svg width={51} height={9}>
+          <Rect x={1} y={1} width={49} height={6.8} rx={3.4} stroke={OPENING_BLUE} strokeWidth={1} fill="#FFFFFF" />
+          <Rect x={1} y={3.3} width={49} height={2.3} rx={1.15} stroke={OPENING_BLUE} strokeWidth={1} fill="#FFFFFF" />
         </Svg>
       )}
       <Text style={styles.legendText}>({formatShort(width)})</Text>
@@ -164,10 +165,9 @@ const useStyles = makeStyles(c => ({
   errorText: {fontFamily: SANS, fontSize: 14, color: c.danger, textAlign: 'center'},
   retry: {paddingVertical: 8, paddingHorizontal: 16, borderRadius: 8, borderWidth: 1, borderColor: c.brand},
   retryText: {fontFamily: SANS, fontSize: 14, color: c.textPrimary},
-  gestureHint: {fontFamily: SANS, fontSize: 12, color: c.textMuted, textAlign: 'center', marginTop: 8},
   noOpenings: {fontFamily: SANS, fontSize: 14, color: c.textMuted, marginTop: 20},
-  legend: {flexDirection: 'row', justifyContent: 'space-between', marginTop: 24},
+  legend: {flexDirection: 'row', justifyContent: 'space-between', marginTop: 32},
   legendColumn: {gap: 12},
   legendRow: {flexDirection: 'row', alignItems: 'center', gap: 6},
-  legendText: {fontFamily: SANS, fontSize: 15, color: c.text},
+  legendText: {fontFamily: SANS, fontSize: 16, color: c.text},
 }));

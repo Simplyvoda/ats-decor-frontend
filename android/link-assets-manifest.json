@@ -2,6 +2,10 @@
   "migIndex": 1,
   "data": [
     {
+      "path": "assets/fonts/Cinzel-Bold.ttf",
+      "sha1": "6752a098160ab1e928b9b5a3c30c18a455ef02ee"
+    },
+    {
       "path": "assets/fonts/CormorantGaramond-Medium.ttf",
       "sha1": "2757a4a3e557b1954f4c15ec7e596451fb31128a"
     },

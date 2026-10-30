@@ -5,7 +5,7 @@ import {useTheme} from '../../theme/useTheme';
 import {Opening, Point, formatMetres, wallLetter} from './roomGeometry';
 
 // Door/window blue from the designs
-const OPENING_BLUE = '#3B6FE0';
+const OPENING_BLUE = '#306CFE';
 
 type Props = {
   points: Point[];

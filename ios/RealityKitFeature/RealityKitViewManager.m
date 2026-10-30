@@ -33,6 +33,7 @@ RCT_EXTERN_METHOD(placeFurnitureFromLayout:(nonnull NSNumber *)reactTag itemJson
 RCT_EXTERN_METHOD(exportDesignPdf:(nonnull NSNumber *)reactTag name:(NSString *)name)
 RCT_EXPORT_VIEW_PROPERTY(modelUrl, NSString)
 RCT_EXPORT_VIEW_PROPERTY(editingEnabled, BOOL)
+RCT_EXPORT_VIEW_PROPERTY(startFromAbove, BOOL)
 RCT_EXPORT_VIEW_PROPERTY(onSnapshotReady, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onFurnitureSelectionChanged, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onFurnitureLayoutExported, RCTDirectEventBlock)

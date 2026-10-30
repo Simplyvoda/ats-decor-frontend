@@ -31,6 +31,7 @@
 		B868BB3E0C877A34B68C40F3 /* libPods-fe.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E5308F11A4BE7422B340F51B /* libPods-fe.a */; };
 		CEA2952313CD45C0B7E58240 /* Colors.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5C452F58C2DC42B2BD956E2D /* Colors.xcassets */; };
 		F2DBCCAAE06C42F3BBAD6361 /* BootSplash.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E8317B5416F649B5BC4CD939 /* BootSplash.storyboard */; };
+		8DC713E8D1874B8C9F7B0071 /* Cinzel-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 0624317A97834EFBBFDAC71F /* Cinzel-Bold.ttf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -65,6 +66,7 @@
 		E5308F11A4BE7422B340F51B /* libPods-fe.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-fe.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E8317B5416F649B5BC4CD939 /* BootSplash.storyboard */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = BootSplash.storyboard; path = fe/BootSplash.storyboard; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
+		0624317A97834EFBBFDAC71F /* Cinzel-Bold.ttf */ = {isa = PBXFileReference; name = "Cinzel-Bold.ttf"; path = "../assets/fonts/Cinzel-Bold.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -113,6 +115,7 @@
 			children = (
 				28429C529CE14408BFDF2176 /* CormorantGaramond-Medium.ttf */,
 				6A0FD5EE046C43BF97E2BC5C /* DMSans-Medium.ttf */,
+				0624317A97834EFBBFDAC71F /* Cinzel-Bold.ttf */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -262,6 +265,7 @@
 				CEA2952313CD45C0B7E58240 /* Colors.xcassets in Resources */,
 				58027BFBC61B45D0A14FE933 /* CormorantGaramond-Medium.ttf in Resources */,
 				566E3793A2904823BDFA927B /* DMSans-Medium.ttf in Resources */,
+				8DC713E8D1874B8C9F7B0071 /* Cinzel-Bold.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -221,6 +221,12 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
     // branches already.
     @objc var editingEnabled: Bool = true
 
+    // Start looking down at the whole room from above a corner, like a
+    // dollhouse, instead of standing inside it. Used by the room builder's
+    // preview card, where the room should be seen at a glance. Read once,
+    // when the camera is set up after the room loads.
+    @objc var startFromAbove: Bool = false
+
     // Resolves "bundle://name.usdz" (app bundle), "https://..." (remote), or "file://..." (local) into a loadable URL.
     private func resolveURL(_ urlString: String) -> URL? {
         if urlString.hasPrefix("bundle://") {
@@ -602,6 +608,19 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
         self.roomBounds = bounds
         self.initialCamPosition = cam.position
         self.initialPivotPosition = pivot.position
+
+        if startFromAbove {
+            // Pull back far enough that the room's full diagonal fits, swing
+            // round to a corner and tip the camera down ~57°. Same orbit
+            // variables the drag/pinch gestures use, so they carry on from
+            // here. Numbers checked by rendering rectangle and L-shaped
+            // rooms in a 333×211 card.
+            let diagonal = sqrt(bounds.extents.x * bounds.extents.x + bounds.extents.z * bounds.extents.z)
+            cameraRadius = max(2.5, diagonal * 1.15 + bounds.extents.y * 0.5)
+            yaw = .pi / 5
+            pitch = -1.0
+            applyOrbit()
+        }
     }
 
     // Furniture USDZs use PBR materials that render black without a light.

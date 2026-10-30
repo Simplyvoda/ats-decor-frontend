@@ -19,6 +19,9 @@ interface RealityKitViewProps {
   // require a selection first) — camera orbit/pan/zoom are unaffected
   // either way. Defaults true on the native side if omitted.
   editingEnabled?: boolean;
+  // Start with a dollhouse view from above a corner instead of inside the
+  // room (room builder preview). Defaults false on the native side.
+  startFromAbove?: boolean;
   style?: object;
   // Fired after captureSnapshotCommand with {path} or {error}
   onSnapshotReady?: (e: {

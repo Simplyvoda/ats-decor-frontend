@@ -304,8 +304,8 @@ export const useStyles = makeStyles(c => ({
   progressText: {fontFamily: SANS, fontSize: 14, color: c.text},
 
   // Page text
-  title: {fontFamily: SERIF, fontSize: 32, color: c.textPrimary, fontWeight: '600'},
-  subtitle: {fontFamily: SANS, fontSize: 15, color: c.textSecondary, marginTop: 6, lineHeight: 21},
+  title: {fontFamily: SERIF, fontSize: 32, color: c.text, fontWeight: '600'},
+  subtitle: {fontFamily: SANS, fontSize: 16, color: c.textSoft, marginTop: 6, lineHeight: 21},
 
   // Buttons
   primaryButton: {
@@ -327,7 +327,7 @@ export const useStyles = makeStyles(c => ({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  outlineButtonText: {fontFamily: SANS, fontSize: 16, fontWeight: '600', color: c.textPrimary},
+  outlineButtonText: {fontFamily: SANS, fontSize: 16, fontWeight: '700', color: c.text, letterSpacing: 0.8},
 
   // Segmented control
   segSeparate: {flexDirection: 'row', gap: 20},
@@ -339,17 +339,20 @@ export const useStyles = makeStyles(c => ({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  // 278 × 50 pill with a 122 × 39 highlight, per the Room Preview design
   segJoined: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignSelf: 'center',
-    width: 276,
-    padding: 4,
+    width: 278,
+    height: 50,
+    padding: 5,
     borderRadius: 10,
     backgroundColor: c.surfaceMuted,
   },
-  segJoinedItem: {flex: 1, height: 40, borderRadius: 8, alignItems: 'center', justifyContent: 'center'},
+  segJoinedItem: {width: 122, height: 39, marginTop: 0.5, borderRadius: 10, alignItems: 'center', justifyContent: 'center'},
   segItemActive: {backgroundColor: c.brand},
-  segText: {fontFamily: SANS, fontSize: 16, color: c.text},
+  segText: {fontFamily: SANS, fontSize: 16, color: c.text, letterSpacing: 0.8},
   segTextActive: {color: c.onBrand, fontWeight: '700'},
 
   // Stepper
