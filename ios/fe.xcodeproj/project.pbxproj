@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A0FEA7122F00000000000012 /* RoomGeometryBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0FEA7112F00000000000011 /* RoomGeometryBuilder.swift */; };
+		A0FEA7142F00000000000014 /* RoomBuilderModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0FEA7132F00000000000013 /* RoomBuilderModule.swift */; };
+		A0FEA7162F00000000000016 /* RoomBuilderModule.m in Sources */ = {isa = PBXBuildFile; fileRef = A0FEA7152F00000000000015 /* RoomBuilderModule.m */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		51DC9810477F8FC2683D429F /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
 		566E3793A2904823BDFA927B /* DMSans-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 6A0FD5EE046C43BF97E2BC5C /* DMSans-Medium.ttf */; };
@@ -31,6 +34,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		A0FEA7112F00000000000011 /* RoomGeometryBuilder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RoomGeometryBuilder.swift; sourceTree = "<group>"; };
+		A0FEA7132F00000000000013 /* RoomBuilderModule.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RoomBuilderModule.swift; sourceTree = "<group>"; };
+		A0FEA7152F00000000000015 /* RoomBuilderModule.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RoomBuilderModule.m; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* fe.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = fe.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = fe/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = fe/Info.plist; sourceTree = "<group>"; };
@@ -153,6 +159,9 @@
 				A016CC0E2FDA328B00C215B3 /* RealityKitViewManager.swift */,
 				A0679A302F33B975002EF03A /* RealityKitModule.m */,
 				A0FEA7032F00000000000003 /* RealityKitModule.swift */,
+				A0FEA7112F00000000000011 /* RoomGeometryBuilder.swift */,
+				A0FEA7132F00000000000013 /* RoomBuilderModule.swift */,
+				A0FEA7152F00000000000015 /* RoomBuilderModule.m */,
 			);
 			path = RealityKitFeature;
 			sourceTree = "<group>";
@@ -362,6 +371,9 @@
 				A0D530673049A5AB008DB519 /* RoomPlanSupport.m in Sources */,
 				A016CC122FDA328B00C215B3 /* RealityKitView.swift in Sources */,
 				A0FEA7042F00000000000004 /* RealityKitModule.swift in Sources */,
+				A0FEA7122F00000000000012 /* RoomGeometryBuilder.swift in Sources */,
+				A0FEA7142F00000000000014 /* RoomBuilderModule.swift in Sources */,
+				A0FEA7162F00000000000016 /* RoomBuilderModule.m in Sources */,
 				A02821652EC8AB0200F31026 /* RoomplanViewManager.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
