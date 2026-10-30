@@ -194,7 +194,9 @@ export default function ARViewerScreen() {
     if (route.params?.fromScan) {
       Toast.show({
         type: 'info',
-        text1: 'Scan ready',
+        // fromRoomBuilder: a room built from typed-in measurements
+        // (RoomBuilderScreen), handled like a fresh scan otherwise
+        text1: route.params?.fromRoomBuilder ? 'Room ready' : 'Scan ready',
         text2: 'Use ⋮ → Save design to keep it',
         visibilityTime: 5000,
       });

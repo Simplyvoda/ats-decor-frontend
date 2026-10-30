@@ -1,4 +1,4 @@
-import {Camera, LayoutPanelTop} from 'lucide-react-native';
+import {Camera, LayoutPanelTop, Ruler} from 'lucide-react-native';
 import React from 'react';
 import {Text, TouchableOpacity, View} from 'react-native';
 import {navigateTo} from '../../utils/navigation';
@@ -55,6 +55,21 @@ const DesignScreen = () => {
           </View>
         </TouchableOpacity>
 
+        <View className="items-center -mt-1">
+          <Text className="font-dm-sans text-sm text-[#7A7A7A] dark:text-night-text-muted mb-3">
+            Prefer to measure it yourself?
+          </Text>
+          <TouchableOpacity
+            onPress={() => navigateTo(navigation, 'RoomBuilder')}
+            accessibilityRole="button"
+            className="flex-row items-center px-5 py-3 rounded-[12px] border-[1px] border-brand">
+            <Ruler color={'#C1A36A'} size={18} />
+            <Text className="font-dm-sans text-[16px] text-brand ml-2">
+              Enter room dimensions manually
+            </Text>
+          </TouchableOpacity>
+        </View>
+
         <TouchableOpacity
           onPress={() => navigateTo(navigation, 'ChooseModel')}
           className="px-3 py-5 flex flex-row justify-start items-center shadow-slate-600 shadow-sm rounded-[16px] bg-white dark:bg-night-surface">
@@ -72,7 +87,7 @@ const DesignScreen = () => {
         </TouchableOpacity>
 
         <View className="px-3 py-8 flex flex-row justify-start items-center rounded-[16px] bg-transparent border-[1px] border-[#2C2C2C33] dark:border-night-border">
-          <View className="ml-5">
+          <View className="ml-5 flex-1">
             <Text className="font-cormorant text-2xl mb-5 text-black dark:text-night-text-primary">
               Design Tips
             </Text>
@@ -82,10 +97,16 @@ const DesignScreen = () => {
                 Scan in good lighting for best results
               </Text>
             </View>
-            <View className="flex-row items-center">
+            <View className="flex-row items-center mb-5">
               <View className="h-3 w-3 rounded-full bg-brand" />
               <Text className="font-dm-sans text-base ml-2 text-black dark:text-night-text-secondary">
                 Test different ideas till you get it right
+              </Text>
+            </View>
+            <View className="flex-row items-center pr-6">
+              <View className="h-3 w-3 rounded-full bg-brand" />
+              <Text className="font-dm-sans text-base ml-2 text-black dark:text-night-text-secondary">
+                Measure each wall carefully and enter dimensions in metres
               </Text>
             </View>
           </View>
