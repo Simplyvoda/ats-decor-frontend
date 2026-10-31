@@ -4,7 +4,6 @@ import BootSplash from 'react-native-bootsplash';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
 import WelcomeScreen from '../screens/WelcomeScreen';
-import StepsScreen from '../screens/StepsScreen';
 import ViewMoodboards from '../screens/home_screens/moodboards/ViewMoodboards';
 import SignUp from '../screens/auth_screens/SignUp';
 import SetPassword from '../screens/auth_screens/SetPassword';
@@ -103,7 +102,6 @@ function AppNavigator(): React.JSX.Element {
         // ── Unauthenticated ────────────────────────────────────────────────
         <>
           <Stack.Screen name="Welcome" component={WelcomeScreen} />
-          <Stack.Screen name="Steps" component={StepsScreen} />
           <Stack.Screen name="Auth" component={AuthNavigator} />
         </>
       )}
