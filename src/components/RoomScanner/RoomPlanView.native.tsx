@@ -15,6 +15,9 @@ import {UIManager, findNodeHandle, requireNativeComponent} from 'react-native';
 // from ios/RoomPlanFeature/RoomplanViewManager.m, props/events silently misbehave.
 interface RoomPlanViewProps {
   style?: object;
+  // false drops detected furniture from the saved room (walls, floor,
+  // doors and windows only). See src/config/scan.ts.
+  includeFurniture?: boolean;
   // Fired when a finished scan has been processed and exported:
   //   success → {json, fileUrl}   (metadata JSON + file:// URL of the .usdz)
   //   failure → {error}           (no fileUrl — check before navigating!)

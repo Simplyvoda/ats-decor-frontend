@@ -120,6 +120,10 @@ class RoomplanView: UIView, RoomCaptureSessionDelegate {
     // the dictionary argument arrives in JS as e.nativeEvent.
     @objc var onExportComplete: RCTBubblingEventBlock?
 
+    // Prop from JS (src/config/scan.ts). false = save only the room's
+    // structure (walls, floor, doors, windows, openings), no furniture.
+    @objc var includeFurniture: Bool = true
+
     override init(frame: CGRect) {
         super.init(frame: frame)
         backgroundColor = .black
@@ -313,6 +317,36 @@ class RoomplanView: UIView, RoomCaptureSessionDelegate {
         cleanup()
     }
 
+    // MARK: - Furniture filter
+
+    // RoomPlan has no setting to skip furniture, and CapturedRoom's lists
+    // are read-only. But CapturedRoom is Codable, so: turn it into JSON,
+    // empty its "objects" list (the furniture), and turn it back. Walls,
+    // doors, windows, openings and floors are untouched. If anything about
+    // that fails (e.g. Apple renames the key), keep the room as scanned
+    // rather than failing the whole scan.
+    static func withoutFurniture(_ room: CapturedRoom) -> CapturedRoom {
+        do {
+            let data = try JSONEncoder().encode(room)
+            guard
+                var json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+                json["objects"] != nil
+            else {
+                NSLog("⚠️ withoutFurniture: no objects list found, keeping furniture")
+                return room
+            }
+            let removed = room.objects.count
+            json["objects"] = [Any]()
+            let filtered = try JSONSerialization.data(withJSONObject: json)
+            let result = try JSONDecoder().decode(CapturedRoom.self, from: filtered)
+            NSLog("🪑 Removed \(removed) furniture item(s) from the scan")
+            return result
+        } catch {
+            NSLog("⚠️ withoutFurniture failed, keeping furniture: \(error)")
+            return room
+        }
+    }
+
     // MARK: - RoomCaptureSessionDelegate
 
     // Fires after stopScanning() (the delegate is nil'd on the abort/reset
@@ -329,7 +363,8 @@ class RoomplanView: UIView, RoomCaptureSessionDelegate {
                 NSLog("📦 Starting room builder process")
                 // .beautifyObjects smooths/cleans the reconstructed 3D mesh
                 let roomBuilder = RoomBuilder(options: [.beautifyObjects])
-                let capturedRoom: CapturedRoom = try await roomBuilder.capturedRoom(from: data)
+                let builtRoom: CapturedRoom = try await roomBuilder.capturedRoom(from: data)
+                let capturedRoom = self.includeFurniture ? builtRoom : Self.withoutFurniture(builtRoom)
 
                 // Metadata JSON is transient → temp dir. The model itself goes to
                 // Documents/savedRoom.usdz — a FIXED name, so each new scan

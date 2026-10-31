@@ -17,6 +17,7 @@ import RoomPlanView, {
   startScanningCommand,
   stopScanningCommand,
 } from '../components/RoomScanner/RoomPlanView.native';
+import {INCLUDE_FURNITURE_IN_SCANS} from '../config/scan';
 import {goBack} from '../utils/navigation';
 
 const {RealityKitModule} = NativeModules;
@@ -88,6 +89,7 @@ export default function ScannerScreen() {
       <RoomPlanView
         ref={ref}
         style={StyleSheet.absoluteFill}
+        includeFurniture={INCLUDE_FURNITURE_IN_SCANS}
         onExportComplete={onExportComplete}
       />
 
@@ -112,7 +114,11 @@ export default function ScannerScreen() {
 
       {/* Bottom overlay */}
       <SafeAreaView style={styles.bottomOverlay} pointerEvents="box-none">
-        <Text style={styles.caption}>Slowly turn your camera to capture your room</Text>
+        <Text style={styles.caption}>
+          {scanning && !INCLUDE_FURNITURE_IN_SCANS
+            ? 'Furniture is outlined to help the scan. We’ll clear it from your finished room.'
+            : 'Slowly turn your camera to capture your room'}
+        </Text>
 
         <View style={styles.controlRow}>
           <TouchableOpacity
@@ -152,7 +158,14 @@ export default function ScannerScreen() {
       {processing && (
         <View style={styles.processingOverlay} pointerEvents="auto">
           <ActivityIndicator color="white" size="large" />
-          <Text style={styles.processingText}>Finishing scan…</Text>
+          <Text style={styles.processingText}>
+            {INCLUDE_FURNITURE_IN_SCANS ? 'Finishing scan…' : 'Clearing furniture…'}
+          </Text>
+          {!INCLUDE_FURNITURE_IN_SCANS && (
+            <Text style={styles.processingSubtext}>
+              Keeping just your walls, doors and windows
+            </Text>
+          )}
         </View>
       )}
     </View>
@@ -238,5 +251,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  processingText: {color: 'white', marginTop: 12, fontSize: 14},
+  processingText: {color: 'white', marginTop: 12, fontSize: 16, fontWeight: '600'},
+  processingSubtext: {color: 'rgba(255,255,255,0.75)', marginTop: 4, fontSize: 14},
 });
