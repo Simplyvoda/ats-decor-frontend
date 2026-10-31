@@ -46,6 +46,19 @@ export default function MeasurementsStep({
     return i === 4 ? 'Worked out from walls A and C' : 'Worked out from walls B and D';
   };
 
+  // Walls that must match share one box: a rectangle asks for its two
+  // pairs of opposite walls, a square for a single length. Each box edits
+  // the first wall of its group; setWallLength copies it to the others.
+  const fields: {wall: number; label: string}[] =
+    shape === 'square'
+      ? [{wall: 0, label: 'Wall length (all 4 walls)'}]
+      : shape === 'rectangle'
+        ? [
+            {wall: 0, label: 'Walls A & C length'},
+            {wall: 1, label: 'Walls B & D length'},
+          ]
+        : lengths.map((_, i) => ({wall: i, label: `Wall ${wallLetter(i)} length`}));
+
   return (
     <View>
       <View style={styles.planBox}>
@@ -58,24 +71,20 @@ export default function MeasurementsStep({
         )}
       </View>
 
-      {shape !== 'square' && (
-        <Text style={styles.note}>
-          {shape === 'rectangle'
-            ? 'Opposite walls of a rectangle are the same length, so they update together.'
-            : 'Walls E and F are worked out from A–D.'}
-        </Text>
+      {shape === 'lshape' && (
+        <Text style={styles.note}>Walls E and F are worked out from A–D.</Text>
       )}
 
       <View style={styles.fields}>
-        {lengths.map((value, i) => (
+        {fields.map(({wall, label}) => (
           <LengthInput
-            key={`${shape}-${i}`}
-            label={`Wall ${wallLetter(i)} length`}
-            value={value}
-            onChange={v => onWallChange(i, v)}
-            editable={isWallEditable(shape, i)}
-            error={wallProblem(shape, lengths, i)}
-            hint={hintFor(i)}
+            key={`${shape}-${wall}`}
+            label={label}
+            value={lengths[wall]}
+            onChange={v => onWallChange(wall, v)}
+            editable={isWallEditable(shape, wall)}
+            error={wallProblem(shape, lengths, wall)}
+            hint={hintFor(wall)}
           />
         ))}
 
