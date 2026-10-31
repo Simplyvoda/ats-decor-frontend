@@ -401,7 +401,7 @@ const SignUp = () => {
               <Pressable
                 onPress={onApplePress}
                 disabled={isAppleSubmitting}
-                className="w-full flex flex-row items-center justify-center bg-white border border-gray-800 rounded-full py-3 space-x-2">
+                className="w-full flex flex-row items-center justify-center bg-white border border-gray-800 rounded-lg py-3 space-x-2">
                 <Image
                   source={images.apple_icon}
                   style={{width: 18, height: 18}}
