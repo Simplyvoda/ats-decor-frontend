@@ -477,6 +477,8 @@ export default function ARViewerScreen() {
         ref={realityKitRef}
         modelUrl={modelUrl}
         editingEnabled={!viewOnly}
+        // Open on a zoomed-out overview of the whole room, not inside it
+        startFromAbove
         onSnapshotReady={handleSnapshotReady}
         onFurnitureLayoutExported={handleFurnitureLayoutExported}
         onDesignPdfExported={handlePdfExported}

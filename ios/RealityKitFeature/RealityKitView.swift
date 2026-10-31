@@ -610,17 +610,36 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
         self.initialPivotPosition = pivot.position
 
         if startFromAbove {
-            // Pull back far enough that the room's full diagonal fits, swing
-            // round to a corner and tip the camera down ~57°. Same orbit
-            // variables the drag/pinch gestures use, so they carry on from
-            // here. Numbers checked by rendering rectangle and L-shaped
-            // rooms in a 333×211 card.
-            let diagonal = sqrt(bounds.extents.x * bounds.extents.x + bounds.extents.z * bounds.extents.z)
-            cameraRadius = max(2.5, diagonal * 1.15 + bounds.extents.y * 0.5)
-            yaw = .pi / 5
-            pitch = -1.0
-            applyOrbit()
+            applyOverview()
         }
+    }
+
+    // The zoomed-out "dollhouse" view: pulled back far enough that the
+    // whole room fits, swung round to a corner and tipped down ~57°. Uses
+    // the same orbit variables the drag/pinch gestures use, so they carry
+    // on from here.
+    private func applyOverview() {
+        guard let bounds = roomBounds else { return }
+        let diagonal = sqrt(bounds.extents.x * bounds.extents.x + bounds.extents.z * bounds.extents.z)
+
+        // Fits a wide card (checked by rendering rooms in the 333×211
+        // room builder preview)
+        let fitWide = diagonal * 1.15 + bounds.extents.y * 0.5
+
+        // A tall, narrow screen (the full-screen viewer in portrait) sees
+        // much less side to side: the 65° field of view is measured top to
+        // bottom, so the side-to-side angle shrinks with the screen's
+        // width/height ratio. Back off until the room's width fits too.
+        let size = arView.bounds.size
+        let aspect = size.height > 0 ? Float(size.width / size.height) : 0.5
+        let halfAcross = atan(tan(Float(65.0 / 2) * .pi / 180) * aspect)
+        let fitNarrow = (diagonal / 2) / tan(halfAcross) * 1.2
+
+        // 20 m is as far as pinch-zoom goes
+        cameraRadius = min(20, max(2.5, fitWide, fitNarrow))
+        yaw = .pi / 5
+        pitch = -1.0
+        applyOrbit()
     }
 
     // Furniture USDZs use PBR materials that render black without a light.
@@ -1202,6 +1221,10 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
         )
         pivot.orientation = simd_quatf(angle: 0, axis: [0, 1, 0])
         pivot.position = initialPivotPosition
+        // Views that open on the overview reset back to it too
+        if startFromAbove {
+            applyOverview()
+        }
         setSelectedFurniture(nil)
     }
 
