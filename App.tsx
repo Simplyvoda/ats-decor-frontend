@@ -24,6 +24,7 @@ import {applyAnalyticsPreference, track} from './src/services/analytics';
 import {useTheme} from './src/theme/useTheme';
 import {ThemeColors} from './src/theme/colors';
 import {ThemePreferenceProvider} from './src/theme/ThemePreference';
+import {showFatalErrors} from './src/utils/showFatalErrors';
 
 // React Navigation's own colours (screen backgrounds during transitions,
 // default header/tab colours) built from the app's theme, so nothing
@@ -68,6 +69,9 @@ Sentry.init({
   // uncomment the line below to enable Spotlight (https://spotlightjs.com)
   // spotlight: __DEV__,
 });
+
+// TEMPORARY: show crash messages on screen in TestFlight builds.
+showFatalErrors();
 
 // Apply a saved "analytics off" before any event can be sent.
 applyAnalyticsPreference();
