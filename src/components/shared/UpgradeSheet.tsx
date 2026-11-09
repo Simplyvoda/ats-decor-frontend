@@ -4,6 +4,7 @@ import {Crown} from 'lucide-react-native';
 import {usePlan} from '../../context/PlanContext';
 import {limitMessage} from '../../config/plans';
 import {makeStyles, useTheme} from '../../theme/useTheme';
+import useAfterModalClose from '../../hooks/useAfterModalClose';
 
 // Opens whenever the user hits a plan limit: from a quick check before an
 // action (usePlan().gate) or when the server refuses one. "See plans"
@@ -13,12 +14,14 @@ export default function UpgradeSheet({onSeePlans}: {onSeePlans: () => void}) {
   const {colors} = useTheme();
   const {upgrade, closeUpgrade} = usePlan();
   const {title, body} = limitMessage(upgrade?.feature, upgrade ?? undefined);
+  const afterClose = useAfterModalClose();
 
   return (
     <Modal
       visible={upgrade !== null}
       transparent
       animationType="slide"
+      onDismiss={afterClose.onDismiss}
       onRequestClose={closeUpgrade}>
       <Pressable style={styles.backdrop} onPress={closeUpgrade}>
         <Pressable style={styles.sheet}>
@@ -32,7 +35,7 @@ export default function UpgradeSheet({onSeePlans}: {onSeePlans: () => void}) {
             style={styles.primary}
             onPress={() => {
               closeUpgrade();
-              onSeePlans();
+              afterClose.run(onSeePlans);
             }}>
             <Text style={styles.primaryText}>See plans</Text>
           </TouchableOpacity>

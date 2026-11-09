@@ -23,6 +23,7 @@ import {IRoom} from '../../interface/room.interface';
 import {makeStyles, useTheme} from '../theme/useTheme';
 import {roomDesignParams} from '../utils/designs';
 import {PrimaryButton} from './room_builder/ui';
+import useAfterModalClose from '../hooks/useAfterModalClose';
 
 // Where every scan and manual build ends: name the room and save it. Only
 // once it's saved can the user start designing in it. A saved room can
@@ -45,6 +46,8 @@ export default function SaveRoomScreen() {
   const [name, setName] = useState('');
   const [saving, setSaving] = useState(false);
   const [savedRoom, setSavedRoom] = useState<IRoom | null>(null);
+  const [popupOpen, setPopupOpen] = useState(false);
+  const afterClose = useAfterModalClose();
   const [consentBusy, setConsentBusy] = useState(false);
   // Set once the room is saved, or the user chose to leave without it.
   const allowLeave = useRef(false);
@@ -117,6 +120,7 @@ export default function SaveRoomScreen() {
       const room = await RoomService.createRoom({...params, name: trimmed} as NewRoom);
       allowLeave.current = true;
       setSavedRoom(room);
+      setPopupOpen(true);
     } catch (err: any) {
       Toast.show({
         type: 'error',
@@ -128,34 +132,31 @@ export default function SaveRoomScreen() {
     }
   };
 
-  // Either way the save flow is finished, so it's cleared from the stack.
-  const startDesigning = () => {
-    if (!savedRoom) {
-      return;
-    }
-    navigation.reset({
-      index: 1,
-      routes: [
-        {name: 'HomeTabs'},
-        {name: 'ARViewer', params: roomDesignParams(savedRoom)},
-      ],
-    });
+  // Every choice finishes the save flow, so it's cleared from the stack.
+  // The popup closes first: changing screens while it's showing fails on
+  // iOS.
+  const leaveTo = (routes: {name: string; params?: object}[]) => {
+    setPopupOpen(false);
+    afterClose.run(() =>
+      navigation.reset({index: routes.length - 1, routes}),
+    );
   };
 
+  const startDesigning = () =>
+    savedRoom &&
+    leaveTo([
+      {name: 'HomeTabs'},
+      {name: 'ARViewer', params: roomDesignParams(savedRoom)},
+    ]);
+
   const seePlans = () =>
-    navigation.reset({
-      index: 1,
-      routes: [
-        {name: 'HomeTabs'},
-        {name: 'Settings', params: {screen: 'Shopping'}},
-      ],
-    });
+    leaveTo([
+      {name: 'HomeTabs'},
+      {name: 'Settings', params: {screen: 'Shopping'}},
+    ]);
 
   const notReadyYet = () =>
-    navigation.reset({
-      index: 0,
-      routes: [{name: 'HomeTabs', params: {screen: 'Design'}}],
-    });
+    leaveTo([{name: 'HomeTabs', params: {screen: 'Design'}}]);
 
   const locked = savedRoom?.status === 'locked';
 
@@ -228,7 +229,11 @@ export default function SaveRoomScreen() {
         </View>
       </KeyboardAvoidingView>
 
-      <Modal visible={savedRoom !== null} transparent animationType="fade">
+      <Modal
+        visible={popupOpen}
+        transparent
+        animationType="fade"
+        onDismiss={afterClose.onDismiss}>
         <View style={styles.backdrop}>
           <View style={styles.card}>
             <View style={styles.iconWrap}>

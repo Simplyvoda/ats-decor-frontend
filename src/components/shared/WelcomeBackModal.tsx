@@ -10,6 +10,8 @@ type Props = {
   when: string; // e.g. "Yesterday · 4:30 PM"
   onContinue: () => void;
   onClose: () => void;
+  // Runs once the popup has fully closed (iOS).
+  onDismiss?: () => void;
 };
 
 // Shown to returning users when the app opens: their latest design and a
@@ -21,6 +23,7 @@ export default function WelcomeBackModal({
   when,
   onContinue,
   onClose,
+  onDismiss,
 }: Props) {
   const styles = useStyles();
   const {colors} = useTheme();
@@ -31,6 +34,7 @@ export default function WelcomeBackModal({
       transparent
       statusBarTranslucent
       animationType="fade"
+      onDismiss={onDismiss}
       onRequestClose={onClose}>
       <View style={styles.backdrop}>
         <View style={styles.card}>

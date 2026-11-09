@@ -1,5 +1,11 @@
-import React, {useEffect, useRef, useState} from 'react';
-import {StatusBar, Text, TouchableOpacity, View} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {
+  StatusBar,
+  Text,
+  TouchableOpacity,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import {
   BottomTabBar,
   createBottomTabNavigator,
@@ -33,6 +39,7 @@ import {
 import {APP_TOUR} from '../config/tours';
 import {useUserContext} from '../context/UserContext';
 import {useTheme} from '../theme/useTheme';
+import useAfterModalClose from '../hooks/useAfterModalClose';
 
 const Tab = createBottomTabNavigator();
 
@@ -116,38 +123,28 @@ export default function HomeTabNavigator() {
   const [skipped, setSkipped] = useState(false);
   const showTour = user?.first_login_completed === false && !skipped;
 
-  // ── Tour: switch to the tab a step is about and highlight its button ──
-  const tabBarRef = useRef<View>(null);
-  const [tabBarRect, setTabBarRect] = useState<Rect | null>(null);
+  // ── Tour: highlight the tab button each step is about ──
+  // The screen stays where it is; changing tabs under the tour's popup
+  // doesn't work reliably on iOS.
+  const window = useWindowDimensions();
+  const [tabBarHeight, setTabBarHeight] = useState(0);
   const [tourTarget, setTourTarget] = useState<string | undefined>();
 
-  const measureTabBar = () =>
-    tabBarRef.current?.measureInWindow((x, y, width, height) =>
-      setTabBarRect({x, y, width, height}),
-    );
+  const onTourStep = (step: TourStep) => setTourTarget(step.target);
+  const endTour = () => setTourTarget(undefined);
 
-  const goToTab = (tab: string) => navigation.navigate('HomeTabs', {screen: tab});
-
-  const onTourStep = (step: TourStep) => {
-    setTourTarget(step.target);
-    goToTab(step.target ?? 'Home');
-  };
-
-  const endTour = () => {
-    setTourTarget(undefined);
-    goToTab('Home');
-  };
-
-  // The tab buttons share the bar's width equally. The bar's height also
-  // covers the home-indicator area below the buttons, so that is left out.
+  // The tab bar runs along the bottom of the screen, full width, and its
+  // buttons share that width equally. Its height includes the
+  // home-indicator strip below the buttons, which is left out.
   const tabIndex = tourTarget ? TABS.indexOf(tourTarget) : -1;
+  const buttonWidth = window.width / TABS.length;
   const highlight: Rect | null =
-    tabBarRect && tabIndex >= 0
+    tabBarHeight > 0 && tabIndex >= 0
       ? {
-          x: tabBarRect.x + (tabBarRect.width / TABS.length) * tabIndex,
-          y: tabBarRect.y,
-          width: tabBarRect.width / TABS.length,
-          height: tabBarRect.height - insets.bottom,
+          x: buttonWidth * tabIndex,
+          y: window.height - tabBarHeight,
+          width: buttonWidth,
+          height: tabBarHeight - insets.bottom,
         }
       : null;
 
@@ -156,6 +153,8 @@ export default function HomeTabNavigator() {
   // finishing the tour doesn't bring this up straight afterwards.
   const [isReturning, setIsReturning] = useState<boolean | null>(null);
   const [welcomeBack, setWelcomeBack] = useState<WelcomeBack | null>(null);
+  const [welcomeOpen, setWelcomeOpen] = useState(false);
+  const afterWelcomeClose = useAfterModalClose();
 
   useEffect(() => {
     if (isReturning === null && user?.first_login_completed !== undefined) {
@@ -184,6 +183,7 @@ export default function HomeTabNavigator() {
             lastActivity: describeLastActivity(design, catalogue),
             when: formatActivityTime(design.updatedAt),
           });
+          setWelcomeOpen(true);
         }
       } catch (err: any) {
         console.warn('Could not load latest design:', err?.message ?? err);
@@ -198,7 +198,8 @@ export default function HomeTabNavigator() {
     <>
       <Tab.Navigator
         tabBar={props => (
-          <View ref={tabBarRef} collapsable={false} onLayout={measureTabBar}>
+          <View
+            onLayout={e => setTabBarHeight(e.nativeEvent.layout.height)}>
             <BottomTabBar {...props} />
           </View>
         )}
@@ -250,16 +251,18 @@ export default function HomeTabNavigator() {
         }}
       />
       <WelcomeBackModal
-        visible={welcomeBack !== null}
+        visible={welcomeOpen}
         designName={welcomeBack?.design.name ?? ''}
         lastActivity={welcomeBack?.lastActivity ?? ''}
         when={welcomeBack?.when ?? ''}
-        onClose={() => setWelcomeBack(null)}
+        onClose={() => setWelcomeOpen(false)}
+        onDismiss={afterWelcomeClose.onDismiss}
+        // Opens the design once the popup has closed
         onContinue={() => {
           const design = welcomeBack?.design;
-          setWelcomeBack(null);
+          setWelcomeOpen(false);
           if (design) {
-            openDesign(navigation, design);
+            afterWelcomeClose.run(() => openDesign(navigation, design));
           }
         }}
       />
