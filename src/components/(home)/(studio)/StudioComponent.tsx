@@ -72,11 +72,11 @@ const useStyles = makeStyles(c => ({
   container: {
     marginHorizontal: 16,
     marginBottom: 20,
-    padding: 16,
+    // padding: 16,
     gap: 20,
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: c.border,
+    // borderRadius: 24,
+    // borderWidth: 1,
+    // borderColor: c.border,
   },
   card: {
     flexDirection: 'row',
@@ -92,7 +92,7 @@ const useStyles = makeStyles(c => ({
     elevation: 1,
   },
   strip: {
-    width: 20,
+    width: 22,
     height: 70,
     borderRadius: 10,
     alignItems: 'center',
@@ -102,14 +102,14 @@ const useStyles = makeStyles(c => ({
   text: {flex: 1},
   title: {
     fontFamily: 'Cormorant Garamond',
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: '600',
     color: c.textPrimary,
     marginBottom: 4,
   },
   subtitle: {
     fontFamily: 'DM Sans',
-    fontSize: 14,
+    fontSize: 13,
     color: c.text,
   },
 }));
