@@ -679,15 +679,16 @@ export default function ARViewerScreen() {
         onSnapshotReady={handleSnapshotReady}
         onFurnitureLayoutExported={handleFurnitureLayoutExported}
         onDesignPdfExported={handlePdfExported}
-        onFurnitureSelectionChanged={e =>
-          setScene(sc => ({...sc, furnitureSelected: e.nativeEvent.selected}))
-        }
-        onRoomLoaded={e =>
-          setScene(sc => ({
-            ...sc,
-            roomStatus: e.nativeEvent.success ? 'ready' : 'error',
-          }))
-        }
+        // Read the event straight away: React Native clears it once this
+        // handler returns, before the setScene update below runs.
+        onFurnitureSelectionChanged={e => {
+          const selected = e.nativeEvent.selected;
+          setScene(sc => ({...sc, furnitureSelected: selected}));
+        }}
+        onRoomLoaded={e => {
+          const roomStatus = e.nativeEvent.success ? 'ready' : 'error';
+          setScene(sc => ({...sc, roomStatus}));
+        }}
         style={StyleSheet.absoluteFill}
       />
 

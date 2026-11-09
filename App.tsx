@@ -25,6 +25,7 @@ import {useTheme} from './src/theme/useTheme';
 import {ThemeColors} from './src/theme/colors';
 import {ThemePreferenceProvider} from './src/theme/ThemePreference';
 import {showFatalErrors} from './src/utils/showFatalErrors';
+import ErrorBoundary from './src/components/shared/ErrorBoundary';
 
 // React Navigation's own colours (screen backgrounds during transitions,
 // default header/tab colours) built from the app's theme, so nothing
@@ -157,7 +158,20 @@ function AppContent() {
           pendingUrlRef.current = null;
         }
       }}>
-      <AppNavigator />
+      <ErrorBoundary
+        // Drop the screen that broke, so it isn't drawn again straight away.
+        onRecover={() => {
+          const state = navigationRef.getRootState();
+          if (state && state.routes.length > 1) {
+            navigationRef.resetRoot({
+              ...state,
+              index: state.routes.length - 2,
+              routes: state.routes.slice(0, -1),
+            } as any);
+          }
+        }}>
+        <AppNavigator />
+      </ErrorBoundary>
       <UpgradeSheet
         onSeePlans={() =>
           (navigationRef as any).navigate('Settings', {screen: 'Shopping'})
