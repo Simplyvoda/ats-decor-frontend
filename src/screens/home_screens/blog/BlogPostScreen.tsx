@@ -34,6 +34,7 @@ import BlogService from '../../../services/BlogService';
 import {useUserContext} from '../../../context/UserContext';
 import {sanityImageUrl} from '../../../utils/sanityImage';
 
+
 type BlogPostRouteParams = {
   BlogPost: {post: BlogPost};
 };
