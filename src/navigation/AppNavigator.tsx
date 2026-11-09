@@ -97,6 +97,7 @@ function AppNavigator(): React.JSX.Element {
           <Stack.Screen name="BlogPost" component={BlogPostScreen} />
           <Stack.Screen name="CreateNote" component={CreateNoteScreen} />
           <Stack.Screen name="DesignNotes" component={DesignNotesScreen} />
+          <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
         </>
       ) : (
         // ── Unauthenticated ────────────────────────────────────────────────

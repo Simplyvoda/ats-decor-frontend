@@ -7,10 +7,11 @@ import {
   NotebookPen,
   RotateCcw,
   Save,
+  ScanLine,
   Trash2,
   X,
 } from 'lucide-react-native';
-import React, {useEffect, useRef, useState} from 'react';
+import React, {SetStateAction, useEffect, useRef, useState} from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -53,6 +54,10 @@ import {IFurniture} from '../../interface/furniture.interface';
 import {IPlacedFurniture} from '../../interface/design.interface';
 import {images} from '../../assets/constants/images';
 import {makeStyles, useTheme} from '../theme/useTheme';
+import {useUserContext} from '../context/UserContext';
+import ConsentScreen from '../components/shared/ConsentScreen';
+import {ROOM_DATA_CONSENT} from '../config/consent';
+import {track} from '../services/analytics';
 
 const STYLE_PRESETS = [
   'Minimalist',
@@ -151,15 +156,26 @@ export default function ARViewerScreen() {
   );
 
   const realityKitRef = useRef(null);
-  const [activeCategory, setActiveCategory] =
-    useState<FurnitureCategory | null>(null);
-  const [showToolsMenu, setShowToolsMenu] = useState(false);
-  const [furnitureSelected, setFurnitureSelected] = useState(false);
-  // The room model can take a while to download and read — show progress
-  // until the native view reports it is on screen (see onRoomLoaded).
-  const [roomStatus, setRoomStatus] = useState<'loading' | 'ready' | 'error'>(
-    'loading',
-  );
+  // Which panels are open: a furniture category's list, the ⋮ tools menu.
+  const [{activeCategory, showToolsMenu}, setPanels] = useState<{
+    activeCategory: FurnitureCategory | null;
+    showToolsMenu: boolean;
+  }>({activeCategory: null, showToolsMenu: false});
+  const setActiveCategory = (cat: FurnitureCategory | null) =>
+    setPanels(p => ({...p, activeCategory: cat}));
+  const setShowToolsMenu = (next: SetStateAction<boolean>) =>
+    setPanels(p => ({
+      ...p,
+      showToolsMenu:
+        typeof next === 'function' ? next(p.showToolsMenu) : next,
+    }));
+
+  // What the native 3D view reports. The room model can take a while to
+  // download and read — show progress until it's on screen (onRoomLoaded).
+  const [{roomStatus, furnitureSelected}, setScene] = useState<{
+    roomStatus: 'loading' | 'ready' | 'error';
+    furnitureSelected: boolean;
+  }>({roomStatus: 'loading', furnitureSelected: false});
   const [catalogue, setCatalogue] =
     useState<FurnitureCategory[]>(DEV_CATALOGUE);
 
@@ -175,19 +191,78 @@ export default function ARViewerScreen() {
 
   // ── Publish design state ── prefilled from route params when reopening an
   // already-saved design, so re-saving doesn't reset name/style/tags/visibility.
-  const [showPublishModal, setShowPublishModal] = useState(false);
-  const [pubName, setPubName] = useState(route.params?.designName ?? '');
-  const [pubStyle, setPubStyle] = useState<string | null>(
-    route.params?.designStyle ?? null,
-  );
-  const [pubTags, setPubTags] = useState<string[]>(
-    route.params?.designTags ?? [],
-  );
-  const [pubTagInput, setPubTagInput] = useState('');
-  const [pubIsPublic, setPubIsPublic] = useState(
-    route.params?.designIsPublic ?? false,
-  );
-  const [isPublishing, setIsPublishing] = useState(false);
+  const [publish, setPublish] = useState<{
+    // Room-data consent, asked before the first save of a typed-in room
+    // (scans already asked on the scan screen).
+    showConsent: boolean;
+    savingConsent: boolean;
+    showPublishModal: boolean;
+    pubName: string;
+    pubStyle: string | null;
+    pubTags: string[];
+    pubTagInput: string;
+    pubIsPublic: boolean;
+    isPublishing: boolean;
+  }>(() => ({
+    showConsent: false,
+    savingConsent: false,
+    showPublishModal: false,
+    pubName: route.params?.designName ?? '',
+    pubStyle: route.params?.designStyle ?? null,
+    pubTags: route.params?.designTags ?? [],
+    pubTagInput: '',
+    pubIsPublic: route.params?.designIsPublic ?? false,
+    isPublishing: false,
+  }));
+  const {
+    showConsent,
+    savingConsent,
+    showPublishModal,
+    pubName,
+    pubStyle,
+    pubTags,
+    pubTagInput,
+    pubIsPublic,
+    isPublishing,
+  } = publish;
+  const {user, giveRoomDataConsent} = useUserContext();
+
+  // "Save design": a room the user built or scanned needs their room-data
+  // consent first. Designs from Explore / house models don't.
+  const openSaveForm = () => {
+    const needsConsent =
+      route.params?.fromScan === true && !user?.room_data_consent_at;
+    setPublish(p => ({
+      ...p,
+      showConsent: needsConsent,
+      showPublishModal: !needsConsent,
+    }));
+  };
+
+  const agreeAndContinue = async () => {
+    setPublish(p => ({...p, savingConsent: true}));
+    try {
+      await giveRoomDataConsent();
+      setPublish(p => ({
+        ...p,
+        savingConsent: false,
+        showConsent: false,
+        showPublishModal: true,
+      }));
+    } catch (err: any) {
+      setPublish(p => ({...p, savingConsent: false}));
+      Toast.show({
+        type: 'error',
+        text1: 'Could not save your choice',
+        text2: err.response?.data?.message || err.message,
+      });
+    }
+  };
+
+  const setPub =
+    <K extends keyof typeof publish>(key: K) =>
+    (value: (typeof publish)[K]) =>
+      setPublish(p => ({...p, [key]: value}));
 
   // Fresh scans aren't saved automatically — nudge the user once
   useEffect(() => {
@@ -295,22 +370,23 @@ export default function ARViewerScreen() {
 
   const addPubTag = () => {
     const t = pubTagInput.trim().toLowerCase();
-    if (t && !pubTags.includes(t)) {
-      setPubTags(prev => [...prev, t]);
-    }
-    setPubTagInput('');
+    setPublish(p => ({
+      ...p,
+      pubTags: t && !p.pubTags.includes(t) ? [...p.pubTags, t] : p.pubTags,
+      pubTagInput: '',
+    }));
   };
 
   const handlePublish = () => {
     if (!pubName.trim() || isPublishing) {
       return;
     }
-    setIsPublishing(true);
+    setPub('isPublishing')(true);
 
     snapshotCallback.current = async ({path, error}) => {
       if (error || !path) {
         Toast.show({type: 'error', text1: 'Could not capture thumbnail'});
-        setIsPublishing(false);
+        setPub('isPublishing')(false);
         return;
       }
       try {
@@ -337,6 +413,19 @@ export default function ARViewerScreen() {
           ? await DesignService.update(currentDesignId, payload)
           : await DesignService.publish(payload);
         setCurrentDesignId(res.data.id);
+        track.roomSaved(
+          route.params?.fromRoomBuilder
+            ? 'room_builder'
+            : route.params?.fromScan
+              ? 'scan'
+              : 'house_model',
+          !!currentDesignId,
+          pubIsPublic,
+        );
+        // Counted when it becomes public, not on re-saves of a public one.
+        if (pubIsPublic && !route.params?.designIsPublic) {
+          track.publishedToExplore('save');
+        }
         Toast.show({
           type: 'success',
           text1: currentDesignId
@@ -382,7 +471,7 @@ export default function ARViewerScreen() {
           text2: err.response?.data?.message || err.message,
         });
       } finally {
-        setIsPublishing(false);
+        setPub('isPublishing')(false);
       }
     };
 
@@ -425,6 +514,7 @@ export default function ARViewerScreen() {
 
   const handleSelectItem = (item: FurnitureItem) => {
     loadFurnitureCommand(realityKitRef, item.modelUrl, item.placement);
+    track.productPlaced(user?.id, activeCategory?.name ?? 'unknown', item.id);
     handleCloseSheet();
   };
 
@@ -483,10 +573,13 @@ export default function ARViewerScreen() {
         onFurnitureLayoutExported={handleFurnitureLayoutExported}
         onDesignPdfExported={handlePdfExported}
         onFurnitureSelectionChanged={e =>
-          setFurnitureSelected(e.nativeEvent.selected)
+          setScene(sc => ({...sc, furnitureSelected: e.nativeEvent.selected}))
         }
         onRoomLoaded={e =>
-          setRoomStatus(e.nativeEvent.success ? 'ready' : 'error')
+          setScene(sc => ({
+            ...sc,
+            roomStatus: e.nativeEvent.success ? 'ready' : 'error',
+          }))
         }
         style={StyleSheet.absoluteFill}
       />
@@ -555,7 +648,7 @@ export default function ARViewerScreen() {
                     style={styles.toolsMenuItem}
                     onPress={() => {
                       setShowToolsMenu(false);
-                      setShowPublishModal(true);
+                      openSaveForm();
                     }}>
                     <Save color={colors.brand} size={18} />
                     <Text style={styles.toolsMenuText}>
@@ -651,12 +744,31 @@ export default function ARViewerScreen() {
         </Animated.View>
       )}
 
+      {/* ── Room-data consent (before saving a typed-in room) ── */}
+      <Modal
+        visible={showConsent}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setPub('showConsent')(false)}>
+        <ConsentScreen
+          icon={ScanLine}
+          {...ROOM_DATA_CONSENT}
+          onFootnotePress={() => {
+            setPub('showConsent')(false);
+            (navigation as any).navigate('PrivacyPolicy');
+          }}
+          busy={savingConsent}
+          onAccept={agreeAndContinue}
+          onDecline={() => setPub('showConsent')(false)}
+        />
+      </Modal>
+
       {/* ── Publish design modal ── */}
       <Modal
         visible={showPublishModal}
         transparent
         animationType="fade"
-        onRequestClose={() => setShowPublishModal(false)}>
+        onRequestClose={() => setPub('showPublishModal')(false)}>
         <KeyboardAvoidingView
           style={styles.modalBackdrop}
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
@@ -666,7 +778,7 @@ export default function ARViewerScreen() {
                 {currentDesignId ? 'Update Design' : 'Save design'}
               </Text>
               <TouchableOpacity
-                onPress={() => setShowPublishModal(false)}
+                onPress={() => setPub('showPublishModal')(false)}
                 hitSlop={10}>
                 <X color={colors.icon} size={22} />
               </TouchableOpacity>
@@ -674,7 +786,7 @@ export default function ARViewerScreen() {
 
             <TextInput
               value={pubName}
-              onChangeText={setPubName}
+              onChangeText={setPub('pubName')}
               placeholder="Design name..."
               placeholderTextColor={colors.textMuted}
               style={styles.modalInput}
@@ -685,7 +797,7 @@ export default function ARViewerScreen() {
               labelField="label"
               valueField="value"
               value={pubStyle}
-              onChange={item => setPubStyle(item.value)}
+              onChange={item => setPub('pubStyle')(item.value)}
               placeholder="Style (Optional)"
               placeholderStyle={{color: colors.textMuted, fontSize: 14}}
               selectedTextStyle={{color: colors.text, fontSize: 14}}
@@ -705,7 +817,7 @@ export default function ARViewerScreen() {
                 {pubTags.map(tag => (
                   <TouchableOpacity
                     key={tag}
-                    onPress={() => setPubTags(pubTags.filter(t => t !== tag))}
+                    onPress={() => setPub('pubTags')(pubTags.filter(t => t !== tag))}
                     style={styles.tagChip}>
                     <Text style={styles.tagChipText}>{tag}</Text>
                     <X size={12} color={colors.textMuted} />
@@ -715,7 +827,7 @@ export default function ARViewerScreen() {
             )}
             <TextInput
               value={pubTagInput}
-              onChangeText={setPubTagInput}
+              onChangeText={setPub('pubTagInput')}
               onSubmitEditing={addPubTag}
               onBlur={addPubTag}
               placeholder="Add a tag and press return"
@@ -735,7 +847,7 @@ export default function ARViewerScreen() {
               </View>
               <Switch
                 value={pubIsPublic}
-                onValueChange={setPubIsPublic}
+                onValueChange={setPub('pubIsPublic')}
                 trackColor={{true: colors.brand, false: colors.border}}
                 ios_backgroundColor={colors.border}
                 thumbColor="white"

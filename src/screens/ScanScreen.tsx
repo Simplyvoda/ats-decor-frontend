@@ -18,27 +18,42 @@ import RoomPlanView, {
   stopScanningCommand,
 } from '../components/RoomScanner/RoomPlanView.native';
 import {INCLUDE_FURNITURE_IN_SCANS} from '../config/scan';
+import {SCAN_TOUR} from '../config/tours';
+import GuidedTour from '../components/shared/GuidedTour';
+import ScanConsentGate from '../components/RoomScanner/ScanConsentGate';
+import {useUserContext} from '../context/UserContext';
 import {goBack} from '../utils/navigation';
+import {track} from '../services/analytics';
 
 const {RealityKitModule} = NativeModules;
 const ACCENT = '#C4A962';
 
 export default function ScannerScreen() {
   const ref = useRef(null);
+  // When the current scan started, for scan_completed's duration.
+  const scanStartedAt = useRef(0);
   const navigation = useNavigation();
-  const [scanning, setScanning] = useState(false);
-  const [processing, setProcessing] = useState(false);
+  // processing = the scan is stopped and the 3D file is being written.
+  const [{scanning, processing}, setScan] = useState({
+    scanning: false,
+    processing: false,
+  });
+  const {user, completeTour} = useUserContext();
+  // Skipping hides the scan tips until the next visit to this screen.
+  const [tourSkipped, setTourSkipped] = useState(false);
+  const showTour = user?.first_scan_completed === false && !tourSkipped;
 
   const onExportComplete = (e: {
     nativeEvent: {json?: string; fileUrl?: string; error?: string};
   }) => {
     const {fileUrl, error} = e.nativeEvent;
-    setProcessing(false);
+    setScan(s => ({...s, processing: false}));
 
     // No fileUrl means the native export failed — navigating to the viewer
     // with nothing to load would just show a broken screen.
     if (error || !fileUrl) {
-      setScanning(false);
+      track.scanFailed(error ?? 'no file');
+      setScan({scanning: false, processing: false});
       Toast.show({
         type: 'error',
         text1: 'Scan processing failed',
@@ -47,22 +62,30 @@ export default function ScannerScreen() {
       return;
     }
 
+    track.scanCompleted((Date.now() - scanStartedAt.current) / 1000);
+
     // Saving happens in ARViewer (⋮ → Save design) so the design gets a
     // real snapshot thumbnail instead of a blind background upload here.
-    (navigation as any).navigate('ARViewer', {modelUrl: fileUrl, fromScan: true});
+    (navigation as any).navigate('ARViewer', {
+      modelUrl: fileUrl,
+      fromScan: true,
+    });
   };
 
   const startScan = () => {
     startScanningCommand(ref);
-    setScanning(true);
+    scanStartedAt.current = Date.now();
+    track.scanStarted();
+    setScan(s => ({...s, scanning: true}));
   };
 
   const resetScan = () => {
     resetScanningCommand(ref);
+    scanStartedAt.current = Date.now();
   };
 
   const finishScan = () => {
-    setProcessing(true);
+    setScan(s => ({...s, processing: true}));
     stopScanningCommand(ref);
   };
 
@@ -85,90 +108,97 @@ export default function ScannerScreen() {
   };
 
   return (
-    <View style={styles.root}>
-      <RoomPlanView
-        ref={ref}
-        style={StyleSheet.absoluteFill}
-        includeFurniture={INCLUDE_FURNITURE_IN_SCANS}
-        onExportComplete={onExportComplete}
-      />
+    // The scanner (and so the camera) only appears once both consents are in.
+    <ScanConsentGate>
+      <View style={styles.root}>
+        <RoomPlanView
+          ref={ref}
+          style={StyleSheet.absoluteFill}
+          includeFurniture={INCLUDE_FURNITURE_IN_SCANS}
+          onExportComplete={onExportComplete}
+        />
 
-      {/* Corner brackets — pure decoration */}
-      <View pointerEvents="none" style={StyleSheet.absoluteFill}>
-        <View style={[styles.corner, styles.cornerTL]} />
-        <View style={[styles.corner, styles.cornerTR]} />
-        <View style={[styles.corner, styles.cornerBL]} />
-        <View style={[styles.corner, styles.cornerBR]} />
-      </View>
-
-      {/* Top overlay */}
-      <SafeAreaView style={styles.topOverlay} pointerEvents="box-none">
-        <View style={styles.topRow} pointerEvents="box-none">
-          <TouchableOpacity style={styles.backBtn} onPress={onBackPress}>
-            <ChevronLeft color="white" size={24} />
-          </TouchableOpacity>
-          <Text style={styles.title}>Scan Room</Text>
-          <View style={styles.backBtnSpacer} />
-        </View>
-      </SafeAreaView>
-
-      {/* Bottom overlay */}
-      <SafeAreaView style={styles.bottomOverlay} pointerEvents="box-none">
-        <Text style={styles.caption}>
-          {scanning && !INCLUDE_FURNITURE_IN_SCANS
-            ? 'Furniture is outlined to help the scan. We’ll clear it from your finished room.'
-            : 'Slowly turn your camera to capture your room'}
-        </Text>
-
-        <View style={styles.controlRow}>
-          <TouchableOpacity
-            style={[styles.sideBtn, !scanning && styles.sideBtnDisabled]}
-            disabled={!scanning}
-            onPress={resetScan}>
-            <RotateCcw color="#333" size={20} />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.shutterOuter}
-            disabled={scanning}
-            onPress={startScan}>
-            <View style={[styles.shutterInner, scanning && styles.shutterInnerDisabled]} />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.sideBtn, !scanning && styles.sideBtnDisabled]}
-            disabled={!scanning}
-            onPress={finishScan}>
-            <Check color="#333" size={20} />
-          </TouchableOpacity>
+        {/* Corner brackets — pure decoration */}
+        <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+          <View style={[styles.corner, styles.cornerTL]} />
+          <View style={[styles.corner, styles.cornerTR]} />
+          <View style={[styles.corner, styles.cornerBL]} />
+          <View style={[styles.corner, styles.cornerBR]} />
         </View>
 
-        {/* Dev-only: skip scanning by loading the last saved room. __DEV__ is
+        {/* Top overlay */}
+        <SafeAreaView style={styles.topOverlay} pointerEvents="box-none">
+          <View style={styles.topRow} pointerEvents="box-none">
+            <TouchableOpacity style={styles.backBtn} onPress={onBackPress}>
+              <ChevronLeft color="white" size={24} />
+            </TouchableOpacity>
+            <Text style={styles.title}>Scan Room</Text>
+            <View style={styles.backBtnSpacer} />
+          </View>
+        </SafeAreaView>
+
+        {/* Bottom overlay */}
+        <SafeAreaView style={styles.bottomOverlay} pointerEvents="box-none">
+          <Text style={styles.caption}>
+            Slowly turn your camera to capture your room
+          </Text>
+
+          <View style={styles.controlRow}>
+            <TouchableOpacity
+              style={[styles.sideBtn, !scanning && styles.sideBtnDisabled]}
+              disabled={!scanning}
+              onPress={resetScan}>
+              <RotateCcw color="#333" size={20} />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.shutterOuter}
+              disabled={scanning}
+              onPress={startScan}>
+              <View
+                style={[
+                  styles.shutterInner,
+                  scanning && styles.shutterInnerDisabled,
+                ]}
+              />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.sideBtn, !scanning && styles.sideBtnDisabled]}
+              disabled={!scanning}
+              onPress={finishScan}>
+              <Check color="#333" size={20} />
+            </TouchableOpacity>
+          </View>
+
+          {/* Dev-only: skip scanning by loading the last saved room. __DEV__ is
             the JS twin of the native #if DEBUG — stripped from release
             bundles by the bundler, not by someone remembering to delete it. */}
-        {__DEV__ && (
-          <TouchableOpacity
-            onPress={loadSavedRoomDev}
-            hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
-            <Text style={styles.devLink}>[Dev] Load saved room</Text>
-          </TouchableOpacity>
-        )}
-      </SafeAreaView>
-
-      {processing && (
-        <View style={styles.processingOverlay} pointerEvents="auto">
-          <ActivityIndicator color="white" size="large" />
-          <Text style={styles.processingText}>
-            {INCLUDE_FURNITURE_IN_SCANS ? 'Finishing scan…' : 'Clearing furniture…'}
-          </Text>
-          {!INCLUDE_FURNITURE_IN_SCANS && (
-            <Text style={styles.processingSubtext}>
-              Keeping just your walls, doors and windows
-            </Text>
+          {__DEV__ && (
+            <TouchableOpacity
+              onPress={loadSavedRoomDev}
+              hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
+              <Text style={styles.devLink}>[Dev] Load saved room</Text>
+            </TouchableOpacity>
           )}
-        </View>
-      )}
-    </View>
+        </SafeAreaView>
+
+        {processing && (
+          <View style={styles.processingOverlay} pointerEvents="auto">
+            <ActivityIndicator color="white" size="large" />
+            <Text style={styles.processingText}>Finishing scan…</Text>
+          </View>
+        )}
+
+        <GuidedTour
+          visible={showTour}
+          steps={SCAN_TOUR}
+          finishLabel="Start scanning"
+          onFinish={() => completeTour('first_scan_completed')}
+          onSkip={() => setTourSkipped(true)}
+        />
+      </View>
+    </ScanConsentGate>
   );
 }
 
@@ -176,10 +206,34 @@ const styles = StyleSheet.create({
   root: {flex: 1, backgroundColor: '#000'},
 
   corner: {position: 'absolute', width: 28, height: 28, borderColor: 'white'},
-  cornerTL: {top: 110, left: 24, borderTopWidth: 3, borderLeftWidth: 3, borderTopLeftRadius: 6},
-  cornerTR: {top: 110, right: 24, borderTopWidth: 3, borderRightWidth: 3, borderTopRightRadius: 6},
-  cornerBL: {bottom: 180, left: 24, borderBottomWidth: 3, borderLeftWidth: 3, borderBottomLeftRadius: 6},
-  cornerBR: {bottom: 180, right: 24, borderBottomWidth: 3, borderRightWidth: 3, borderBottomRightRadius: 6},
+  cornerTL: {
+    top: 110,
+    left: 24,
+    borderTopWidth: 3,
+    borderLeftWidth: 3,
+    borderTopLeftRadius: 6,
+  },
+  cornerTR: {
+    top: 110,
+    right: 24,
+    borderTopWidth: 3,
+    borderRightWidth: 3,
+    borderTopRightRadius: 6,
+  },
+  cornerBL: {
+    bottom: 180,
+    left: 24,
+    borderBottomWidth: 3,
+    borderLeftWidth: 3,
+    borderBottomLeftRadius: 6,
+  },
+  cornerBR: {
+    bottom: 180,
+    right: 24,
+    borderBottomWidth: 3,
+    borderRightWidth: 3,
+    borderBottomRightRadius: 6,
+  },
 
   topOverlay: {position: 'absolute', top: 0, left: 0, right: 0},
   topRow: {
@@ -198,9 +252,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   backBtnSpacer: {width: 40, height: 40},
-  title: {flex: 1, textAlign: 'center', color: 'white', fontSize: 17, fontWeight: '600'},
+  title: {
+    flex: 1,
+    textAlign: 'center',
+    color: 'white',
+    fontSize: 17,
+    fontWeight: '600',
+  },
 
-  bottomOverlay: {position: 'absolute', left: 0, right: 0, bottom: 0, alignItems: 'center', paddingBottom: 12},
+  bottomOverlay: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: 'center',
+    paddingBottom: 12,
+  },
   caption: {
     color: 'white',
     fontSize: 14,
@@ -211,7 +278,13 @@ const styles = StyleSheet.create({
     textShadowRadius: 4,
   },
 
-  controlRow: {flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 32, marginBottom: 12},
+  controlRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 32,
+    marginBottom: 12,
+  },
   sideBtn: {
     width: 44,
     height: 44,
@@ -236,7 +309,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  shutterInner: {width: 60, height: 60, borderRadius: 30, backgroundColor: ACCENT},
+  shutterInner: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: ACCENT,
+  },
   shutterInnerDisabled: {opacity: 0.4},
 
   devLink: {color: 'rgba(255,255,255,0.5)', fontSize: 11, marginTop: 4},
@@ -251,6 +329,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  processingText: {color: 'white', marginTop: 12, fontSize: 16, fontWeight: '600'},
-  processingSubtext: {color: 'rgba(255,255,255,0.75)', marginTop: 4, fontSize: 14},
+  processingText: {
+    color: 'white',
+    marginTop: 12,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  processingSubtext: {
+    color: 'rgba(255,255,255,0.75)',
+    marginTop: 4,
+    fontSize: 14,
+  },
 });
