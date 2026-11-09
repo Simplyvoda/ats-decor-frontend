@@ -26,6 +26,9 @@ end
 # source 'https://github.com/CocoaPods/Specs.git'
 
 $RNFirebaseAsStaticFramework = true
+# Analytics without Apple's advertising ID (IDFA): no "Allow tracking?"
+# prompt needed, and PrivacyInfo's NSPrivacyTracking stays false.
+$RNFirebaseAnalyticsWithoutAdIdSupport = true
 
 use_modular_headers!
 

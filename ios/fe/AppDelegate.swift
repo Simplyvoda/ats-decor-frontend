@@ -2,6 +2,7 @@ import UIKit
 import React
 import React_RCTAppDelegate
 import RNBootSplash
+import FirebaseCore
 //import ReactAppDependencyProvider
 
 @main
@@ -15,6 +16,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
   ) -> Bool {
+    // Firebase (GA4 analytics) needs GoogleService-Info.plist from the
+    // Firebase console. Without it, configure() would crash at launch, so
+    // only start Firebase when the file is in the app — analytics calls
+    // in JS are skipped otherwise (see src/services/analytics.ts).
+    if Bundle.main.path(forResource: "GoogleService-Info", ofType: "plist") != nil {
+      FirebaseApp.configure()
+    }
+
     let delegate = ReactNativeDelegate()
     let factory = RCTReactNativeFactory(delegate: delegate)
 //    delegate.dependencyProvider = RCTAppDependencyProvider()

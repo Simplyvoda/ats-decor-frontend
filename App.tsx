@@ -18,6 +18,7 @@ import {
   extractVerifiedSession,
 } from './src/utils/deepLinking';
 import * as Sentry from '@sentry/react-native';
+import {applyAnalyticsPreference, track} from './src/services/analytics';
 import {useTheme} from './src/theme/useTheme';
 import {ThemeColors} from './src/theme/colors';
 import {ThemePreferenceProvider} from './src/theme/ThemePreference';
@@ -66,11 +67,23 @@ Sentry.init({
   // spotlight: __DEV__,
 });
 
+// Apply a saved "analytics off" before any event can be sent.
+applyAnalyticsPreference();
+
 // Lives inside UserProvider (not App itself) so it can call
 // signInFromSession when a signup-confirmation link comes in.
 function AppContent() {
   const navigationRef = useNavigationContainerRef();
   const pendingUrlRef = useRef<string | null>(null);
+  // Last screen sent to analytics, so re-renders don't log it twice.
+  const lastScreenRef = useRef<string | undefined>(undefined);
+  const logScreen = () => {
+    const name = navigationRef.getCurrentRoute()?.name;
+    if (name && name !== lastScreenRef.current) {
+      lastScreenRef.current = name;
+      track.screen(name);
+    }
+  };
   const {signInFromSession} = useUserContext();
   const {isDark, colors} = useTheme();
 
@@ -130,7 +143,9 @@ function AppContent() {
     <NavigationContainer
       ref={navigationRef}
       theme={navigationTheme(isDark, colors)}
+      onStateChange={logScreen}
       onReady={() => {
+        logScreen();
         if (pendingUrlRef.current) {
           handleDeepLink(pendingUrlRef.current);
           pendingUrlRef.current = null;
