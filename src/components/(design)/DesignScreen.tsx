@@ -1,4 +1,4 @@
-import {Camera, LayoutPanelTop, Ruler} from 'lucide-react-native';
+import {Camera, Ruler} from 'lucide-react-native';
 import React from 'react';
 import {ScrollView, Text, TouchableOpacity, View} from 'react-native';
 import {navigateTo} from '../../utils/navigation';
@@ -6,6 +6,9 @@ import {useNavigation} from '@react-navigation/native';
 import {isRoomScanSupported} from '../../utils/deviceCapabilities';
 import {Toast} from 'react-native-toast-message/lib/src/Toast';
 
+// The Design tab: where a new room is made, by scanning or by entering its
+// measurements. Either way the room is saved first (SaveRoomScreen), and
+// designs start from saved rooms. Templates are under Home → Studio.
 const DesignScreen = () => {
   const navigation = useNavigation();
   const scanSupported = isRoomScanSupported();
@@ -73,23 +76,6 @@ const DesignScreen = () => {
             </Text>
           </TouchableOpacity>
         </View>
-
-        <TouchableOpacity
-          onPress={() => navigateTo(navigation, 'ChooseModel')}
-          activeOpacity={1}
-          className="px-3 py-5 flex flex-row justify-start items-center shadow-slate-600 shadow-sm rounded-[16px] bg-white dark:bg-night-surface">
-          <View className="bg-[#0E920E] w-[30px] h-[80px] rounded-[14px] flex items-center justify-center">
-            <LayoutPanelTop color={'white'} />
-          </View>
-          <View className="ml-5">
-            <Text className="font-cormorant text-xl text-black dark:text-night-text-primary">
-              Choose a model
-            </Text>
-            <Text className="font-dm-sans text-md text-black dark:text-night-text-secondary">
-              Choose a house model and start designing⁠
-            </Text>
-          </View>
-        </TouchableOpacity>
 
         <View className="px-3 py-8 flex flex-row justify-start items-center rounded-[16px] bg-transparent border-[1px] border-[#2C2C2C33] dark:border-night-border">
           <View className="ml-5 flex-1">

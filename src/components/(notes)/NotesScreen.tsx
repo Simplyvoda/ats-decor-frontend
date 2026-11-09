@@ -29,8 +29,7 @@ import {navigateTo} from '../../utils/navigation';
 import SharedHeader from '../shared/Header';
 import useRefetchOnFocus from '../../hooks/useRefetchOnFocus';
 import {useTheme} from '../../theme/useTheme';
-
-export const NOTES_LIMIT = 50;
+import {usePlan} from '../../context/PlanContext';
 
 const formatDate = (iso: string) => {
   const d = new Date(iso);
@@ -42,6 +41,11 @@ const formatDate = (iso: string) => {
 export default function NotesScreen() {
   const {colors} = useTheme();
   const navigation = useNavigation();
+  const {usage, gate} = usePlan();
+  // The plan's note limit, shown once limits are switched on.
+  const noteLimit = usage?.enforced
+    ? usage.features['note.active']?.limit ?? null
+    : null;
 
   const [{notes, trashedNotes, isLoading}, setList] = useState<{
     notes: INote[];
@@ -213,14 +217,8 @@ export default function NotesScreen() {
     navigateTo(navigation, 'CreateNote', {note});
   };
 
-  const canCreate = notes.length < NOTES_LIMIT;
-
   const goToCreate = () => {
-    if (!canCreate) {
-      Toast.show({
-        type: 'error',
-        text1: `Limit of ${NOTES_LIMIT} notes reached`,
-      });
+    if (!gate('note.active')) {
       return;
     }
     navigateTo(navigation, 'CreateNote');
@@ -250,9 +248,11 @@ export default function NotesScreen() {
             className="flex-1 ml-2 py-3 font-dm-sans text-[15px] text-gray-primary dark:text-night-text"
           />
         </View>
-        <Text className="font-dm-sans text-[#7A7A7A] dark:text-night-text-muted text-[14px] mt-3">
-          {notes.length}/{NOTES_LIMIT} notes used
-        </Text>
+        {noteLimit !== null && (
+          <Text className="font-dm-sans text-[#7A7A7A] dark:text-night-text-muted text-[14px] mt-3">
+            {notes.length}/{noteLimit} notes used
+          </Text>
+        )}
       </View>
 
       {/* Tag filter chips */}

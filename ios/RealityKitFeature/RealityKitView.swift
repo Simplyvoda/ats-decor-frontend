@@ -1053,7 +1053,10 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
     // below, PlaDomus logo bottom-left. Moves the camera programmatically for
     // each shot and restores the exact prior state afterwards, so the user's
     // viewpoint is untouched. Result path arrives via onDesignPdfExported.
-    func exportDesignPdf(name: String) {
+    //
+    // `watermark`: free-plan exports get "Made with PlaDomus" across both
+    // pictures (the app decides, from the user's plan).
+    func exportDesignPdf(name: String, watermark: Bool = false) {
         guard let cam = camera, let pivot = cameraPivot else {
             onDesignPdfExported?(["error": "Scene not ready"])
             return
@@ -1098,14 +1101,19 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
                             self.onDesignPdfExported?(["error": "Could not capture the scene"])
                             return
                         }
-                        self.composeDesignPdf(name: name, roomView: roomImage, topView: topImage)
+                        self.composeDesignPdf(
+                            name: name,
+                            roomView: roomImage,
+                            topView: topImage,
+                            watermark: watermark
+                        )
                     }
                 }
             }
         }
     }
 
-    private func composeDesignPdf(name: String, roomView: UIImage, topView: UIImage) {
+    private func composeDesignPdf(name: String, roomView: UIImage, topView: UIImage, watermark: Bool) {
         let pageRect = CGRect(x: 0, y: 0, width: 595.2, height: 841.8) // A4 portrait
         let margin: CGFloat = 40
         let contentWidth = pageRect.width - margin * 2
@@ -1135,7 +1143,11 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
                 let w = image.size.width * scale
                 let h = image.size.height * scale
                 // Center horizontally — device snapshots are tall portrait shots
-                image.draw(in: CGRect(x: margin + (contentWidth - w) / 2, y: y, width: w, height: h))
+                let frame = CGRect(x: margin + (contentWidth - w) / 2, y: y, width: w, height: h)
+                image.draw(in: frame)
+                if watermark {
+                    Self.drawWatermark(in: frame, context: ctx.cgContext)
+                }
                 y += h + 24
             }
 
@@ -1164,6 +1176,22 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
                     withAttributes: fallbackAttrs
                 )
             }
+
+            if watermark {
+                let footerAttrs: [NSAttributedString.Key: Any] = [
+                    .font: UIFont.systemFont(ofSize: 10, weight: .regular),
+                    .foregroundColor: UIColor.gray,
+                ]
+                let footer = "Made with PlaDomus · Upgrade to export without a watermark" as NSString
+                let size = footer.size(withAttributes: footerAttrs)
+                footer.draw(
+                    at: CGPoint(
+                        x: pageRect.width - margin - size.width,
+                        y: pageRect.height - margin - size.height
+                    ),
+                    withAttributes: footerAttrs
+                )
+            }
         }
 
         let filename = "design_export_\(Int(Date().timeIntervalSince1970 * 1000)).pdf"
@@ -1174,6 +1202,40 @@ class RealityKitView: UIView, UIGestureRecognizerDelegate {
         } catch {
             onDesignPdfExported?(["error": error.localizedDescription])
         }
+    }
+
+    // Tiles "Made with PlaDomus" diagonally across `rect`: faint white
+    // text with a thin dark outline, so it shows on light and dark rooms.
+    private static func drawWatermark(in rect: CGRect, context: CGContext) {
+        let text = "Made with PlaDomus" as NSString
+        let attrs: [NSAttributedString.Key: Any] = [
+            .font: UIFont.systemFont(ofSize: 20, weight: .semibold),
+            .foregroundColor: UIColor(white: 1, alpha: 0.5),
+            .strokeColor: UIColor(white: 0, alpha: 0.3),
+            .strokeWidth: -2, // negative: fill and outline
+        ]
+        let size = text.size(withAttributes: attrs)
+        let stepX = size.width + 48
+        let stepY = size.height + 56
+        // Far enough out that the rotated grid still covers the corners
+        let reach = hypot(rect.width, rect.height) / 2 + stepX
+
+        context.saveGState()
+        context.clip(to: rect)
+        context.translateBy(x: rect.midX, y: rect.midY)
+        context.rotate(by: -.pi / 6)
+        var row = 0
+        var y = -reach
+        while y <= reach {
+            var x = -reach + (row % 2 == 0 ? 0 : stepX / 2)
+            while x <= reach {
+                text.draw(at: CGPoint(x: x, y: y), withAttributes: attrs)
+                x += stepX
+            }
+            y += stepY
+            row += 1
+        }
+        context.restoreGState()
     }
 
     // MARK: - Camera Commands

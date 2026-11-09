@@ -12,6 +12,8 @@ import {SafeAreaProvider} from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import ThemedToast from './src/components/molecules/ThemedToast';
 import {UserProvider, useUserContext} from './src/context/UserContext';
+import {PlanProvider} from './src/context/PlanContext';
+import UpgradeSheet from './src/components/shared/UpgradeSheet';
 import {
   extractAuthError,
   extractRecoveryToken,
@@ -152,6 +154,11 @@ function AppContent() {
         }
       }}>
       <AppNavigator />
+      <UpgradeSheet
+        onSeePlans={() =>
+          (navigationRef as any).navigate('Settings', {screen: 'Shopping'})
+        }
+      />
     </NavigationContainer>
   );
 }
@@ -161,8 +168,10 @@ export default Sentry.wrap(function App() {
     <SafeAreaProvider>
       <ThemePreferenceProvider>
         <UserProvider>
-          <AppContent />
-          <ThemedToast />
+          <PlanProvider>
+            <AppContent />
+            <ThemedToast />
+          </PlanProvider>
         </UserProvider>
       </ThemePreferenceProvider>
     </SafeAreaProvider>

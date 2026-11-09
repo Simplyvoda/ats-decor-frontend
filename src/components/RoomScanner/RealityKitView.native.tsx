@@ -147,14 +147,16 @@ export const placeFurnitureFromLayoutCommand = (
 
 // Export the current design as a one-page PDF (room view + top view, with
 // the PlaDomus logo); result path arrives via onDesignPdfExported.
+// `watermark` tiles "Made with PlaDomus" over the pictures (free plan).
 export const exportDesignPdfCommand = (
   ref: React.RefObject<any>,
   name: string,
+  watermark: boolean,
 ) => {
   UIManager.dispatchViewManagerCommand(
     findNodeHandle(ref.current),
     UIManager.getViewManagerConfig('RealityKitView').Commands.exportDesignPdf,
-    [name],
+    [name, watermark],
   );
 };
 

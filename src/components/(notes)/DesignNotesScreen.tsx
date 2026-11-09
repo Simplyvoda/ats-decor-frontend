@@ -15,6 +15,7 @@ import {IDraftNote, INote} from '../../../interface/note.interface';
 import {goBack, navigateTo} from '../../utils/navigation';
 import useRefetchOnFocus from '../../hooks/useRefetchOnFocus';
 import {useTheme} from '../../theme/useTheme';
+import {usePlan} from '../../context/PlanContext';
 
 const formatDate = (iso: string) => {
   const d = new Date(iso);
@@ -30,6 +31,7 @@ type ListItem =
 export default function DesignNotesScreen() {
   const {colors} = useTheme();
   const navigation = useNavigation();
+  const {gate} = usePlan();
   const route = useRoute<any>();
   const designId: string | undefined = route.params?.designId;
   const designName: string | undefined = route.params?.designName;
@@ -72,6 +74,9 @@ export default function DesignNotesScreen() {
   ];
 
   const goToCreate = () => {
+    if (!gate('note.active')) {
+      return;
+    }
     navigateTo(navigation, 'CreateNote', {
       projectId: designId,
       fromARViewer,

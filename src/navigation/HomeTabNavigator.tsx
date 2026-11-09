@@ -1,8 +1,14 @@
-import React, {useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {StatusBar, Text, TouchableOpacity, View} from 'react-native';
-import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import {
+  BottomTabBar,
+  createBottomTabNavigator,
+} from '@react-navigation/bottom-tabs';
 import {useNavigation} from '@react-navigation/native';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from 'react-native-safe-area-context';
 import {Compass, FileText, Home, PenTool, Settings} from 'lucide-react-native';
 
 import DesignScreen from '../components/(design)/DesignScreen';
@@ -10,7 +16,20 @@ import ExploreScreen from '../components/(explore)/ExploreScreen';
 import HomeScreen from '../screens/home_screens/InitialScreen';
 import NotesScreen from '../components/(notes)/NotesScreen';
 import UserAvatar from '../components/molecules/UserAvatar';
-import GuidedTour from '../components/shared/GuidedTour';
+import GuidedTour, {
+  Rect,
+  TourStep,
+} from '../components/shared/GuidedTour';
+import WelcomeBackModal from '../components/shared/WelcomeBackModal';
+import DesignService from '../services/DesignService';
+import FurnitureService from '../services/FurnitureService';
+import {IDesign} from '../../interface/design.interface';
+import {
+  describeLastActivity,
+  formatActivityTime,
+  latestDesign,
+  openDesign,
+} from '../utils/designs';
 import {APP_TOUR} from '../config/tours';
 import {useUserContext} from '../context/UserContext';
 import {useTheme} from '../theme/useTheme';
@@ -79,16 +98,110 @@ function TabHeader() {
   );
 }
 
+// The tabs, left to right, as they appear in the tab bar.
+const TABS = ['Home', 'Design', 'Notes', 'Explore'];
+
+type WelcomeBack = {
+  design: IDesign;
+  lastActivity: string;
+  when: string;
+};
+
 export default function HomeTabNavigator() {
   const {colors} = useTheme();
+  const navigation = useNavigation<any>();
+  const insets = useSafeAreaInsets();
   const {user, completeTour} = useUserContext();
   // Skipping hides the tour until the app is next opened.
   const [skipped, setSkipped] = useState(false);
   const showTour = user?.first_login_completed === false && !skipped;
 
+  // ── Tour: switch to the tab a step is about and highlight its button ──
+  const tabBarRef = useRef<View>(null);
+  const [tabBarRect, setTabBarRect] = useState<Rect | null>(null);
+  const [tourTarget, setTourTarget] = useState<string | undefined>();
+
+  const measureTabBar = () =>
+    tabBarRef.current?.measureInWindow((x, y, width, height) =>
+      setTabBarRect({x, y, width, height}),
+    );
+
+  const goToTab = (tab: string) => navigation.navigate('HomeTabs', {screen: tab});
+
+  const onTourStep = (step: TourStep) => {
+    setTourTarget(step.target);
+    goToTab(step.target ?? 'Home');
+  };
+
+  const endTour = () => {
+    setTourTarget(undefined);
+    goToTab('Home');
+  };
+
+  // The tab buttons share the bar's width equally. The bar's height also
+  // covers the home-indicator area below the buttons, so that is left out.
+  const tabIndex = tourTarget ? TABS.indexOf(tourTarget) : -1;
+  const highlight: Rect | null =
+    tabBarRect && tabIndex >= 0
+      ? {
+          x: tabBarRect.x + (tabBarRect.width / TABS.length) * tabIndex,
+          y: tabBarRect.y,
+          width: tabBarRect.width / TABS.length,
+          height: tabBarRect.height - insets.bottom,
+        }
+      : null;
+
+  // ── Welcome back: returning users see their latest design ──
+  // Decided once, when we first know whether they've done the tour, so
+  // finishing the tour doesn't bring this up straight afterwards.
+  const [isReturning, setIsReturning] = useState<boolean | null>(null);
+  const [welcomeBack, setWelcomeBack] = useState<WelcomeBack | null>(null);
+
+  useEffect(() => {
+    if (isReturning === null && user?.first_login_completed !== undefined) {
+      setIsReturning(user.first_login_completed);
+    }
+  }, [isReturning, user?.first_login_completed]);
+
+  useEffect(() => {
+    if (!isReturning) {
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const design = latestDesign((await DesignService.getDesigns()).data);
+        if (!design) {
+          return;
+        }
+        // The catalogue only names the last piece added; carry on without it.
+        const catalogue = await FurnitureService.getFurniture()
+          .then(res => res.data)
+          .catch(() => []);
+        if (!cancelled) {
+          setWelcomeBack({
+            design,
+            lastActivity: describeLastActivity(design, catalogue),
+            when: formatActivityTime(design.updatedAt),
+          });
+        }
+      } catch (err: any) {
+        console.warn('Could not load latest design:', err?.message ?? err);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [isReturning]);
+
   return (
     <>
       <Tab.Navigator
+        tabBar={props => (
+          <View ref={tabBarRef} collapsable={false} onLayout={measureTabBar}>
+            <BottomTabBar {...props} />
+          </View>
+        )}
         screenOptions={({route}) => ({
           header: () => <TabHeader />,
           tabBarActiveTintColor: colors.brand,
@@ -125,8 +238,30 @@ export default function HomeTabNavigator() {
       <GuidedTour
         visible={showTour}
         steps={APP_TOUR}
-        onFinish={() => completeTour('first_login_completed')}
-        onSkip={() => setSkipped(true)}
+        highlight={highlight}
+        onStepChange={onTourStep}
+        onFinish={() => {
+          endTour();
+          completeTour('first_login_completed');
+        }}
+        onSkip={() => {
+          endTour();
+          setSkipped(true);
+        }}
+      />
+      <WelcomeBackModal
+        visible={welcomeBack !== null}
+        designName={welcomeBack?.design.name ?? ''}
+        lastActivity={welcomeBack?.lastActivity ?? ''}
+        when={welcomeBack?.when ?? ''}
+        onClose={() => setWelcomeBack(null)}
+        onContinue={() => {
+          const design = welcomeBack?.design;
+          setWelcomeBack(null);
+          if (design) {
+            openDesign(navigation, design);
+          }
+        }}
       />
     </>
   );

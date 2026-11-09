@@ -1,5 +1,12 @@
-import React, {useEffect, useState} from 'react';
-import {Modal, Text, TouchableOpacity, View} from 'react-native';
+import React, {useEffect, useRef, useState} from 'react';
+import {
+  Animated,
+  Modal,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import type {LucideIcon} from 'lucide-react-native';
 import {makeStyles, useTheme} from '../../theme/useTheme';
 
@@ -7,7 +14,16 @@ export type TourStep = {
   icon: LucideIcon;
   title: string;
   body: string;
+  // What this step is about, e.g. a tab name. The screen showing the tour
+  // decides what that means (switching to it, and passing `highlight`).
+  target?: string;
 };
+
+// A box on screen, in window coordinates (from measureInWindow).
+export type Rect = {x: number; y: number; width: number; height: number};
+
+// Space between the highlighted thing and the ring drawn around it.
+const SPOTLIGHT_PADDING = 6;
 
 type Props = {
   visible: boolean;
@@ -18,6 +34,11 @@ type Props = {
   // "Skip for now" just closes the tour. It isn't saved as done, so the
   // tour shows again next time.
   onSkip: () => void;
+  // Called whenever a new step shows, so the screen can move to its target.
+  onStepChange?: (step: TourStep) => void;
+  // Where the current step's target is. Everything else is dimmed and a
+  // ring is drawn around it.
+  highlight?: Rect | null;
 };
 
 // A short step-by-step card shown over the screen: an icon, a title, a
@@ -28,6 +49,8 @@ export default function GuidedTour({
   finishLabel = 'Get started',
   onFinish,
   onSkip,
+  onStepChange,
+  highlight,
 }: Props) {
   const styles = useStyles();
   const {colors} = useTheme();
@@ -40,11 +63,19 @@ export default function GuidedTour({
     }
   }, [visible]);
 
+  const step = steps[index];
+  useEffect(() => {
+    if (visible && step) {
+      onStepChange?.(step);
+    }
+    // onStepChange is usually an inline function; only a new step matters.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visible, step]);
+
   if (steps.length === 0) {
     return null;
   }
 
-  const step = steps[index];
   const isFirst = index === 0;
   const isLast = index === steps.length - 1;
   const Icon = step.icon;
@@ -53,9 +84,11 @@ export default function GuidedTour({
     <Modal
       visible={visible}
       transparent
+      statusBarTranslucent
       animationType="fade"
       onRequestClose={onSkip}>
-      <View style={styles.backdrop}>
+      <View style={[styles.backdrop, highlight && styles.clear]}>
+        {highlight && <Spotlight rect={highlight} />}
         <View style={styles.card}>
           {!isLast && (
             <TouchableOpacity
@@ -106,7 +139,62 @@ export default function GuidedTour({
   );
 }
 
+// Dims the screen except for `rect`, and draws a pulsing ring around it.
+// Four dark boxes surround the hole, so what's inside shows at full colour.
+function Spotlight({rect}: {rect: Rect}) {
+  const styles = useStyles();
+  const pulse = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulse, {toValue: 1, duration: 800, useNativeDriver: true}),
+        Animated.timing(pulse, {toValue: 0, duration: 800, useNativeDriver: true}),
+      ]),
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [pulse]);
+
+  const x = rect.x - SPOTLIGHT_PADDING;
+  const y = rect.y - SPOTLIGHT_PADDING;
+  const width = rect.width + SPOTLIGHT_PADDING * 2;
+  const height = rect.height + SPOTLIGHT_PADDING * 2;
+
+  return (
+    <View style={StyleSheet.absoluteFill} pointerEvents="none">
+      <View style={[styles.shade, {top: 0, left: 0, right: 0, height: y}]} />
+      <View style={[styles.shade, {top: y + height, left: 0, right: 0, bottom: 0}]} />
+      <View style={[styles.shade, {top: y, left: 0, width: x, height}]} />
+      <View style={[styles.shade, {top: y, left: x + width, right: 0, height}]} />
+      <Animated.View
+        style={[
+          styles.ring,
+          {
+            top: y,
+            left: x,
+            width,
+            height,
+            opacity: pulse.interpolate({inputRange: [0, 1], outputRange: [1, 0.4]}),
+            transform: [
+              {scale: pulse.interpolate({inputRange: [0, 1], outputRange: [1, 1.06]})},
+            ],
+          },
+        ]}
+      />
+    </View>
+  );
+}
+
 const useStyles = makeStyles(c => ({
+  clear: {backgroundColor: 'transparent'},
+  shade: {position: 'absolute', backgroundColor: c.overlay},
+  ring: {
+    position: 'absolute',
+    borderRadius: 14,
+    borderWidth: 2,
+    borderColor: c.brand,
+  },
   backdrop: {
     flex: 1,
     backgroundColor: c.overlay,

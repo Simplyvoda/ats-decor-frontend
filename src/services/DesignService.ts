@@ -78,8 +78,12 @@ const DesignService = {
       name: 'thumbnail.jpg',
     } as any);
 
-    // Local scans upload the USDZ; bundled/hosted models pass the reference
-    if (payload.modelUrl.startsWith('file://')) {
+    // A design from a saved room shares the room's model, so nothing is
+    // uploaded. Otherwise local scans upload the USDZ, and bundled/hosted
+    // models (templates) pass the reference.
+    if (payload.roomId) {
+      formData.append('room_id', payload.roomId);
+    } else if (payload.modelUrl.startsWith('file://')) {
       const modelKey = await this.uploadModelDirect(payload.modelUrl);
       if (modelKey) {
         formData.append('model_key', modelKey);
@@ -98,7 +102,8 @@ const DesignService = {
       headers: {'Content-Type': 'multipart/form-data'},
       timeout: 120_000,
     });
-    bumpDataVersion('designs');
+    // Room design counts change too (templates also get a room)
+    bumpDataVersion('designs', 'rooms');
     return res.data;
   },
 
@@ -163,9 +168,16 @@ const DesignService = {
     return res.data;
   },
 
+  // Spends a watermark-free export on this design (free plans get one).
+  async unlockExport(id: string): Promise<IDesignResponse> {
+    const res = await api.post(`/designs/${id}/unlock-export`);
+    bumpDataVersion('designs');
+    return res.data;
+  },
+
   async deleteDesign(id: string): Promise<void> {
     await api.delete(`/designs/${id}`);
-    bumpDataVersion('designs');
+    bumpDataVersion('designs', 'rooms');
   },
 };
 

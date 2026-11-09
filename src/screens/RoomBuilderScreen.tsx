@@ -1,6 +1,8 @@
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import React, {useCallback, useEffect, useMemo, useReducer, useRef, useState} from 'react';
 import {
+  ActivityIndicator,
+  Alert,
   BackHandler,
   KeyboardAvoidingView,
   NativeModules,
@@ -11,7 +13,10 @@ import {
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
-import {makeStyles} from '../theme/useTheme';
+import {makeStyles, useTheme} from '../theme/useTheme';
+import RoomService from '../services/RoomService';
+import {IRoom} from '../../interface/room.interface';
+import type {SaveRoomParams} from './SaveRoomScreen';
 import {goBack, navigateTo} from '../utils/navigation';
 import IntroStep from './room_builder/IntroStep';
 import MeasurementsStep from './room_builder/MeasurementsStep';
@@ -21,6 +26,7 @@ import ShapeStep from './room_builder/ShapeStep';
 import {
   DEFAULT_CEILING,
   Opening,
+  answersFromSpec,
   RoomShape,
   allWallsValid,
   buildRoomSpec,
@@ -40,9 +46,12 @@ import {
 //
 // Intro, then four steps: shape → wall lengths → doors and windows →
 // preview. The preview step asks the native RoomBuilderModule to build a
-// .usdz room from the measurements; "Continue to design" opens it in
-// ARViewerScreen like a fresh scan, so furniture, saving and publishing
-// all work the same way.
+// .usdz room from the measurements; "Save room" goes to SaveRoomScreen,
+// and designing starts once the room is saved.
+//
+// With an `editRoom` param it reopens a saved manual room with its
+// answers filled in; saving then updates that room (and every design
+// made from it) instead of making a new one.
 //
 // All steps live in this one screen so the answers survive moving back
 // and forth between them.
@@ -131,12 +140,20 @@ function roomReducer(state: RoomAnswers, action: RoomAction): RoomAnswers {
 
 export default function RoomBuilderScreen() {
   const navigation = useNavigation();
+  const editRoom: IRoom | undefined = useRoute<any>().params?.editRoom;
   const styles = useStyles();
   const shared = useSharedStyles();
+  const {colors} = useTheme();
   const scrollRef = useRef<ScrollView>(null);
 
-  const [step, setStep] = useState<Step>(0);
-  const [answers, dispatch] = useReducer(roomReducer, initialAnswers);
+  // Editing skips the intro and opens on the measurements.
+  const [step, setStep] = useState<Step>(editRoom?.spec ? 2 : 0);
+  const [answers, dispatch] = useReducer(roomReducer, initialAnswers, init =>
+    editRoom?.spec
+      ? {...init, ...answersFromSpec(editRoom.spec), confirmed: true}
+      : init,
+  );
+  const [savingEdit, setSavingEdit] = useState(false);
   const {shape, lengths, ceiling, confirmed, openings} = answers;
 
   // The 3D room built from the answers (step 4).
@@ -152,27 +169,31 @@ export default function RoomBuilderScreen() {
     scrollRef.current?.scrollTo({y: 0, animated: false});
   }, []);
 
+  // The first screen of the flow: the intro, or the measurements when
+  // editing a saved room. Back from here leaves the builder.
+  const atStart = step === 0 || (!!editRoom && step === 2);
+
   const back = useCallback(() => {
-    if (step === 0) {
+    if (atStart) {
       goBack(navigation);
     } else {
       goToStep((step - 1) as Step);
     }
-  }, [step, navigation, goToStep]);
+  }, [atStart, step, navigation, goToStep]);
 
   // Swiping back (iOS) or the Android back button steps back through the
   // flow instead of throwing all the answers away
   useEffect(() => {
-    navigation.setOptions({gestureEnabled: step === 0});
+    navigation.setOptions({gestureEnabled: atStart});
     const sub = BackHandler.addEventListener('hardwareBackPress', () => {
-      if (step === 0) {
+      if (atStart) {
         return false;
       }
       back();
       return true;
     });
     return () => sub.remove();
-  }, [step, back, navigation]);
+  }, [atStart, back, navigation]);
 
   const changeShape = (s: RoomShape) => dispatch({type: 'shapeChanged', shape: s});
 
@@ -226,11 +247,64 @@ export default function RoomBuilderScreen() {
     };
   }, [step, spec, buildAttempt]);
 
-  const continueToDesign = () => {
+  const saveRoom = () => {
     if (!modelUrl) {
       return;
     }
-    navigateTo(navigation, 'ARViewer', {modelUrl, fromScan: true, fromRoomBuilder: true});
+    const roomSpec = buildRoomSpec(shape, lengths, ceiling, openings);
+    if (editRoom) {
+      confirmEdit(roomSpec, modelUrl);
+      return;
+    }
+    const params: SaveRoomParams = {
+      source: 'manual',
+      modelFileUrl: modelUrl,
+      spec: roomSpec,
+    };
+    navigateTo(navigation, 'SaveRoom', params);
+  };
+
+  // Says how many designs the change reaches before applying it.
+  const confirmEdit = (
+    roomSpec: ReturnType<typeof buildRoomSpec>,
+    fileUrl: string,
+  ) => {
+    if (!editRoom) {
+      return;
+    }
+    const n = editRoom.design_count;
+    const apply = async () => {
+      setSavingEdit(true);
+      try {
+        await RoomService.updateDimensions(editRoom.id, roomSpec, fileUrl);
+        Toast.show({
+          type: 'success',
+          text1: 'Room updated',
+          text2: 'Changed your mind? Use Undo in My Rooms.',
+        });
+        goBack(navigation);
+      } catch (err: any) {
+        Toast.show({
+          type: 'error',
+          text1: 'Could not update the room',
+          text2: err.response?.data?.message || err.message,
+        });
+      } finally {
+        setSavingEdit(false);
+      }
+    };
+    if (n === 0) {
+      apply();
+      return;
+    }
+    Alert.alert(
+      `Update ${n} design${n === 1 ? '' : 's'}?`,
+      `The new measurements apply to every design made from “${editRoom.name}”. Furniture stays where it is, so check each design afterwards.`,
+      [
+        {text: 'Cancel', style: 'cancel'},
+        {text: 'Update', onPress: apply},
+      ],
+    );
   };
 
   if (step === 0) {
@@ -306,7 +380,15 @@ export default function RoomBuilderScreen() {
         return (
           <View style={{gap: 14}}>
             <OutlineButton label="Edit" onPress={() => goToStep(2)} />
-            <PrimaryButton label="Continue to design" onPress={continueToDesign} disabled={!modelUrl} />
+            {savingEdit ? (
+              <ActivityIndicator color={colors.brand} style={styles.saving} />
+            ) : (
+              <PrimaryButton
+                label={editRoom ? 'Save changes' : 'Save room'}
+                onPress={saveRoom}
+                disabled={!modelUrl}
+              />
+            )}
           </View>
         );
     }
@@ -332,4 +414,5 @@ const useStyles = makeStyles(c => ({
   root: {flex: 1, backgroundColor: c.background},
   content: {paddingHorizontal: 30, paddingTop: 28, paddingBottom: 32},
   footer: {paddingHorizontal: 30, paddingTop: 12, paddingBottom: 8},
+  saving: {paddingVertical: 14},
 }));

@@ -19,12 +19,14 @@ import {navigateTo} from '../../utils/navigation';
 import SharedHeader from '../shared/Header';
 import useRefetchOnFocus from '../../hooks/useRefetchOnFocus';
 import {useTheme} from '../../theme/useTheme';
+import {usePlan} from '../../context/PlanContext';
 
 const PAGE_SIZE = 12;
 
 export default function ExploreScreen() {
   const {colors} = useTheme();
   const navigation = useNavigation();
+  const {gate} = usePlan();
 
   const [feed, setFeed] = useState<{
     designs: IDesign[];
@@ -119,6 +121,10 @@ export default function ExploreScreen() {
 
   const toggleLike = async (design: IDesign) => {
     const liked = !!design.liked_by_me;
+    // Saving to the mood board counts toward the plan's limit.
+    if (!liked && !gate('community.save')) {
+      return;
+    }
     // Optimistic update
     setDesigns(prev =>
       prev.map(d =>

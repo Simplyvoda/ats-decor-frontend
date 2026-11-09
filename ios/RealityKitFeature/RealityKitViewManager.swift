@@ -92,7 +92,7 @@ class RealityKitViewManager: RCTViewManager {
         withView(reactTag) { $0.placeFurnitureFromLayout(itemJson as String) }
     }
 
-    @objc func exportDesignPdf(_ reactTag: NSNumber, name: NSString) {
-        withView(reactTag) { $0.exportDesignPdf(name: name as String) }
+    @objc func exportDesignPdf(_ reactTag: NSNumber, name: NSString, watermark: Bool) {
+        withView(reactTag) { $0.exportDesignPdf(name: name as String, watermark: watermark) }
     }
 }

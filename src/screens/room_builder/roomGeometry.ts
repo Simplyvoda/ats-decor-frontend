@@ -208,6 +208,7 @@ export const buildRoomSpec = (
   ceilingHeight: number,
   openings: Opening[],
 ) => ({
+  shape,
   points: roomPoints(shape, lengths),
   ceilingHeight,
   openings: openings.map(o => {
@@ -227,3 +228,32 @@ export const formatMetres = (n: number) => `${n.toFixed(2)} m`;
 
 // 0.9 → "0.9 m", 1.25 → "1.25 m" (no trailing zeros), for widths/positions
 export const formatShort = (n: number) => `${round2(n)} m`;
+
+// The builder's answers back from a saved room's spec, so a room can be
+// reopened for editing. Wall lengths are the distances between corners.
+export const answersFromSpec = (spec: {
+  shape?: RoomShape;
+  points: Point[];
+  ceilingHeight: number;
+  openings: {type: OpeningType; wall: number; offset: number; width: number}[];
+}) => {
+  const {points} = spec;
+  const shape: RoomShape =
+    spec.shape ?? (points.length === 6 ? 'lshape' : 'rectangle');
+  const lengths = points.map((p, i) => {
+    const next = points[(i + 1) % points.length];
+    return round2(Math.hypot(next.x - p.x, next.y - p.y));
+  });
+  return {
+    shape,
+    lengths,
+    ceiling: spec.ceilingHeight,
+    openings: spec.openings.map((o, i) => ({
+      id: `saved-${i}`,
+      type: o.type,
+      wall: o.wall,
+      offset: o.offset,
+      width: o.width,
+    })),
+  };
+};

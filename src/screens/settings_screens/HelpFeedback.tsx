@@ -64,12 +64,12 @@ const HelpFeedback = () => {
   const faqs = [
     {
       question: 'How do I get started?',
-      answer: `Simply sign up for a Free Casual account. You’ll immediately have access to 3 room scans, 4 designs, and our Basic AI Decor Assistant. From your dashboard you can:
-- Upload or scan your room
-- Drag & drop furniture and decor
-- Generate mood boards
-- Save and share designs in the community gallery.
-When you’re ready for more, upgrade to Hobbyist (or higher) to unlock additional features.`,
+      answer: `Sign up for a free Casual account. Then:
+- Scan your room, or enter its measurements, and save it to My Rooms
+- Start designs from your saved rooms, as many ideas per room as your plan allows
+- Place, move and rotate furniture in 3D
+- Save designs you love from the community to your mood board.
+Your plan's limits are in Settings → Shopping. When you're ready for more, upgrade to Hobbyist.`,
     },
     {
       question: 'Do I need to be a professional to use PlaDomus?',

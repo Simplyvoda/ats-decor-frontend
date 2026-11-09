@@ -29,7 +29,7 @@ import DesignService from '../../services/DesignService';
 import {IDraftNote, INote} from '../../../interface/note.interface';
 import {IDesign} from '../../../interface/design.interface';
 import {goBack} from '../../utils/navigation';
-import {NOTES_LIMIT} from './NotesScreen';
+import {usePlan} from '../../context/PlanContext';
 import {useTheme} from '../../theme/useTheme';
 
 const formatDate = (iso: string) => {
@@ -50,6 +50,10 @@ type NoteFields = {
 export default function CreateNoteScreen() {
   const {colors} = useTheme();
   const navigation = useNavigation();
+  const {usage} = usePlan();
+  const noteLimit = usage?.enforced
+    ? usage.features['note.active']?.limit ?? null
+    : null;
   const route = useRoute<any>();
 
   // View/edit an existing saved note, or a locally-held draft (a note
@@ -493,10 +497,10 @@ export default function CreateNoteScreen() {
             </View>
 
             {/* Quota banner */}
-            {notesUsed !== null && (
+            {notesUsed !== null && noteLimit !== null && (
               <View className="bg-[#F2E9D8] dark:bg-night-muted border border-brand rounded-[12px] px-4 py-4 mb-8">
                 <Text className="font-dm-sans text-[15px] text-gray-primary dark:text-night-text">
-                  {notesUsed}/{NOTES_LIMIT} notes used
+                  {notesUsed}/{noteLimit} notes used
                 </Text>
               </View>
             )}

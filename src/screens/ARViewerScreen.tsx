@@ -55,6 +55,7 @@ import {IPlacedFurniture} from '../../interface/design.interface';
 import {images} from '../../assets/constants/images';
 import {makeStyles, useTheme} from '../theme/useTheme';
 import {useUserContext} from '../context/UserContext';
+import {usePlan} from '../context/PlanContext';
 import ConsentScreen from '../components/shared/ConsentScreen';
 import {ROOM_DATA_CONSENT} from '../config/consent';
 import {track} from '../services/analytics';
@@ -145,6 +146,9 @@ export default function ARViewerScreen() {
   const route = useRoute<any>();
   const justSavedRef = useRef(false);
   const modelUrl: string = route.params?.modelUrl ?? '';
+  // The saved room this design is in. New designs from a room share its
+  // model, so saving sends the room's id rather than a model file.
+  const roomId: string | undefined = route.params?.roomId;
   // Explore/Moodboard open designs for browsing, not editing — nothing
   // here can be changed, so no furniture editing UI and no "unsaved
   // changes" prompt on the way out.
@@ -226,12 +230,20 @@ export default function ARViewerScreen() {
     isPublishing,
   } = publish;
   const {user, giveRoomDataConsent} = useUserContext();
+  const {gate, usage, showUpgrade} = usePlan();
+  // This design has had a watermark-free export unlocked for it
+  const [exportUnlocked, setExportUnlocked] = useState<boolean>(
+    route.params?.exportUnlocked === true,
+  );
 
   // "Save design": a room the user built or scanned needs their room-data
-  // consent first. Designs from Explore / house models don't.
+  // consent first. Designs from Explore / house models don't, and nor do
+  // saved rooms (consent was given when the room was saved).
   const openSaveForm = () => {
     const needsConsent =
-      route.params?.fromScan === true && !user?.room_data_consent_at;
+      route.params?.fromScan === true &&
+      !roomId &&
+      !user?.room_data_consent_at;
     setPublish(p => ({
       ...p,
       showConsent: needsConsent,
@@ -264,9 +276,16 @@ export default function ARViewerScreen() {
     (value: (typeof publish)[K]) =>
       setPublish(p => ({...p, [key]: value}));
 
-  // Fresh scans aren't saved automatically — nudge the user once
+  // A new design isn't saved automatically — nudge the user once
   useEffect(() => {
-    if (route.params?.fromScan) {
+    if (roomId && !route.params?.designId) {
+      Toast.show({
+        type: 'info',
+        text1: route.params?.roomName ?? 'Your room',
+        text2: 'Add furniture, then use ⋮ → Save design to keep it',
+        visibilityTime: 5000,
+      });
+    } else if (route.params?.fromScan) {
       Toast.show({
         type: 'info',
         // fromRoomBuilder: a room built from typed-in measurements
@@ -355,17 +374,95 @@ export default function ARViewerScreen() {
     }
   };
 
-  const handleExportPdf = () => {
-    setShowToolsMenu(false);
-    if (isExporting) {
-      return;
-    }
+  const exportPdf = (watermark: boolean) => {
     setIsExporting(true);
     Toast.show({type: 'info', text1: 'Preparing PDF…'});
     exportDesignPdfCommand(
       realityKitRef,
       route.params?.designName ?? 'PlaDomus Design',
+      watermark,
     );
+  };
+
+  // Spends the plan's watermark-free export on this design, then exports.
+  const unlockAndExport = async () => {
+    if (!currentDesignId) {
+      return;
+    }
+    try {
+      await DesignService.unlockExport(currentDesignId);
+      setExportUnlocked(true);
+      exportPdf(false);
+    } catch (err: any) {
+      // A plan limit opens the upgrade sheet by itself.
+      if (err?.response?.data?.code !== 'PLAN_LIMIT_REACHED') {
+        Toast.show({
+          type: 'error',
+          text1: 'Could not remove the watermark',
+          text2: err?.response?.data?.message || err?.message,
+        });
+      }
+    }
+  };
+
+  // Free-plan exports carry a "Made with PlaDomus" watermark, unless the
+  // design was unlocked with the plan's free watermark-free export.
+  const handleExportPdf = () => {
+    setShowToolsMenu(false);
+    if (isExporting) {
+      return;
+    }
+    const allowance = usage?.features['export.watermark_free'];
+    const clean =
+      !usage?.enforced ||
+      !allowance ||
+      allowance.limit === null ||
+      exportUnlocked;
+    if (clean) {
+      exportPdf(false);
+      return;
+    }
+
+    const left = Math.max(0, (allowance.limit ?? 0) - allowance.used);
+    const withWatermark = {
+      text: 'Export with watermark',
+      onPress: () => exportPdf(true),
+    };
+    const cancel = {text: 'Cancel', style: 'cancel' as const};
+    if (left > 0 && currentDesignId) {
+      Alert.alert(
+        'Remove the watermark?',
+        `Exports on your plan carry a “Made with PlaDomus” watermark. You can remove it from ${left === 1 ? 'one design' : `${left} designs`} for free. Use it on this design?`,
+        [
+          {text: 'Remove watermark', onPress: unlockAndExport},
+          withWatermark,
+          cancel,
+        ],
+      );
+    } else if (left > 0) {
+      Alert.alert(
+        'Export with watermark?',
+        'Exports on your plan carry a “Made with PlaDomus” watermark. Save this design first to remove it with your free watermark-free export.',
+        [withWatermark, cancel],
+      );
+    } else {
+      Alert.alert(
+        'Export with watermark?',
+        'Exports on your plan carry a “Made with PlaDomus” watermark. Upgrade to export without it.',
+        [
+          withWatermark,
+          {
+            text: 'See plans',
+            onPress: () =>
+              showUpgrade({
+                code: 'PLAN_LIMIT_REACHED',
+                feature: 'export.watermark_free',
+              }),
+          },
+          cancel,
+        ],
+      );
+    }
   };
 
   const addPubTag = () => {
@@ -379,6 +476,14 @@ export default function ARViewerScreen() {
 
   const handlePublish = () => {
     if (!pubName.trim() || isPublishing) {
+      return;
+    }
+    // A new design uses one of the plan's designs; sharing to Explore
+    // needs a plan that allows posting. (The server checks both too.)
+    if (!currentDesignId && !gate('design.create')) {
+      return;
+    }
+    if (pubIsPublic && !route.params?.designIsPublic && !gate('community.post')) {
       return;
     }
     setPub('isPublishing')(true);
@@ -405,6 +510,7 @@ export default function ARViewerScreen() {
           isPublic: pubIsPublic,
           thumbnailPath: path,
           modelUrl,
+          roomId,
           furnitureLayout: layoutResult.layout,
         };
         // Editing an already-saved design replaces it in place rather than
@@ -413,10 +519,11 @@ export default function ARViewerScreen() {
           ? await DesignService.update(currentDesignId, payload)
           : await DesignService.publish(payload);
         setCurrentDesignId(res.data.id);
+        const roomSource = route.params?.roomSource;
         track.roomSaved(
-          route.params?.fromRoomBuilder
+          route.params?.fromRoomBuilder || roomSource === 'manual'
             ? 'room_builder'
-            : route.params?.fromScan
+            : route.params?.fromScan || roomSource === 'scanned'
               ? 'scan'
               : 'house_model',
           !!currentDesignId,
@@ -847,7 +954,12 @@ export default function ARViewerScreen() {
               </View>
               <Switch
                 value={pubIsPublic}
-                onValueChange={setPub('pubIsPublic')}
+                onValueChange={on => {
+                  if (on && !gate('community.post')) {
+                    return;
+                  }
+                  setPub('pubIsPublic')(on);
+                }}
                 trackColor={{true: colors.brand, false: colors.border}}
                 ios_backgroundColor={colors.border}
                 thumbColor="white"

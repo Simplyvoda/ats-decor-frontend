@@ -1,258 +1,116 @@
-import React, {useCallback, useState} from 'react';
-import {
-  ActivityIndicator,
-  Alert,
-  Image,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
-import {Lightbulb, Trash2} from 'lucide-react-native';
+import React from 'react';
+import {Text, TouchableOpacity, View} from 'react-native';
+import {Clock, Home, LayoutPanelTop, LucideIcon} from 'lucide-react-native';
 import {useNavigation} from '@react-navigation/native';
-import DesignService from '../../../services/DesignService';
-import {IDesign} from '../../../../interface/design.interface';
-import useRefetchOnFocus from '../../../hooks/useRefetchOnFocus';
-import {makeStyles, useTheme} from '../../../theme/useTheme';
+import {makeStyles} from '../../../theme/useTheme';
+import {navigateTo} from '../../../utils/navigation';
 
-const designTips = [
-  {id: 1, text: 'Use the 60-30-10 rule for colour schemes'},
-  {id: 2, text: 'Layer different textures for visual interest'},
-  {id: 3, text: 'Mix high and low-end pieces'},
+type StudioCard = {
+  title: string;
+  subtitle: string;
+  icon: LucideIcon;
+  // The coloured strip on the card's left (from the Home mockup)
+  color: string;
+  screen: string;
+};
+
+const CARDS: StudioCard[] = [
+  {
+    title: 'Recent Designs',
+    subtitle: 'Pick up where you left off',
+    icon: Clock,
+    color: '#2C2C2C',
+    screen: 'RecentDesigns',
+  },
+  {
+    title: 'My Rooms',
+    subtitle: 'Explore and manage your rooms',
+    icon: Home,
+    color: '#C1A36A',
+    screen: 'MyRooms',
+  },
+  {
+    title: 'Choose a template',
+    subtitle: 'Choose a house model and start designing',
+    icon: LayoutPanelTop,
+    color: '#0E920E',
+    screen: 'ChooseModel',
+  },
 ];
 
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('en-GB', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  });
-}
-
+// Home → Studio: the way into your designs, your saved rooms and templates.
 const StudioComponent = () => {
   const navigation = useNavigation();
   const styles = useStyles();
-  const {colors} = useTheme();
-  const [{designs, loading}, setList] = useState<{
-    designs: IDesign[];
-    loading: boolean;
-  }>({designs: [], loading: true});
-
-  const fetchDesigns = useCallback(async () => {
-    try {
-      const res = await DesignService.getDesigns();
-      setList({designs: res.data, loading: false});
-      return true;
-    } catch (err: any) {
-      console.warn('Failed to load designs:', err?.message ?? err);
-      setList(l => ({...l, loading: false}));
-      return false;
-    }
-  }, []);
-
-  useRefetchOnFocus(fetchDesigns, ['designs'], 5 * 60 * 1000);
-
-  const handleDelete = (design: IDesign) => {
-    Alert.alert('Delete scan', `Remove "${design.name}"?`, [
-      {text: 'Cancel', style: 'cancel'},
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            await DesignService.deleteDesign(design.id);
-            setList(l => ({
-              ...l,
-              designs: l.designs.filter(d => d.id !== design.id),
-            }));
-          } catch (err: any) {
-            Alert.alert('Error', err?.message ?? 'Failed to delete');
-          }
-        },
-      },
-    ]);
-  };
 
   return (
-    <>
-      {/* Welcome Back Card */}
-      <View style={styles.welcomeCard}>
-        <Text style={styles.cardTitle}>Welcome Back!</Text>
-        <Text style={styles.cardSubtitle}>
-          Ready to design your next cozy space?
-        </Text>
-        <View style={styles.tipsContainer}>
-          {designTips.map(tip => (
-            <View style={styles.tipItem} key={tip.id}>
-              <Lightbulb size={16} color={colors.brand} style={styles.tipIcon} />
-              <Text style={styles.tipText}>{tip.text}</Text>
+    <View style={styles.container}>
+      {CARDS.map(card => {
+        const Icon = card.icon;
+        return (
+          <TouchableOpacity
+            key={card.screen}
+            style={styles.card}
+            onPress={() => navigateTo(navigation, card.screen)}
+            activeOpacity={0.8}
+            accessibilityRole="button">
+            <View style={[styles.strip, {backgroundColor: card.color}]}>
+              <Icon size={18} color="#FFFFFF" />
             </View>
-          ))}
-        </View>
-      </View>
-
-      {/* Recent Designs */}
-      <View style={styles.recentSection}>
-        <Text style={styles.sectionTitle}>Recent Design</Text>
-
-        {loading ? (
-          <ActivityIndicator color={colors.brand} style={styles.loader} />
-        ) : designs.length === 0 ? (
-          <Text style={styles.emptyText}>
-            No saved scans yet — scan a room to get started.
-          </Text>
-        ) : (
-          designs.map(design => (
-            <TouchableOpacity
-              key={design.id}
-              style={styles.designItem}
-              onPress={() =>
-                (navigation as any).navigate('ARViewer', {
-                  modelUrl: design.file_url,
-                  designId: design.id,
-                  designName: design.name,
-                  furnitureLayout: design.furniture_layout,
-                  designStyle: design.style ?? undefined,
-                  designTags: design.tags?.map(t => t.name) ?? [],
-                  designIsPublic: design.is_public,
-                })
-              }
-              activeOpacity={0.7}>
-              <View style={styles.designIcon}>
-                {design.thumbnail_url ? (
-                  <Image
-                    // Thumbnail URLs are unique per upload (a new
-                    // thumbnail gets a new URL), so the cached copy is
-                    // always the right one.
-                    source={{uri: design.thumbnail_url, cache: 'force-cache'}}
-                    style={styles.designThumbnail}
-                    resizeMode="cover"
-                  />
-                ) : (
-                  <Text style={styles.designIconText}>3D</Text>
-                )}
-              </View>
-              <View style={styles.designInfo}>
-                <Text style={styles.designTitle} numberOfLines={1}>
-                  {design.name}
-                </Text>
-                <Text style={styles.designStyle}>
-                  {formatDate(design.createdAt)}
-                </Text>
-              </View>
-              <TouchableOpacity
-                onPress={() => handleDelete(design)}
-                hitSlop={{top: 8, bottom: 8, left: 8, right: 8}}>
-                <Trash2 size={18} color={colors.iconMuted} />
-              </TouchableOpacity>
-            </TouchableOpacity>
-          ))
-        )}
-      </View>
-    </>
+            <View style={styles.text}>
+              <Text style={styles.title}>{card.title}</Text>
+              <Text style={styles.subtitle}>{card.subtitle}</Text>
+            </View>
+          </TouchableOpacity>
+        );
+      })}
+    </View>
   );
 };
 
 const useStyles = makeStyles(c => ({
-  welcomeCard: {
-    marginHorizontal: 20,
+  container: {
+    marginHorizontal: 16,
     marginBottom: 20,
-    paddingHorizontal: 20,
-    paddingVertical: 40,
-    borderRadius: 16,
-    borderColor: c.border,
+    padding: 16,
+    gap: 20,
+    borderRadius: 24,
     borderWidth: 1,
-  },
-  cardTitle: {
-    fontFamily: 'CormorantGaramond-SemiBold',
-    fontSize: 24,
-    fontWeight: '600',
-    color: c.textPrimary,
-    marginBottom: 8,
-  },
-  cardSubtitle: {
-    fontSize: 16,
-    fontFamily: 'DMSans-Regular',
-    color: c.textSecondary,
-    marginBottom: 20,
-  },
-  tipsContainer: {
-    gap: 16,
-  },
-  tipItem: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-  },
-  tipIcon: {
-    marginRight: 12,
-    marginTop: 2,
-  },
-  tipText: {
-    fontSize: 14,
-    color: c.textSecondary,
-    flex: 1,
-    lineHeight: 20,
-  },
-  recentSection: {
-    marginHorizontal: 20,
-    marginBottom: 20,
-    padding: 20,
-    borderRadius: 16,
     borderColor: c.border,
-    borderWidth: 1,
   },
-  sectionTitle: {
-    fontFamily: 'CormorantGaramond-SemiBold',
-    fontSize: 24,
-    fontWeight: '600',
-    color: c.textPrimary,
-    marginBottom: 20,
-  },
-  loader: {
-    marginVertical: 20,
-  },
-  emptyText: {
-    fontSize: 14,
-    color: c.textMuted,
-    fontFamily: 'DMSans-Regular',
-    textAlign: 'center',
-    paddingVertical: 16,
-  },
-  designItem: {
+  card: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+    borderRadius: 18,
+    backgroundColor: c.surface,
+    shadowColor: c.shadow,
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    shadowOffset: {width: 0, height: 2},
+    elevation: 1,
   },
-  designIcon: {
-    width: 80,
-    height: 80,
+  strip: {
+    width: 20,
+    height: 70,
     borderRadius: 10,
-    marginRight: 16,
-    backgroundColor: c.surfaceMuted,
     alignItems: 'center',
     justifyContent: 'center',
-    overflow: 'hidden',
+    marginRight: 16,
   },
-  designThumbnail: {
-    width: '100%',
-    height: '100%',
-  },
-  designIconText: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: c.brand,
-  },
-  designInfo: {
-    flex: 1,
-  },
-  designTitle: {
-    fontSize: 16,
-    fontWeight: '500',
+  text: {flex: 1},
+  title: {
+    fontFamily: 'CormorantGaramond-SemiBold',
+    fontSize: 24,
+    fontWeight: '600',
     color: c.textPrimary,
     marginBottom: 4,
   },
-  designStyle: {
+  subtitle: {
+    fontFamily: 'DMSans-Regular',
     fontSize: 14,
-    color: c.textMuted,
+    color: c.text,
   },
 }));
 

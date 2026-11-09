@@ -21,6 +21,9 @@ import ScanScreen from '../screens/ScanScreen';
 import ChooseModelScreen from '../screens/ChooseModelScreen';
 import RoomBuilderScreen from '../screens/RoomBuilderScreen';
 import ARViewerScreen from '../screens/ARViewerScreen';
+import SaveRoomScreen from '../screens/SaveRoomScreen';
+import MyRoomsScreen from '../screens/home_screens/MyRoomsScreen';
+import RecentDesignsScreen from '../screens/home_screens/RecentDesignsScreen';
 import BlogPostScreen from '../screens/home_screens/blog/BlogPostScreen';
 import CreateNoteScreen from '../components/(notes)/CreateNoteScreen';
 import DesignNotesScreen from '../components/(notes)/DesignNotesScreen';
@@ -91,13 +94,17 @@ function AppNavigator(): React.JSX.Element {
           <Stack.Screen name="ScanScreen" component={ScanScreen} />
           <Stack.Screen name="ChooseModel" component={ChooseModelScreen} />
           <Stack.Screen name="RoomBuilder" component={RoomBuilderScreen} />
+          <Stack.Screen name="SaveRoom" component={SaveRoomScreen} />
           <Stack.Screen name="ARViewer" component={ARViewerScreen} />
+          <Stack.Screen name="MyRooms" component={MyRoomsScreen} />
+          <Stack.Screen name="RecentDesigns" component={RecentDesignsScreen} />
           <Stack.Screen name="Settings" component={SettingsNavigator} />
           <Stack.Screen name="Moodboards" component={ViewMoodboards} />
           <Stack.Screen name="BlogPost" component={BlogPostScreen} />
           <Stack.Screen name="CreateNote" component={CreateNoteScreen} />
           <Stack.Screen name="DesignNotes" component={DesignNotesScreen} />
           <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
+          <Stack.Screen name="TermsOfService" component={TermsOfServiceScreen} />
         </>
       ) : (
         // ── Unauthenticated ────────────────────────────────────────────────

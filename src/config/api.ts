@@ -2,6 +2,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {API_URL} from '@env';
 import {emitUnauthorized} from '../utils/authEvents';
+import {emitPlanLimit} from '../utils/planEvents';
 
 const api = axios.create({
   baseURL: API_URL,
@@ -70,6 +71,12 @@ api.interceptors.response.use(
     } else if (error.response?.status === 401) {
       // Retried request 401'd again even with a fresh token — give up.
       emitUnauthorized();
+    }
+    // The user's plan doesn't allow this: open the upgrade sheet. The
+    // caller still gets the error, to undo anything it did optimistically.
+    const code = error.response?.data?.code;
+    if (code === 'PLAN_LIMIT_REACHED' || code === 'ROOM_LOCKED') {
+      emitPlanLimit(error.response.data);
     }
     return Promise.reject(error);
   },

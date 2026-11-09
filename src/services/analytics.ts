@@ -129,6 +129,23 @@ export const track = {
       .catch(() => {});
   },
 
+  // Someone hit a plan limit (the upgrade sheet opened).
+  limitHit(feature: string) {
+    safely(a => logEvent(a, 'limit_hit', {feature: feature.slice(0, 100)}));
+  },
+
+  paywallViewed() {
+    safely(a => logEvent(a, 'paywall_viewed'));
+  },
+
+  purchaseStarted(plan: string) {
+    safely(a => logEvent(a, 'purchase_started', {plan}));
+  },
+
+  purchaseCompleted(plan: string) {
+    safely(a => logEvent(a, 'purchase_completed', {plan}));
+  },
+
   // from: saving a design as public, or switching an existing one to public.
   publishedToExplore(from: 'save' | 'visibility_toggle') {
     safely(a => logEvent(a, 'publish_to_explore', {from}));

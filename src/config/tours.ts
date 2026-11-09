@@ -14,7 +14,8 @@ import {
 import type {TourStep} from '../components/shared/GuidedTour';
 import {INCLUDE_FURNITURE_IN_SCANS} from './scan';
 
-// Shown once on the home screen, until the user finishes it.
+// Shown once on the home screen, until the user finishes it. `target` is the
+// tab a step talks about: the tour switches to it and highlights its button.
 export const APP_TOUR: TourStep[] = [
   {
     icon: Sparkles,
@@ -24,26 +25,31 @@ export const APP_TOUR: TourStep[] = [
   {
     icon: PenTool,
     title: 'Start a design',
-    body: 'Open the Design tab to scan a room with your camera, type in its measurements, or start from a house model.',
+    target: 'Design',
+    body: 'Open the Design tab to scan a room with your camera or type in its measurements. It’s saved to My Rooms, so you only do this once per room.',
   },
   {
     icon: Armchair,
     title: 'Try furniture in your room',
-    body: 'Place, move and rotate furniture in your 3D room, then save the design to come back to it any time.',
+    target: 'Home',
+    body: 'Open a room from Home → My Rooms and start a design. Try as many ideas as you like in the same room, and save each one.',
   },
   {
     icon: Compass,
     title: 'Get inspired',
+    target: 'Explore',
     body: 'Explore shows designs other people have shared. You can publish your own there too.',
   },
   {
     icon: Heart,
     title: 'Save what you love',
+    target: 'Explore',
     body: 'Tap the heart on any design in Explore to keep it in your moodboard.',
   },
   {
     icon: FileText,
     title: 'Keep notes',
+    target: 'Notes',
     body: 'Use Notes for measurements, shopping lists and ideas while you plan.',
   },
 ];

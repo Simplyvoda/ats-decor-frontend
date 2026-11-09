@@ -46,7 +46,7 @@ export default function ScannerScreen() {
   const onExportComplete = (e: {
     nativeEvent: {json?: string; fileUrl?: string; error?: string};
   }) => {
-    const {fileUrl, error} = e.nativeEvent;
+    const {fileUrl, error, json} = e.nativeEvent;
     setScan(s => ({...s, processing: false}));
 
     // No fileUrl means the native export failed — navigating to the viewer
@@ -64,11 +64,12 @@ export default function ScannerScreen() {
 
     track.scanCompleted((Date.now() - scanStartedAt.current) / 1000);
 
-    // Saving happens in ARViewer (⋮ → Save design) so the design gets a
-    // real snapshot thumbnail instead of a blind background upload here.
-    (navigation as any).navigate('ARViewer', {
-      modelUrl: fileUrl,
-      fromScan: true,
+    // Every scan is saved as a room before any designing starts. Replace
+    // (not push) so going back from Save Room doesn't land mid-scan.
+    (navigation as any).replace('SaveRoom', {
+      source: 'scanned',
+      modelFileUrl: fileUrl,
+      scanData: json,
     });
   };
 
