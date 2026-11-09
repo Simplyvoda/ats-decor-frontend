@@ -101,14 +101,14 @@ const useStyles = makeStyles(c => ({
   },
   text: {flex: 1},
   title: {
-    fontFamily: 'CormorantGaramond-SemiBold',
+    fontFamily: 'Cormorant Garamond',
     fontSize: 24,
     fontWeight: '600',
     color: c.textPrimary,
     marginBottom: 4,
   },
   subtitle: {
-    fontFamily: 'DMSans-Regular',
+    fontFamily: 'DM Sans',
     fontSize: 14,
     color: c.text,
   },

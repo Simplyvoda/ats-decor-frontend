@@ -44,7 +44,7 @@ const useStyles = makeStyles(c => ({
     borderWidth: 1,
   },
   title: {
-    fontFamily: 'CormorantGaramond-SemiBold',
+    fontFamily: 'Cormorant Garamond',
     fontSize: 24,
     fontWeight: '600',
     color: c.textPrimary,
@@ -59,7 +59,7 @@ const useStyles = makeStyles(c => ({
   },
   subtext: {
     fontSize: 16,
-    fontFamily: 'DMSans-Regular',
+    fontFamily: 'DM Sans',
     color: c.textSecondary,
     marginBottom: 20,
     textAlign: 'center',

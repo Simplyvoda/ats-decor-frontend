@@ -159,7 +159,7 @@ const useStyles = makeStyles(c => ({
     borderRadius: 6,
   },
   tabText: {
-    fontFamily: 'DMSans-Regular',
+    fontFamily: 'DM Sans',
     fontSize: 15,
     color: c.textMuted,
     paddingHorizontal: 15,
@@ -181,7 +181,7 @@ const useStyles = makeStyles(c => ({
   emptyText: {
     textAlign: 'center',
     color: c.textMuted,
-    fontFamily: 'DMSans-Regular',
+    fontFamily: 'DM Sans',
     fontSize: 14,
     marginTop: 24,
   },

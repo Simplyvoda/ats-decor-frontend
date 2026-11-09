@@ -119,7 +119,7 @@ const useStyles = makeStyles(c => ({
     marginBottom: 16,
   },
   headingText: {
-    fontFamily: 'CormorantGaramond-SemiBold',
+    fontFamily: 'Cormorant Garamond',
     fontSize: 22,
     fontWeight: '600',
     color: c.text,
@@ -141,7 +141,7 @@ const useStyles = makeStyles(c => ({
   },
   searchInput: {
     flex: 1,
-    fontFamily: 'DMSans-Regular',
+    fontFamily: 'DM Sans',
     fontSize: 14,
     color: c.text,
     padding: 0,
@@ -157,7 +157,7 @@ const useStyles = makeStyles(c => ({
     paddingVertical: 10,
   },
   sortBtnText: {
-    fontFamily: 'DMSans-Regular',
+    fontFamily: 'DM Sans',
     fontSize: 13,
     color: c.text,
   },
@@ -180,14 +180,14 @@ const useStyles = makeStyles(c => ({
     gap: 8,
   },
   title: {
-    fontFamily: 'DMSans-Regular',
+    fontFamily: 'DM Sans',
     fontSize: 15,
     fontWeight: '600',
     color: c.text,
     lineHeight: 21,
   },
   meta: {
-    fontFamily: 'DMSans-Regular',
+    fontFamily: 'DM Sans',
     fontSize: 13,
     color: c.textMuted,
   },

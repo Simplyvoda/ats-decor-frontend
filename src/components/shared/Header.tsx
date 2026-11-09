@@ -77,7 +77,7 @@ const useStyles = makeStyles(c => ({
     height: '100%',
   },
   actionLabel: {
-    fontFamily: 'DMSans-Regular',
+    fontFamily: 'DM Sans',
     fontSize: 16,
     fontWeight: '500',
     color: c.onBrand,

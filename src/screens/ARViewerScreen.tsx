@@ -1016,7 +1016,7 @@ const useStyles = makeStyles(c => ({
     paddingHorizontal: 40,
   },
   roomStatusText: {
-    fontFamily: 'DMSans-Regular',
+    fontFamily: 'DM Sans',
     fontSize: 15,
     color: '#fff',
     textAlign: 'center',

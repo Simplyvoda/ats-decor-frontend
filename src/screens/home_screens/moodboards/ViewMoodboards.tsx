@@ -249,13 +249,13 @@ const useStyles = makeStyles(c => ({
     marginBottom: 8,
   },
   headerTitle: {
-    fontFamily: 'CormorantGaramond-SemiBold',
+    fontFamily: 'Cormorant Garamond',
     fontSize: 22,
     color: c.onBrand,
     fontWeight: '600',
   },
   headerSubtitle: {
-    fontFamily: 'DMSans-Regular',
+    fontFamily: 'DM Sans',
     fontSize: 14,
     color: c.onBrand,
     opacity: 0.9,
@@ -284,7 +284,7 @@ const useStyles = makeStyles(c => ({
     marginBottom: 14,
   },
   itemCount: {
-    fontFamily: 'CormorantGaramond-SemiBold',
+    fontFamily: 'Cormorant Garamond',
     fontSize: 20,
     color: c.text,
     fontWeight: '600',
@@ -322,7 +322,7 @@ const useStyles = makeStyles(c => ({
     borderColor: c.brand,
   },
   filterChipText: {
-    fontFamily: 'DMSans-Regular',
+    fontFamily: 'DM Sans',
     fontSize: 13,
     color: c.text,
   },
@@ -352,13 +352,13 @@ const useStyles = makeStyles(c => ({
     paddingHorizontal: 24,
   },
   emptyTitle: {
-    fontFamily: 'CormorantGaramond-SemiBold',
+    fontFamily: 'Cormorant Garamond',
     fontSize: 20,
     color: c.text,
     marginTop: 12,
   },
   emptyText: {
-    fontFamily: 'DMSans-Regular',
+    fontFamily: 'DM Sans',
     fontSize: 14,
     color: c.textMuted,
     marginTop: 6,
@@ -425,19 +425,19 @@ const useStyles = makeStyles(c => ({
     gap: 2,
   },
   itemTitle: {
-    fontFamily: 'DMSans-Regular',
+    fontFamily: 'DM Sans',
     fontSize: 15,
     fontWeight: '600',
     color: c.text,
     marginBottom: 2,
   },
   itemStyle: {
-    fontFamily: 'DMSans-Regular',
+    fontFamily: 'DM Sans',
     fontSize: 13,
     color: c.textMuted,
   },
   itemDesc: {
-    fontFamily: 'DMSans-Regular',
+    fontFamily: 'DM Sans',
     fontSize: 13,
     color: c.textMuted,
   },

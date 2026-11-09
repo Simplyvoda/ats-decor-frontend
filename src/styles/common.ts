@@ -25,7 +25,7 @@ export const styles = StyleSheet.create({
     borderRadius: 8,
   },
   h1Text: {
-    fontFamily: 'CormorantGaramond-SemiBold',
+    fontFamily: 'Cormorant Garamond',
     fontWeight: '700',
     fontStyle: 'normal',
     fontSize: 25,
@@ -36,7 +36,7 @@ export const styles = StyleSheet.create({
     maxWidth: '80%',
   },
   subText: {
-    fontFamily: 'DMSans-Regular',
+    fontFamily: 'DM Sans',
     fontWeight: '400',
     fontStyle: 'normal',
     fontSize: 16,

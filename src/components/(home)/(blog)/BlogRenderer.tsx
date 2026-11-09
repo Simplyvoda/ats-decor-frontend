@@ -414,28 +414,28 @@ const useStyles = makeStyles(c => ({
 
   // Headings
   h1: {
-    fontFamily: 'CormorantGaramond-SemiBold',
+    fontFamily: 'Cormorant Garamond',
     fontSize: 30,
     fontWeight: '600',
     color: c.text,
     marginVertical: 16,
   },
   h2: {
-    fontFamily: 'CormorantGaramond-SemiBold',
+    fontFamily: 'Cormorant Garamond',
     fontSize: 26,
     fontWeight: '600',
     color: c.text,
     marginVertical: 16,
   },
   h3: {
-    fontFamily: 'CormorantGaramond-SemiBold',
+    fontFamily: 'Cormorant Garamond',
     fontSize: 22,
     fontWeight: '600',
     color: c.text,
     marginVertical: 12,
   },
   h4: {
-    fontFamily: 'CormorantGaramond-SemiBold',
+    fontFamily: 'Cormorant Garamond',
     fontSize: 19,
     fontWeight: '600',
     color: c.text,
@@ -444,7 +444,7 @@ const useStyles = makeStyles(c => ({
 
   // Text blocks
   paragraph: {
-    fontFamily: 'DMSans-Regular',
+    fontFamily: 'DM Sans',
     fontSize: 15,
     lineHeight: 24,
     color: c.text,
@@ -458,7 +458,7 @@ const useStyles = makeStyles(c => ({
   },
   blockquote: {
     fontStyle: 'italic',
-    fontFamily: 'DMSans-Regular',
+    fontFamily: 'DM Sans',
     fontSize: 15,
     lineHeight: 24,
     color: c.textSecondary,
@@ -480,7 +480,7 @@ const useStyles = makeStyles(c => ({
     color: c.text,
   },
   listItemText: {
-    fontFamily: 'DMSans-Regular',
+    fontFamily: 'DM Sans',
     fontSize: 15,
     color: c.text,
     flex: 1,
