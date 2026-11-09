@@ -72,16 +72,19 @@ and billing frequency, are clearly displayed during signup.
 
 5.2 Automatic Renewal
 
-Subscriptions automatically renew unless canceled before the next
-billing cycle. You may cancel anytime through your account settings or
-by contacting
-info@pladomus.com.
+Subscriptions automatically renew unless canceled at least 24 hours
+before the end of the current period. Subscriptions bought in our iOS
+app are managed by Apple: you can cancel or change them at any time in
+your App Store account settings (Settings → your name → Subscriptions).
+Canceling stops the next renewal; you keep your plan until the end of
+the period you've paid for.
 
 5.3 Payment Processing
 
-We use secure third-party payment processors. By providing payment
-information, you authorize charges for your selected plan and
-represent that you have the legal right to use the payment method.
+In-app purchases on iOS are charged to your Apple ID by Apple and are
+subject to Apple's Media Services Terms. We use RevenueCat to keep
+track of your subscription status; we never see or store your card
+details. By subscribing, you authorize charges for your selected plan.
 
 5.4 Fee Changes
 
@@ -96,8 +99,11 @@ right to modify or discontinue free offerings with reasonable notice.
 
 7. REFUND POLICY
 
-We offer refunds within 7 days of subscription purchase
-or renewal for premium features. Refund requests can be submitted to info@pladomus.com. Refunds are processed to the original payment method within 5-10 business days.
+Purchases made through the App Store are refunded by Apple under
+Apple's refund policy; you can request one at reportaproblem.apple.com.
+We can't issue refunds for App Store purchases ourselves, but if you
+have a problem with your subscription, contact info@pladomus.com and
+we'll help.
 
 8. PURCHASES AND PRODUCT RECOMMENDATIONS
 
