@@ -215,20 +215,20 @@ export function LengthInput({
   const [unit, setUnit] = useState<'m' | 'cm'>('m');
   const shown = (v: number) =>
     !Number.isFinite(v) ? '' : unit === 'm' ? v.toFixed(2) : String(Math.round(v * 100));
-  const [text, setText] = useState(shown(value));
-  const [focused, setFocused] = useState(false);
+  // What's in the box, and whether the person is typing in it.
+  const [{text, focused}, setInput] = useState({text: shown(value), focused: false});
 
   // Follow changes made elsewhere (e.g. the opposite wall of a rectangle,
   // or switching units) while the person isn't typing here
   useEffect(() => {
     if (!focused) {
-      setText(shown(value));
+      setInput(i => ({...i, text: shown(value)}));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value, unit, focused]);
 
   const onChangeText = (t: string) => {
-    setText(t);
+    setInput(i => ({...i, text: t}));
     const parsed = parseFloat(t.replace(',', '.'));
     if (Number.isFinite(parsed)) {
       onChange(round2(unit === 'm' ? parsed : parsed / 100));
@@ -247,8 +247,8 @@ export function LengthInput({
             value={text}
             editable={editable}
             onChangeText={onChangeText}
-            onFocus={() => setFocused(true)}
-            onBlur={() => setFocused(false)}
+            onFocus={() => setInput(i => ({...i, focused: true}))}
+            onBlur={() => setInput(i => ({...i, focused: false}))}
             keyboardType="decimal-pad"
             returnKeyType="done"
             placeholderTextColor={colors.textMuted}

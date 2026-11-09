@@ -40,6 +40,20 @@ const THEME_OPTIONS: {
   {value: 'dark', label: 'Dark', Icon: Moon},
 ];
 
+type ProfileForm = {
+  firstName: string;
+  lastName: string;
+  bio: string;
+  designStyle: string;
+};
+
+const EMPTY_FORM: ProfileForm = {
+  firstName: '',
+  lastName: '',
+  bio: '',
+  designStyle: '',
+};
+
 const ProfilePreference = () => {
   const navigation = useNavigation();
   const {colors} = useTheme();
@@ -47,29 +61,27 @@ const ProfilePreference = () => {
     useThemePreference();
   const {updateUser} = useUserContext();
 
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [email, setEmail] = useState('');
-  const [bio, setBio] = useState('');
-  const [designStyle, setDesignStyle] = useState('');
-  const [profilePicture, setProfilePicture] = useState<string | null>(null);
-  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
-
-  const [initialValues, setInitialValues] = useState({
-    firstName: '',
-    lastName: '',
-    bio: '',
-    designStyle: '',
+  // What's loading or saving right now.
+  const [busy, setBusy] = useState({
+    loading: true,
+    saving: false,
+    uploadingAvatar: false,
   });
+  // Shown but not edited in the form.
+  const [account, setAccount] = useState<{
+    email: string;
+    profilePicture: string | null;
+  }>({email: '', profilePicture: null});
+  // The editable fields, and their last saved values (to spot changes).
+  const [form, setForm] = useState<ProfileForm>(EMPTY_FORM);
+  const [saved, setSaved] = useState<ProfileForm>(EMPTY_FORM);
 
-  const hasChanges =
-    firstName !== initialValues.firstName ||
-    lastName !== initialValues.lastName ||
-    bio !== initialValues.bio ||
-    designStyle !== initialValues.designStyle;
+  const {firstName, lastName, bio, designStyle} = form;
+  const setField = (field: keyof ProfileForm) => (value: string) =>
+    setForm(f => ({...f, [field]: value}));
+  const hasChanges = (Object.keys(form) as (keyof ProfileForm)[]).some(
+    k => form[k] !== saved[k],
+  );
 
   const handleChangeAvatar = () => {
     launchImageLibrary({mediaType: 'photo', quality: 0.8}, async response => {
@@ -78,13 +90,13 @@ const ProfilePreference = () => {
       const asset = response.assets?.[0];
       if (!asset?.uri) return;
 
-      setIsUploadingAvatar(true);
+      setBusy(b => ({...b, uploadingAvatar: true}));
       try {
         const res = await UserService.uploadProfilePicture(
           asset.uri,
           asset.type ?? 'image/jpeg',
         );
-        setProfilePicture(res.data.profile_picture);
+        setAccount(a => ({...a, profilePicture: res.data.profile_picture}));
         await updateUser({profile_picture: res.data.profile_picture});
         Toast.show({type: 'success', text1: 'Profile picture updated'});
       } catch (err: any) {
@@ -94,7 +106,7 @@ const ProfilePreference = () => {
           text2: err.response?.data?.message || err.message,
         });
       } finally {
-        setIsUploadingAvatar(false);
+        setBusy(b => ({...b, uploadingAvatar: false}));
       }
     });
   };
@@ -103,18 +115,15 @@ const ProfilePreference = () => {
     UserService.getProfile()
       .then(res => {
         const p = res.data;
-        setFirstName(p.first_name ?? '');
-        setLastName(p.last_name ?? '');
-        setEmail(p.email ?? '');
-        setBio(p.bio ?? '');
-        setDesignStyle(p.design_style ?? '');
-        setProfilePicture(p.profile_picture);
-        setInitialValues({
+        const loaded = {
           firstName: p.first_name ?? '',
           lastName: p.last_name ?? '',
           bio: p.bio ?? '',
           designStyle: p.design_style ?? '',
-        });
+        };
+        setForm(loaded);
+        setSaved(loaded);
+        setAccount({email: p.email ?? '', profilePicture: p.profile_picture});
       })
       .catch((err: any) => {
         Toast.show({
@@ -123,7 +132,7 @@ const ProfilePreference = () => {
           text2: err.response?.data?.message || err.message,
         });
       })
-      .finally(() => setIsLoading(false));
+      .finally(() => setBusy(b => ({...b, loading: false})));
   }, []);
 
   const handleSave = async () => {
@@ -131,7 +140,7 @@ const ProfilePreference = () => {
       Toast.show({type: 'error', text1: 'First and last name are required'});
       return;
     }
-    setIsSaving(true);
+    setBusy(b => ({...b, saving: true}));
     try {
       await UserService.updateProfile({
         first_name: firstName.trim(),
@@ -144,12 +153,14 @@ const ProfilePreference = () => {
         first_name: firstName.trim(),
         last_name: lastName.trim(),
       });
-      setInitialValues({
+      const trimmed = {
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         bio: bio.trim(),
         designStyle: designStyle.trim(),
-      });
+      };
+      setForm(trimmed);
+      setSaved(trimmed);
       Toast.show({type: 'success', text1: 'Profile updated'});
     } catch (err: any) {
       Toast.show({
@@ -158,7 +169,7 @@ const ProfilePreference = () => {
         text2: err.response?.data?.message || err.message,
       });
     } finally {
-      setIsSaving(false);
+      setBusy(b => ({...b, saving: false}));
     }
   };
 
@@ -184,7 +195,7 @@ const ProfilePreference = () => {
             </Text>
           </View>
 
-          {isLoading ? (
+          {busy.loading ? (
             <View className="items-center py-16">
               <ActivityIndicator size="large" color={colors.brand} />
             </View>
@@ -202,17 +213,17 @@ const ProfilePreference = () => {
                 {/* Avatar */}
                 <TouchableOpacity
                   onPress={handleChangeAvatar}
-                  disabled={isUploadingAvatar}
+                  disabled={busy.uploadingAvatar}
                   className="relative items-center justify-center my-3">
                   <UserAvatar
-                    profilePicture={profilePicture}
+                    profilePicture={account.profilePicture}
                     firstName={firstName}
                     lastName={lastName}
-                    email={email}
+                    email={account.email}
                     size={80}
                   />
 
-                  {isUploadingAvatar ? (
+                  {busy.uploadingAvatar ? (
                     <View className="absolute inset-0 items-center justify-center bg-black/30 rounded-full">
                       <ActivityIndicator color="#fff" />
                     </View>
@@ -229,7 +240,7 @@ const ProfilePreference = () => {
                 <TextInput
                   className="border border-[#F1EADC] dark:border-night-border rounded-lg py-2.5 px-3 mb-3 text-[14px] text-[#333] dark:text-night-text"
                   value={firstName}
-                  onChangeText={setFirstName}
+                  onChangeText={setField('firstName')}
                   placeholder="First name"
                   placeholderTextColor={colors.textMuted}
                 />
@@ -240,7 +251,7 @@ const ProfilePreference = () => {
                 <TextInput
                   className="border border-[#F1EADC] dark:border-night-border rounded-lg py-2.5 px-3 mb-3 text-[14px] text-[#333] dark:text-night-text"
                   value={lastName}
-                  onChangeText={setLastName}
+                  onChangeText={setField('lastName')}
                   placeholder="Last name"
                   placeholderTextColor={colors.textMuted}
                 />
@@ -250,7 +261,7 @@ const ProfilePreference = () => {
                 </Text>
                 <TextInput
                   className="border border-[#F1EADC] dark:border-night-border bg-[#F5F1E8] dark:bg-night-muted rounded-lg py-2.5 px-3 mb-3 text-[14px] text-[#888] dark:text-night-text-muted"
-                  value={email}
+                  value={account.email}
                   editable={false}
                 />
 
@@ -260,7 +271,7 @@ const ProfilePreference = () => {
                 <TextInput
                   className="border border-[#F1EADC] dark:border-night-border rounded-lg py-2.5 px-3 mb-3 text-[14px] text-[#333] dark:text-night-text"
                   value={bio}
-                  onChangeText={setBio}
+                  onChangeText={setField('bio')}
                   placeholder="Interior design enthusiast"
                   placeholderTextColor={colors.textMuted}
                   multiline
@@ -324,7 +335,7 @@ const ProfilePreference = () => {
                 <TextInput
                   className="border border-[#F1EADC] dark:border-night-border bg-[#FFFDF8] dark:bg-night-muted rounded-lg py-2.5 px-3 text-[14px] text-[#333] dark:text-night-text"
                   value={designStyle}
-                  onChangeText={setDesignStyle}
+                  onChangeText={setField('designStyle')}
                   placeholder="e.g. tech minimalist, bohemian, Scandinavian..."
                   placeholderTextColor={colors.textMuted}
                 />
@@ -336,7 +347,7 @@ const ProfilePreference = () => {
           <View
             style={{paddingHorizontal: 20, paddingBottom: 16, paddingTop: 16}}>
             <PrimaryButton
-              title={isSaving ? 'Saving...' : 'Save Changes'}
+              title={busy.saving ? 'Saving...' : 'Save Changes'}
               onPress={handleSave}
             />
           </View>

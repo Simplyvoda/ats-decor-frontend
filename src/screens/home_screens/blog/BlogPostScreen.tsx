@@ -78,8 +78,10 @@ const BlogPostScreen = () => {
   // The blog list sends posts without their article text (it is most of
   // the download and the list never shows it), so the rest of the post is
   // fetched here. Title, image and date show straight away from the list.
-  const [post, setPost] = useState(listPost);
-  const [loadingBody, setLoadingBody] = useState(!listPost.body);
+  const [{post, loadingBody}, setArticle] = useState({
+    post: listPost,
+    loadingBody: !listPost.body,
+  });
 
   useEffect(() => {
     if (listPost.body) {
@@ -89,7 +91,7 @@ const BlogPostScreen = () => {
     BlogService.getPost(listPost._id)
       .then(res => {
         if (!cancelled) {
-          setPost(res.data);
+          setArticle(a => ({...a, post: res.data}));
         }
       })
       .catch(() => {
@@ -97,7 +99,7 @@ const BlogPostScreen = () => {
       })
       .finally(() => {
         if (!cancelled) {
-          setLoadingBody(false);
+          setArticle(a => ({...a, loadingBody: false}));
         }
       });
     return () => {
@@ -105,65 +107,92 @@ const BlogPostScreen = () => {
     };
   }, [listPost]);
 
-  const [liked, setLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(0);
-  const [isLiking, setIsLiking] = useState(false);
+  const [{liked, likeCount, isLiking}, setLike] = useState({
+    liked: false,
+    likeCount: 0,
+    isLiking: false,
+  });
 
-  const [comments, setComments] = useState<BlogComment[]>([]);
-  const [commentsTotal, setCommentsTotal] = useState(0);
-  const [commentsPage, setCommentsPage] = useState(1);
-  const [loadingComments, setLoadingComments] = useState(true);
-  const [loadingMoreComments, setLoadingMoreComments] = useState(false);
+  // Top-level comments (replies are nested inside each one) and paging.
+  const [thread, setThread] = useState<{
+    comments: BlogComment[];
+    total: number;
+    page: number;
+    loading: boolean;
+    loadingMore: boolean;
+  }>({comments: [], total: 0, page: 1, loading: true, loadingMore: false});
+  const {
+    comments,
+    total: commentsTotal,
+    page: commentsPage,
+    loading: loadingComments,
+    loadingMore: loadingMoreComments,
+  } = thread;
 
-  const [comment, setComment] = useState('');
-  const [isPosting, setIsPosting] = useState(false);
-  const [replyingTo, setReplyingTo] = useState<{
-    id: string;
-    authorName: string;
-  } | null>(null);
+  // The comment box at the bottom.
+  const [composer, setComposer] = useState<{
+    text: string;
+    isPosting: boolean;
+    replyingTo: {id: string; authorName: string} | null;
+  }>({text: '', isPosting: false, replyingTo: null});
+  const {text: comment, isPosting, replyingTo} = composer;
+  const setReplyingTo = (to: {id: string; authorName: string} | null) =>
+    setComposer(c => ({...c, replyingTo: to}));
 
   useEffect(() => {
     BlogService.getLikeStatus(post._id)
-      .then(res => {
-        setLiked(res.data.liked_by_me);
-        setLikeCount(res.data.likes_count);
-      })
+      .then(res =>
+        setLike(l => ({
+          ...l,
+          liked: res.data.liked_by_me,
+          likeCount: res.data.likes_count,
+        })),
+      )
       .catch(() => {});
 
     BlogService.getComments(post._id, {page: 1})
-      .then(res => {
-        setComments(res.data);
-        setCommentsTotal(res.total);
-        setCommentsPage(res.page);
-      })
+      .then(res =>
+        setThread(t => ({
+          ...t,
+          comments: res.data,
+          total: res.total,
+          page: res.page,
+        })),
+      )
       .catch(() => {
         Toast.show({type: 'error', text1: 'Could not load comments'});
       })
-      .finally(() => setLoadingComments(false));
+      .finally(() => setThread(t => ({...t, loading: false})));
   }, [post._id]);
 
   const handleLike = useCallback(async () => {
     if (isLiking) {
       return;
     }
-    setIsLiking(true);
     const wasLiked = liked;
     // Optimistic update
-    setLiked(!wasLiked);
-    setLikeCount(c => (wasLiked ? c - 1 : c + 1));
+    setLike(l => ({
+      isLiking: true,
+      liked: !wasLiked,
+      likeCount: wasLiked ? l.likeCount - 1 : l.likeCount + 1,
+    }));
     try {
       const res = wasLiked
         ? await BlogService.unlike(post._id)
         : await BlogService.like(post._id);
-      setLiked(res.data.liked_by_me);
-      setLikeCount(res.data.likes_count);
+      setLike({
+        isLiking: false,
+        liked: res.data.liked_by_me,
+        likeCount: res.data.likes_count,
+      });
     } catch {
       // Revert on failure
-      setLiked(wasLiked);
-      setLikeCount(c => (wasLiked ? c + 1 : c - 1));
+      setLike(l => ({
+        isLiking: false,
+        liked: wasLiked,
+        likeCount: wasLiked ? l.likeCount + 1 : l.likeCount - 1,
+      }));
       Toast.show({type: 'error', text1: 'Could not update like'});
-    } finally {
-      setIsLiking(false);
     }
   }, [isLiking, liked, post._id]);
 
@@ -171,17 +200,20 @@ const BlogPostScreen = () => {
     if (loadingMoreComments || comments.length >= commentsTotal) {
       return;
     }
-    setLoadingMoreComments(true);
+    setThread(t => ({...t, loadingMore: true}));
     try {
       const res = await BlogService.getComments(post._id, {
         page: commentsPage + 1,
       });
-      setComments(prev => [...prev, ...res.data]);
-      setCommentsPage(res.page);
+      setThread(t => ({
+        ...t,
+        comments: [...t.comments, ...res.data],
+        page: res.page,
+        loadingMore: false,
+      }));
     } catch {
+      setThread(t => ({...t, loadingMore: false}));
       Toast.show({type: 'error', text1: 'Could not load more comments'});
-    } finally {
-      setLoadingMoreComments(false);
     }
   };
 
@@ -190,34 +222,36 @@ const BlogPostScreen = () => {
     if (!body || isPosting) {
       return;
     }
-    setIsPosting(true);
+    setComposer(c => ({...c, isPosting: true}));
     try {
       const res = await BlogService.postComment(post._id, body, replyingTo?.id);
       if (replyingTo) {
         // Top-level pagination total (commentsTotal) is unaffected by a
         // reply — only the parent's reply list grows.
         const parentId = replyingTo.id;
-        setComments(prev =>
-          prev.map(c =>
+        setThread(t => ({
+          ...t,
+          comments: t.comments.map(c =>
             c.id === parentId
               ? {...c, replies: [...(c.replies ?? []), res.data]}
               : c,
           ),
-        );
+        }));
       } else {
-        setComments(prev => [res.data, ...prev]);
-        setCommentsTotal(t => t + 1);
+        setThread(t => ({
+          ...t,
+          comments: [res.data, ...t.comments],
+          total: t.total + 1,
+        }));
       }
-      setComment('');
-      setReplyingTo(null);
+      setComposer({text: '', isPosting: false, replyingTo: null});
     } catch (err: any) {
+      setComposer(c => ({...c, isPosting: false}));
       Toast.show({
         type: 'error',
         text1: 'Could not post comment',
         text2: err.response?.data?.message || err.message,
       });
-    } finally {
-      setIsPosting(false);
     }
   };
 
@@ -488,7 +522,7 @@ const BlogPostScreen = () => {
               }
               placeholderTextColor={colors.textMuted}
               value={comment}
-              onChangeText={setComment}
+              onChangeText={text => setComposer(c => ({...c, text}))}
               multiline
             />
           </View>

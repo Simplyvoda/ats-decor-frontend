@@ -24,8 +24,7 @@ type FormData = {
 const ForgotPassword = () => {
   const {colors} = useTheme();
   const navigation = useNavigation();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [sent, setSent] = useState(false);
+  const [status, setStatus] = useState<'idle' | 'sending' | 'sent'>('idle');
 
   const {
     control,
@@ -35,18 +34,17 @@ const ForgotPassword = () => {
 
   const onSubmit = async (data: FormData) => {
     try {
-      setIsSubmitting(true);
+      setStatus('sending');
       await AuthService.forgotPassword(data.email);
-      setSent(true);
+      setStatus('sent');
     } catch (err: any) {
+      setStatus('idle');
       Toast.show({
         type: 'error',
         text1: 'Error',
         text2: err.response?.data?.message || err.message,
         position: 'bottom',
       });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -67,7 +65,7 @@ const ForgotPassword = () => {
             </Text>
           </View>
 
-          {sent ? (
+          {status === 'sent' ? (
             <View className="my-8 items-center">
               <Text className="cormorant text-2xl text-center mb-2 text-black dark:text-night-text-primary">
                 Check your email
@@ -125,7 +123,7 @@ const ForgotPassword = () => {
               <PrimaryButton
                 title="Send Reset Link"
                 onPress={handleSubmit(onSubmit)}
-                isSubmitting={isSubmitting}
+                isSubmitting={status === 'sending'}
               />
             </View>
           )}

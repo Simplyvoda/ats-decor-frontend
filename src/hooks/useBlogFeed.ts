@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useRef, useState} from 'react';
+import {SetStateAction, useCallback, useEffect, useRef, useState} from 'react';
 import BlogService from '../services/BlogService';
 import {BlogPost} from '../../interface/blog.interface';
 
@@ -15,13 +15,34 @@ export default function useBlogFeed(enabled: boolean = true) {
     }
   }, [enabled]);
 
-  const [posts, setPosts] = useState<BlogPost[]>([]);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [search, setSearch] = useState('');
-  const [sort, setSort] = useState<'ASC' | 'DESC'>('DESC');
+  // Everything about the loaded list, updated together per request.
+  const [feed, setFeed] = useState<{
+    posts: BlogPost[];
+    page: number;
+    totalPages: number;
+    loading: boolean;
+    loadingMore: boolean;
+  }>({posts: [], page: 1, totalPages: 1, loading: true, loadingMore: false});
+  const {posts, page, totalPages, loading, loadingMore} = feed;
+
+  // What the user asked for: the search box and the sort order.
+  const [query, setQuery] = useState<{search: string; sort: 'ASC' | 'DESC'}>({
+    search: '',
+    sort: 'DESC',
+  });
+  const {search, sort} = query;
+  const setSearch = useCallback(
+    (next: string) => setQuery(q => ({...q, search: next})),
+    [],
+  );
+  const setSort = useCallback(
+    (next: SetStateAction<'ASC' | 'DESC'>) =>
+      setQuery(q => ({
+        ...q,
+        sort: typeof next === 'function' ? next(q.sort) : next,
+      })),
+    [],
+  );
 
   // Debounce raw typing so we're not hitting the API on every keystroke
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -37,11 +58,9 @@ export default function useBlogFeed(enabled: boolean = true) {
   const fetchPage = useCallback(
     async (pageToLoad: number, replace: boolean) => {
       const thisRequest = ++requestId.current;
-      if (replace) {
-        setLoading(true);
-      } else {
-        setLoadingMore(true);
-      }
+      setFeed(f =>
+        replace ? {...f, loading: true} : {...f, loadingMore: true},
+      );
       try {
         const res = await BlogService.getPosts({
           page: pageToLoad,
@@ -52,15 +71,17 @@ export default function useBlogFeed(enabled: boolean = true) {
         if (thisRequest !== requestId.current) {
           return;
         }
-        setPosts(prev => (replace ? res.data : [...prev, ...res.data]));
-        setPage(res.page);
-        setTotalPages(res.totalPages);
+        setFeed(f => ({
+          ...f,
+          posts: replace ? res.data : [...f.posts, ...res.data],
+          page: res.page,
+          totalPages: res.totalPages,
+        }));
       } catch (error) {
         console.error('Failed to fetch blog posts:', error);
       } finally {
         if (thisRequest === requestId.current) {
-          setLoading(false);
-          setLoadingMore(false);
+          setFeed(f => ({...f, loading: false, loadingMore: false}));
         }
       }
     },

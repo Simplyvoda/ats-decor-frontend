@@ -1,5 +1,5 @@
 import {Compass, Eye, EyeOff, Heart} from 'lucide-react-native';
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, {SetStateAction, useCallback, useEffect, useRef, useState} from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -26,11 +26,26 @@ export default function ExploreScreen() {
   const {colors} = useTheme();
   const navigation = useNavigation();
 
-  const [designs, setDesigns] = useState<IDesign[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(false);
+  const [feed, setFeed] = useState<{
+    designs: IDesign[];
+    hasMore: boolean;
+    isLoading: boolean;
+    isRefreshing: boolean;
+    isLoadingMore: boolean;
+  }>({
+    designs: [],
+    hasMore: false,
+    isLoading: true,
+    isRefreshing: false,
+    isLoadingMore: false,
+  });
+  const {designs, hasMore, isLoading, isRefreshing, isLoadingMore} = feed;
+  // For the likes / unpublish code below, which only touches the list.
+  const setDesigns = (next: SetStateAction<IDesign[]>) =>
+    setFeed(f => ({
+      ...f,
+      designs: typeof next === 'function' ? next(f.designs) : next,
+    }));
 
   // How many designs are on screen right now. A refresh reloads that many
   // (not just the first page), so the list doesn't shrink under the user
@@ -47,9 +62,12 @@ export default function ExploreScreen() {
         Math.ceil(loadedCount.current / PAGE_SIZE) * PAGE_SIZE,
       );
       const res = await DesignService.getExplore({page: 1, limit});
-      setDesigns(res.data);
-      // A backend without paging returns everything and no total
-      setHasMore(res.total !== undefined && res.data.length < res.total);
+      setFeed(f => ({
+        ...f,
+        designs: res.data,
+        // A backend without paging returns everything and no total
+        hasMore: res.total !== undefined && res.data.length < res.total,
+      }));
       return true;
     } catch (err: any) {
       Toast.show({
@@ -59,8 +77,7 @@ export default function ExploreScreen() {
       });
       return false;
     } finally {
-      setIsLoading(false);
-      setIsRefreshing(false);
+      setFeed(f => ({...f, isLoading: false, isRefreshing: false}));
     }
   }, []);
 
@@ -69,7 +86,7 @@ export default function ExploreScreen() {
   useRefetchOnFocus(fetchFeed, ['designs', 'moodboard'], 2 * 60 * 1000);
 
   const onRefresh = () => {
-    setIsRefreshing(true);
+    setFeed(f => ({...f, isRefreshing: true}));
     fetchFeed();
   };
 
@@ -77,7 +94,7 @@ export default function ExploreScreen() {
     if (isLoading || isRefreshing || isLoadingMore || !hasMore) {
       return;
     }
-    setIsLoadingMore(true);
+    setFeed(f => ({...f, isLoadingMore: true}));
     try {
       const res = await DesignService.getExplore({
         page: Math.floor(designs.length / PAGE_SIZE) + 1,
@@ -85,16 +102,18 @@ export default function ExploreScreen() {
       });
       const seen = new Set(designs.map(d => d.id));
       const fresh = res.data.filter(d => !seen.has(d.id));
-      setDesigns(prev => [...prev, ...fresh]);
-      setHasMore(
-        fresh.length > 0 &&
+      setFeed(f => ({
+        ...f,
+        designs: [...f.designs, ...fresh],
+        hasMore:
+          fresh.length > 0 &&
           res.total !== undefined &&
           designs.length + fresh.length < res.total,
-      );
+      }));
     } catch {
       // Leave what's loaded on screen; scrolling again retries
     } finally {
-      setIsLoadingMore(false);
+      setFeed(f => ({...f, isLoadingMore: false}));
     }
   };
 

@@ -39,6 +39,14 @@ const formatDate = (iso: string) => {
   return `${dd}/${mm}/${d.getFullYear()}`;
 };
 
+type NoteFields = {
+  title: string;
+  description: string;
+  isPrivate: boolean;
+  projectId: string | null;
+  tags: string[];
+};
+
 export default function CreateNoteScreen() {
   const {colors} = useTheme();
   const navigation = useNavigation();
@@ -61,42 +69,9 @@ export default function CreateNoteScreen() {
     isEditingExisting ? 'view' : 'edit',
   );
 
-  const [title, setTitle] = useState(
-    existingNote?.title ?? existingDraft?.title ?? '',
-  );
-  const [description, setDescription] = useState(
-    existingNote?.description ?? existingDraft?.description ?? '',
-  );
-  const [isPrivate, setIsPrivate] = useState(
-    existingNote?.is_private ?? existingDraft?.is_private ?? false,
-  );
-  const [projectId, setProjectId] = useState<string | null>(
-    existingNote?.project_id ??
-      existingDraft?.project_id ??
-      presetProjectId ??
-      null,
-  );
-  const [tags, setTags] = useState<string[]>(
-    existingNote?.tags?.map(t => t.name) ?? existingDraft?.tags ?? [],
-  );
-  const [tagInput, setTagInput] = useState('');
-  const [projects, setProjects] = useState<IDesign[]>([]);
-  const [notesUsed, setNotesUsed] = useState<number | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
-
-  useEffect(() => {
-    if (!fromARViewer) {
-      DesignService.getDesigns()
-        .then(res => setProjects(res.data))
-        .catch(() => {});
-    }
-    NoteService.getNotes({isActive: true})
-      .then(res => setNotesUsed(res.total))
-      .catch(() => {});
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const [initialSnapshot] = useState({
+  // The note as it was when the screen opened (to spot unsaved changes),
+  // and as it is now in the form.
+  const [initialSnapshot] = useState<NoteFields>(() => ({
     title: existingNote?.title ?? existingDraft?.title ?? '',
     description: existingNote?.description ?? existingDraft?.description ?? '',
     isPrivate: existingNote?.is_private ?? existingDraft?.is_private ?? false,
@@ -106,7 +81,34 @@ export default function CreateNoteScreen() {
       presetProjectId ??
       null,
     tags: existingNote?.tags?.map(t => t.name) ?? existingDraft?.tags ?? [],
-  });
+  }));
+  const [fields, setFields] = useState<NoteFields>(initialSnapshot);
+  const {title, description, isPrivate, projectId, tags} = fields;
+  const setField =
+    <K extends keyof NoteFields>(key: K) =>
+    (value: NoteFields[K]) =>
+      setFields(f => ({...f, [key]: value}));
+
+  const [tagInput, setTagInput] = useState('');
+  // Loaded once for the form: designs to attach to, and how many notes
+  // the user already has.
+  const [{projects, notesUsed}, setLookups] = useState<{
+    projects: IDesign[];
+    notesUsed: number | null;
+  }>({projects: [], notesUsed: null});
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    if (!fromARViewer) {
+      DesignService.getDesigns()
+        .then(res => setLookups(l => ({...l, projects: res.data})))
+        .catch(() => {});
+    }
+    NoteService.getNotes({isActive: true})
+      .then(res => setLookups(l => ({...l, notesUsed: res.total})))
+      .catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const hasChanges =
     title !== initialSnapshot.title ||
@@ -121,7 +123,7 @@ export default function CreateNoteScreen() {
   const addTag = () => {
     const t = tagInput.trim().toLowerCase();
     if (t && !tags.includes(t)) {
-      setTags([...tags, t]);
+      setField('tags')([...tags, t]);
     }
     setTagInput('');
   };
@@ -371,7 +373,7 @@ export default function CreateNoteScreen() {
             <View className="bg-white dark:bg-night-surface border border-[#E5E0D5] dark:border-night-border rounded-[14px] px-4 mb-4">
               <TextInput
                 value={title}
-                onChangeText={setTitle}
+                onChangeText={setField('title')}
                 placeholder="Notes title..."
                 placeholderTextColor={colors.textMuted}
                 className="font-cormorant text-[18px] text-gray-primary dark:text-night-text py-4"
@@ -382,7 +384,7 @@ export default function CreateNoteScreen() {
             <View className="bg-white dark:bg-night-surface border border-[#E5E0D5] dark:border-night-border rounded-[14px] px-4 py-3 mb-4 min-h-[220px]">
               <TextInput
                 value={description}
-                onChangeText={setDescription}
+                onChangeText={setField('description')}
                 placeholder="Start writing your note..."
                 placeholderTextColor={colors.textMuted}
                 multiline
@@ -404,7 +406,7 @@ export default function CreateNoteScreen() {
                   {tags.map(tag => (
                     <TouchableOpacity
                       key={tag}
-                      onPress={() => setTags(tags.filter(t => t !== tag))}
+                      onPress={() => setField('tags')(tags.filter(t => t !== tag))}
                       className="bg-[#EFEAE0] dark:bg-night-muted rounded-[8px] px-3 py-1 flex-row items-center">
                       <Text className="font-dm-sans text-[13px] text-gray-primary dark:text-night-text capitalize">
                         {tag}
@@ -441,7 +443,7 @@ export default function CreateNoteScreen() {
                 </View>
                 <Switch
                   value={isPrivate}
-                  onValueChange={setIsPrivate}
+                  onValueChange={setField('isPrivate')}
                   trackColor={{true: colors.brand, false: colors.border}}
                   ios_backgroundColor={colors.border}
                   thumbColor="white"
@@ -466,7 +468,7 @@ export default function CreateNoteScreen() {
                     labelField="label"
                     valueField="value"
                     value={projectId ?? ''}
-                    onChange={item => setProjectId(item.value || null)}
+                    onChange={item => setField('projectId')(item.value || null)}
                     placeholder="Project (Optional)"
                     placeholderStyle={{color: colors.textMuted, fontSize: 14}}
                     selectedTextStyle={{color: colors.text, fontSize: 14}}

@@ -27,13 +27,15 @@ const ViewMoodboards = () => {
   const navigation = useNavigation();
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [activeFilter, setActiveFilter] = useState<string>('All');
-  const [items, setItems] = useState<IMoodboardItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [{items, isLoading}, setList] = useState<{
+    items: IMoodboardItem[];
+    isLoading: boolean;
+  }>({items: [], isLoading: true});
 
   const fetchMoodboard = useCallback(async () => {
     try {
       const res = await MoodboardService.getMoodboard();
-      setItems(res.data);
+      setList({items: res.data, isLoading: false});
       return true;
     } catch (err: any) {
       Toast.show({
@@ -41,9 +43,8 @@ const ViewMoodboards = () => {
         text1: 'Could not load moodboard',
         text2: err.response?.data?.message || err.message,
       });
+      setList(l => ({...l, isLoading: false}));
       return false;
-    } finally {
-      setIsLoading(false);
     }
   }, []);
 
@@ -51,11 +52,11 @@ const ViewMoodboards = () => {
 
   const handleUnlike = async (item: IMoodboardItem) => {
     // Optimistic removal
-    setItems(prev => prev.filter(i => i.id !== item.id));
+    setList(l => ({...l, items: l.items.filter(i => i.id !== item.id)}));
     try {
       await MoodboardService.unlike(item.design_id);
     } catch {
-      setItems(prev => [item, ...prev]);
+      setList(l => ({...l, items: [item, ...l.items]}));
       Toast.show({type: 'error', text1: 'Could not remove item'});
     }
   };

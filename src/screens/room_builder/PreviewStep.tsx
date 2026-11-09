@@ -32,13 +32,15 @@ export default function PreviewStep({
   const shared = useSharedStyles();
   const {colors} = useTheme();
   const [mode, setMode] = useState<'2d' | '3d'>('3d');
-  const [roomLoaded, setRoomLoaded] = useState(false);
-  const [loadError, setLoadError] = useState<string | null>(null);
+  // How the 3D view's load went: not finished, loaded, or failed.
+  const [{roomLoaded, loadError}, setLoad] = useState<{
+    roomLoaded: boolean;
+    loadError: string | null;
+  }>({roomLoaded: false, loadError: null});
 
   // A rebuilt room (after Edit) loads fresh
   useEffect(() => {
-    setRoomLoaded(false);
-    setLoadError(null);
+    setLoad({roomLoaded: false, loadError: null});
   }, [modelUrl]);
 
   const render3D = () => {
@@ -64,9 +66,12 @@ export default function PreviewStep({
             style={{flex: 1}}
             onRoomLoaded={e => {
               if (e.nativeEvent.success) {
-                setRoomLoaded(true);
+                setLoad({roomLoaded: true, loadError: null});
               } else {
-                setLoadError(e.nativeEvent.error ?? 'unknown error');
+                setLoad(l => ({
+                  ...l,
+                  loadError: e.nativeEvent.error ?? 'unknown error',
+                }));
               }
             }}
           />

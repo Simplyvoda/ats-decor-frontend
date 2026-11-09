@@ -43,23 +43,25 @@ export default function ChooseModelScreen() {
   const {colors} = useTheme();
   const navigation = useNavigation();
 
-  const [templates, setTemplates] = useState<IDesignTemplate[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [{templates, isLoading, error}, setList] = useState<{
+    templates: IDesignTemplate[];
+    isLoading: boolean;
+    error: string | null;
+  }>({templates: [], isLoading: true, error: null});
 
   const fetchTemplates = useCallback(async () => {
     try {
-      setIsLoading(true);
-      setError(null);
+      setList(l => ({...l, isLoading: true, error: null}));
       // we needed the templates seeded to the DB not localised
       const res = await DesignTemplateService.getTemplates();
-      setTemplates(res.data);
+      setList({templates: res.data, isLoading: false, error: null});
     } catch (err: any) {
-      setError(
-        err.response?.data?.message || err.message || 'Failed to load models',
-      );
-    } finally {
-      setIsLoading(false);
+      setList(l => ({
+        ...l,
+        isLoading: false,
+        error:
+          err.response?.data?.message || err.message || 'Failed to load models',
+      }));
     }
   }, []);
 

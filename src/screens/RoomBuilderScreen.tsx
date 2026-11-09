@@ -1,5 +1,5 @@
 import {useNavigation} from '@react-navigation/native';
-import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useReducer, useRef, useState} from 'react';
 import {
   BackHandler,
   KeyboardAvoidingView,
@@ -59,6 +59,76 @@ const STEP_TITLES: Record<Exclude<Step, 0>, string> = {
 let nextId = 1;
 const newId = () => `opening-${Date.now()}-${nextId++}`;
 
+// The user's answers about the room.
+type RoomAnswers = {
+  shape: RoomShape;
+  lengths: number[];
+  ceiling: number;
+  confirmed: boolean;
+  openings: Opening[];
+};
+
+type RoomAction =
+  | {type: 'shapeChanged'; shape: RoomShape}
+  | {type: 'wallChanged'; index: number; length: number}
+  | {type: 'ceilingChanged'; ceiling: number}
+  | {type: 'confirmedChanged'; confirmed: boolean}
+  | {type: 'openingAdded'; opening: Omit<Opening, 'id'>}
+  | {type: 'openingRemoved'; id: string}
+  | {type: 'openingsReplaced'; openings: Opening[]};
+
+const initialAnswers: RoomAnswers = {
+  shape: 'rectangle',
+  lengths: defaultLengths('rectangle'),
+  ceiling: DEFAULT_CEILING,
+  confirmed: false,
+  openings: [],
+};
+
+function roomReducer(state: RoomAnswers, action: RoomAction): RoomAnswers {
+  switch (action.type) {
+    case 'shapeChanged':
+      // A new shape starts over: its own default walls, no doors/windows,
+      // and the measurements need confirming again.
+      if (action.shape === state.shape) {
+        return state;
+      }
+      return {
+        ...state,
+        shape: action.shape,
+        lengths: defaultLengths(action.shape),
+        openings: [],
+        confirmed: false,
+      };
+    case 'wallChanged':
+      return {
+        ...state,
+        lengths: setWallLength(
+          state.shape,
+          state.lengths,
+          action.index,
+          action.length,
+        ),
+      };
+    case 'ceilingChanged':
+      return {...state, ceiling: action.ceiling};
+    case 'confirmedChanged':
+      return {...state, confirmed: action.confirmed};
+    case 'openingAdded':
+      return {
+        ...state,
+        openings: [...state.openings, {...action.opening, id: newId()}],
+      };
+    case 'openingRemoved':
+      return {
+        ...state,
+        openings: state.openings.filter(o => o.id !== action.id),
+      };
+    case 'openingsReplaced':
+      return {...state, openings: action.openings};
+  }
+}
+
 export default function RoomBuilderScreen() {
   const navigation = useNavigation();
   const styles = useStyles();
@@ -66,14 +136,15 @@ export default function RoomBuilderScreen() {
   const scrollRef = useRef<ScrollView>(null);
 
   const [step, setStep] = useState<Step>(0);
-  const [shape, setShape] = useState<RoomShape>('rectangle');
-  const [lengths, setLengths] = useState<number[]>(defaultLengths('rectangle'));
-  const [ceiling, setCeiling] = useState(DEFAULT_CEILING);
-  const [confirmed, setConfirmed] = useState(false);
-  const [openings, setOpenings] = useState<Opening[]>([]);
+  const [answers, dispatch] = useReducer(roomReducer, initialAnswers);
+  const {shape, lengths, ceiling, confirmed, openings} = answers;
 
-  const [modelUrl, setModelUrl] = useState<string | null>(null);
-  const [buildError, setBuildError] = useState<string | null>(null);
+  // The 3D room built from the answers (step 4).
+  const [{modelUrl, buildError}, setBuild] = useState<{
+    modelUrl: string | null;
+    buildError: string | null;
+  }>({modelUrl: null, buildError: null});
+  // Bumped by "Try again" to rebuild.
   const [buildAttempt, setBuildAttempt] = useState(0);
 
   const goToStep = useCallback((s: Step) => {
@@ -103,15 +174,7 @@ export default function RoomBuilderScreen() {
     return () => sub.remove();
   }, [step, back, navigation]);
 
-  const changeShape = (s: RoomShape) => {
-    if (s === shape) {
-      return;
-    }
-    setShape(s);
-    setLengths(defaultLengths(s));
-    setOpenings([]);
-    setConfirmed(false);
-  };
+  const changeShape = (s: RoomShape) => dispatch({type: 'shapeChanged', shape: s});
 
   // Leaving the measurements step: doors/windows added earlier may no
   // longer fit if walls got shorter (after "Edit" on the preview)
@@ -129,7 +192,7 @@ export default function RoomBuilderScreen() {
         text1: `${removed} door${removed > 1 ? 's/windows' : ' or window'} removed`,
         text2: "They didn't fit the new wall lengths",
       });
-      setOpenings(kept);
+      dispatch({type: 'openingsReplaced', openings: kept});
     }
     goToStep(3);
   };
@@ -144,17 +207,20 @@ export default function RoomBuilderScreen() {
       return;
     }
     let cancelled = false;
-    setModelUrl(null);
-    setBuildError(null);
+    setBuild({modelUrl: null, buildError: null});
     const module = NativeModules.RoomBuilderModule;
     if (!module?.buildRoom) {
-      setBuildError('not available on this device');
+      setBuild({modelUrl: null, buildError: 'not available on this device'});
       return;
     }
     module
       .buildRoom(spec)
-      .then((url: string) => !cancelled && setModelUrl(url))
-      .catch((e: any) => !cancelled && setBuildError(e?.message ?? 'unknown error'));
+      .then((url: string) => !cancelled && setBuild({modelUrl: url, buildError: null}))
+      .catch(
+        (e: any) =>
+          !cancelled &&
+          setBuild({modelUrl: null, buildError: e?.message ?? 'unknown error'}),
+      );
     return () => {
       cancelled = true;
     };
@@ -189,11 +255,11 @@ export default function RoomBuilderScreen() {
             <MeasurementsStep
               shape={shape}
               lengths={lengths}
-              onWallChange={(i, v) => setLengths(prev => setWallLength(shape, prev, i, v))}
+              onWallChange={(i, v) => dispatch({type: 'wallChanged', index: i, length: v})}
               ceiling={ceiling}
-              onCeilingChange={setCeiling}
+              onCeilingChange={c => dispatch({type: 'ceilingChanged', ceiling: c})}
               confirmed={confirmed}
-              onConfirmedChange={setConfirmed}
+              onConfirmedChange={c => dispatch({type: 'confirmedChanged', confirmed: c})}
             />
           </>
         );
@@ -204,8 +270,8 @@ export default function RoomBuilderScreen() {
             shape={shape}
             lengths={lengths}
             openings={openings}
-            onAdd={o => setOpenings(prev => [...prev, {...o, id: newId()}])}
-            onRemove={id => setOpenings(prev => prev.filter(o => o.id !== id))}
+            onAdd={o => dispatch({type: 'openingAdded', opening: o})}
+            onRemove={id => dispatch({type: 'openingRemoved', id})}
           />
         );
       case 4:

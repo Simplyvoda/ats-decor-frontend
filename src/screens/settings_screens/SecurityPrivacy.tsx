@@ -17,6 +17,10 @@ import PrimaryButton from '../../components/molecules/PrimaryButton';
 import AppSwitch from '../../components/molecules/AppSwitch';
 import AuthService from '../../services/AuthService';
 import UserService from '../../services/UserService';
+import {
+  isAnalyticsEnabled,
+  setAnalyticsEnabled,
+} from '../../services/analytics';
 import {useUserContext} from '../../context/UserContext';
 import {
   isStrongPassword,
@@ -24,18 +28,28 @@ import {
 } from '../../utils/passwordValidation';
 import {useTheme} from '../../theme/useTheme';
 
+const EMPTY_PASSWORDS = {
+  currentPassword: '',
+  newPassword: '',
+  confirmPassword: '',
+};
+
 const SecurityPrivacy = () => {
   const navigation = useNavigation();
   const {colors} = useTheme();
   const {logoutUser} = useUserContext();
 
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwords, setPasswords] = useState(EMPTY_PASSWORDS);
+  const {currentPassword, newPassword, confirmPassword} = passwords;
+  const setPassword = (field: keyof typeof EMPTY_PASSWORDS) => (value: string) =>
+    setPasswords(p => ({...p, [field]: value}));
   const [isUpdating, setIsUpdating] = useState(false);
 
-  const [twoFactor, setTwoFactor] = useState(false);
-  const [marketingEmails, setMarketingEmails] = useState(false);
+  // The privacy switches below.
+  const [{marketingEmails, analytics}, setPrefs] = useState({
+    marketingEmails: false,
+    analytics: true,
+  });
 
   const hasPasswordInput =
     currentPassword.length > 0 ||
@@ -43,8 +57,21 @@ const SecurityPrivacy = () => {
     confirmPassword.length > 0;
 
   useEffect(() => {
+    isAnalyticsEnabled().then(enabled =>
+      setPrefs(p => ({...p, analytics: enabled})),
+    );
+  }, []);
+
+  const handleToggleAnalytics = (value: boolean) => {
+    setPrefs(p => ({...p, analytics: value}));
+    setAnalyticsEnabled(value);
+  };
+
+  useEffect(() => {
     UserService.getProfile()
-      .then(res => setMarketingEmails(res.data.marketing_emails))
+      .then(res =>
+        setPrefs(p => ({...p, marketingEmails: res.data.marketing_emails})),
+      )
       .catch(() => {});
   }, []);
 
@@ -73,9 +100,7 @@ const SecurityPrivacy = () => {
         confirmPassword,
       );
       Toast.show({type: 'success', text1: 'Password updated'});
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
+      setPasswords(EMPTY_PASSWORDS);
     } catch (err: any) {
       Toast.show({
         type: 'error',
@@ -88,11 +113,11 @@ const SecurityPrivacy = () => {
   };
 
   const handleToggleMarketing = async (value: boolean) => {
-    setMarketingEmails(value);
+    setPrefs(p => ({...p, marketingEmails: value}));
     try {
       await UserService.updateProfile({marketing_emails: value});
     } catch {
-      setMarketingEmails(!value);
+      setPrefs(p => ({...p, marketingEmails: !value}));
       Toast.show({type: 'error', text1: 'Could not update preference'});
     }
   };
@@ -104,7 +129,6 @@ const SecurityPrivacy = () => {
         text1: 'Two-factor authentication coming soon',
       });
     }
-    setTwoFactor(false);
   };
 
   const handleDeleteAccount = () => {
@@ -169,7 +193,7 @@ const SecurityPrivacy = () => {
           <TextInput
             className="border border-[#F1EADC] dark:border-night-border rounded-lg py-2.5 px-3 mb-3 text-[14px] text-[#333] dark:text-night-text"
             value={currentPassword}
-            onChangeText={setCurrentPassword}
+            onChangeText={setPassword('currentPassword')}
             placeholder="Enter current password"
             placeholderTextColor={colors.textMuted}
             secureTextEntry
@@ -181,7 +205,7 @@ const SecurityPrivacy = () => {
           <TextInput
             className="border border-[#F1EADC] dark:border-night-border rounded-lg py-2.5 px-3 mb-3 text-[14px] text-[#333] dark:text-night-text"
             value={newPassword}
-            onChangeText={setNewPassword}
+            onChangeText={setPassword('newPassword')}
             placeholder="Enter new password"
             placeholderTextColor={colors.textMuted}
             secureTextEntry
@@ -194,7 +218,7 @@ const SecurityPrivacy = () => {
           <TextInput
             className="border border-[#F1EADC] dark:border-night-border rounded-lg py-2.5 px-3 mb-3 text-[14px] text-[#333] dark:text-night-text"
             value={confirmPassword}
-            onChangeText={setConfirmPassword}
+            onChangeText={setPassword('confirmPassword')}
             placeholder="Re-enter new password"
             placeholderTextColor={colors.textMuted}
             secureTextEntry
@@ -206,7 +230,8 @@ const SecurityPrivacy = () => {
               Two-factor authentication
             </Text>
             <AppSwitch
-              value={twoFactor}
+              // Not built yet: always off, and turning it on just says so.
+              value={false}
               onValueChange={handleToggleTwoFactor}
             />
           </View>
@@ -237,6 +262,22 @@ const SecurityPrivacy = () => {
             <AppSwitch
               value={marketingEmails}
               onValueChange={handleToggleMarketing}
+            />
+          </View>
+
+          <View className="flex-row justify-between items-center mb-3">
+            <View className="flex-1 mr-3">
+              <Text className="text-[14px] text-[#333] dark:text-night-text font-dm-sans">
+                Share usage analytics
+              </Text>
+              <Text className="text-[12px] text-[#999] dark:text-night-text-muted font-dm-sans mt-0.5">
+                Anonymous stats on how features are used, to help us improve
+                the app.
+              </Text>
+            </View>
+            <AppSwitch
+              value={analytics}
+              onValueChange={handleToggleAnalytics}
             />
           </View>
         </View>

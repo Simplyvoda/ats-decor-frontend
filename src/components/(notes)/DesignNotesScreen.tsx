@@ -37,9 +37,11 @@ export default function DesignNotesScreen() {
   // have nowhere to attach to, so they're held as local drafts until it is.
   const fromARViewer = !designId;
 
-  const [notes, setNotes] = useState<INote[]>([]);
-  const [drafts, setDrafts] = useState<IDraftNote[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [{notes, drafts, isLoading}, setList] = useState<{
+    notes: INote[];
+    drafts: IDraftNote[];
+    isLoading: boolean;
+  }>({notes: [], drafts: [], isLoading: true});
 
   const fetchNotes = useCallback(async () => {
     try {
@@ -49,8 +51,7 @@ export default function DesignNotesScreen() {
           : Promise.resolve(null),
         NoteService.getDraftNotes(),
       ]);
-      setNotes(savedRes?.data ?? []);
-      setDrafts(draftList);
+      setList({notes: savedRes?.data ?? [], drafts: draftList, isLoading: false});
       return true;
     } catch (err: any) {
       Toast.show({
@@ -58,9 +59,8 @@ export default function DesignNotesScreen() {
         text1: 'Could not load notes',
         text2: err.response?.data?.message || err.message,
       });
+      setList(l => ({...l, isLoading: false}));
       return false;
-    } finally {
-      setIsLoading(false);
     }
   }, [designId]);
 

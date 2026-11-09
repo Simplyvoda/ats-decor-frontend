@@ -38,8 +38,8 @@ const SetPassword = () => {
   const accessToken = route.params?.accessToken;
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  // Which password boxes show their text.
+  const [visible, setVisible] = useState({password: false, confirm: false});
   const {
     control,
     handleSubmit,
@@ -120,15 +120,15 @@ const SetPassword = () => {
                         autoCapitalize="none"
                         placeholderTextColor={colors.textMuted}
                         placeholder="New password"
-                        secureTextEntry={!showPassword}
+                        secureTextEntry={!visible.password}
                         value={value}
                         onBlur={onBlur}
                         onChangeText={onChange}
                       />
                       <TouchableOpacity
-                        onPress={() => setShowPassword(s => !s)}
+                        onPress={() => setVisible(v => ({...v, password: !v.password}))}
                         hitSlop={{top: 8, bottom: 8, left: 8, right: 8}}>
-                        {showPassword ? (
+                        {visible.password ? (
                           <EyeOff color={colors.textMuted} size={18} />
                         ) : (
                           <Eye color={colors.textMuted} size={18} />
@@ -162,15 +162,15 @@ const SetPassword = () => {
                         autoCapitalize="none"
                         placeholderTextColor={colors.textMuted}
                         placeholder="Confirm new password"
-                        secureTextEntry={!showConfirmPassword}
+                        secureTextEntry={!visible.confirm}
                         value={value}
                         onBlur={onBlur}
                         onChangeText={onChange}
                       />
                       <TouchableOpacity
-                        onPress={() => setShowConfirmPassword(s => !s)}
+                        onPress={() => setVisible(v => ({...v, confirm: !v.confirm}))}
                         hitSlop={{top: 8, bottom: 8, left: 8, right: 8}}>
-                        {showConfirmPassword ? (
+                        {visible.confirm ? (
                           <EyeOff color={colors.textMuted} size={18} />
                         ) : (
                           <Eye color={colors.textMuted} size={18} />

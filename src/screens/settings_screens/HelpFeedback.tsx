@@ -30,21 +30,26 @@ const SUPPORT_EMAIL = 'support@pladomus.com';
 const HelpFeedback = () => {
   const navigation = useNavigation();
   const {colors} = useTheme();
-  const [openIndex, setOpenIndex] = useState<number | null>(null);
-  const [faqSearch, setFaqSearch] = useState('');
-  const [feedback, setFeedback] = useState('');
-  const [isSending, setIsSending] = useState(false);
+  // FAQ list: the search box and which answer is expanded.
+  const [{faqSearch, openIndex}, setFaq] = useState<{
+    faqSearch: string;
+    openIndex: number | null;
+  }>({faqSearch: '', openIndex: null});
+  const [{feedback, isSending}, setFeedbackForm] = useState({
+    feedback: '',
+    isSending: false,
+  });
 
   const handleSendFeedback = async () => {
     if (!feedback.trim()) {
       Toast.show({type: 'error', text1: 'Write some feedback first'});
       return;
     }
-    setIsSending(true);
+    setFeedbackForm(f => ({...f, isSending: true}));
     try {
       await FeedbackService.send(feedback.trim());
       Toast.show({type: 'success', text1: 'Feedback sent — thank you!'});
-      setFeedback('');
+      setFeedbackForm(f => ({...f, feedback: ''}));
     } catch (err: any) {
       Toast.show({
         type: 'error',
@@ -52,7 +57,7 @@ const HelpFeedback = () => {
         text2: err.response?.data?.message || err.message,
       });
     } finally {
-      setIsSending(false);
+      setFeedbackForm(f => ({...f, isSending: false}));
     }
   };
 
@@ -134,8 +139,7 @@ When you’re ready for more, upgrade to Hobbyist (or higher) to unlock addition
             placeholderTextColor={colors.textMuted}
             value={faqSearch}
             onChangeText={text => {
-              setFaqSearch(text);
-              setOpenIndex(null);
+              setFaq({faqSearch: text, openIndex: null});
             }}
           />
 
@@ -156,7 +160,9 @@ When you’re ready for more, upgrade to Hobbyist (or higher) to unlock addition
                   key={index}
                   className="border border-[#C1A36A33] rounded-md mb-3 bg-transparent">
                   <TouchableOpacity
-                    onPress={() => setOpenIndex(isOpen ? null : index)}
+                    onPress={() =>
+                      setFaq(f => ({...f, openIndex: isOpen ? null : index}))
+                    }
                     className="flex-row justify-between items-center px-4 py-3">
                     <Text className="text-[#1A1A1A] dark:text-night-text-primary font-dm-sans font-medium w-[85%]">
                       {faq.question}
@@ -244,7 +250,7 @@ When you’re ready for more, upgrade to Hobbyist (or higher) to unlock addition
             placeholder="Tell us what you think or suggest improvements..."
             placeholderTextColor={colors.textMuted}
             value={feedback}
-            onChangeText={setFeedback}
+            onChangeText={text => setFeedbackForm(f => ({...f, feedback: text}))}
           />
           {feedback.trim().length > 0 && (
             <PrimaryButton

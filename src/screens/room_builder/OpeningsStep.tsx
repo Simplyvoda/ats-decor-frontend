@@ -38,10 +38,22 @@ export default function OpeningsStep({
   const {colors} = useTheme();
   const points = roomPoints(shape, lengths);
 
-  const [type, setType] = useState<OpeningType>('door');
-  const [wall, setWall] = useState(0);
-  const [width, setWidth] = useState(OPENING_LIMITS.door.default);
-  const [offset, setOffset] = useState(centredOffset(lengths[0], OPENING_LIMITS.door.default));
+  // The door/window being set up, before it's added.
+  const [pending, setPending] = useState<{
+    type: OpeningType;
+    wall: number;
+    width: number;
+    offset: number;
+  }>({
+    type: 'door',
+    wall: 0,
+    width: OPENING_LIMITS.door.default,
+    offset: centredOffset(lengths[0], OPENING_LIMITS.door.default),
+  });
+  const {type, wall, width, offset} = pending;
+  const setType = (t: OpeningType) => setPending(p => ({...p, type: t}));
+  const setWall = (w: number) => setPending(p => ({...p, wall: w}));
+  const setOffset = (o: number) => setPending(p => ({...p, offset: o}));
 
   const wallLength = lengths[wall];
   const limits = OPENING_LIMITS[type];
@@ -51,19 +63,17 @@ export default function OpeningsStep({
   // Switching door/window or wall starts from a sensible size, centred
   useEffect(() => {
     const w = Math.min(OPENING_LIMITS[type].default, lengths[wall]);
-    setWidth(w);
-    setOffset(centredOffset(lengths[wall], w));
+    setPending(p => ({...p, width: w, offset: centredOffset(lengths[wall], w)}));
   }, [type, wall, lengths]);
 
   // Keep the position on the wall when the width grows
   const changeWidth = (w: number) => {
-    setWidth(w);
-    if (offset + w > wallLength) {
-      setOffset(Math.max(0, round2(wallLength - w)));
-    }
+    setPending(p => ({
+      ...p,
+      width: w,
+      offset: p.offset + w > wallLength ? Math.max(0, round2(wallLength - w)) : p.offset,
+    }));
   };
-
-  const pending = {type, wall, offset, width};
 
   const add = () => {
     const problem = openingProblem(pending, lengths, openings);

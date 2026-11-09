@@ -43,14 +43,30 @@ export default function NotesScreen() {
   const {colors} = useTheme();
   const navigation = useNavigation();
 
-  const [activeTab, setActiveTab] = useState<'active' | 'trash'>('active');
-  const [notes, setNotes] = useState<INote[]>([]);
-  const [trashedNotes, setTrashedNotes] = useState<INote[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [activeTag, setActiveTag] = useState<string | null>(null);
-  const [menuNoteId, setMenuNoteId] = useState<string | null>(null);
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [{notes, trashedNotes, isLoading}, setList] = useState<{
+    notes: INote[];
+    trashedNotes: INote[];
+    isLoading: boolean;
+  }>({notes: [], trashedNotes: [], isLoading: true});
+
+  const [{search, activeTag}, setFilters] = useState<{
+    search: string;
+    activeTag: string | null;
+  }>({search: '', activeTag: null});
+  const setSearch = (text: string) => setFilters(f => ({...f, search: text}));
+  const setActiveTag = (tag: string | null) =>
+    setFilters(f => ({...f, activeTag: tag}));
+
+  // Which tab is showing, which note's ⋮ menu is open, and which notes are
+  // ticked for bulk delete.
+  const [{activeTab, menuNoteId, selectedIds}, setView] = useState<{
+    activeTab: 'active' | 'trash';
+    menuNoteId: string | null;
+    selectedIds: string[];
+  }>({activeTab: 'active', menuNoteId: null, selectedIds: []});
+  const setMenuNoteId = (id: string | null) =>
+    setView(v => ({...v, menuNoteId: id}));
+  const clearSelection = () => setView(v => ({...v, selectedIds: []}));
 
   const fetchNotes = useCallback(async () => {
     try {
@@ -58,8 +74,7 @@ export default function NotesScreen() {
         NoteService.getNotes({isActive: true}),
         NoteService.getNotes({isActive: false}),
       ]);
-      setNotes(active.data);
-      setTrashedNotes(trash.data);
+      setList({notes: active.data, trashedNotes: trash.data, isLoading: false});
       return true;
     } catch (err: any) {
       Toast.show({
@@ -67,9 +82,8 @@ export default function NotesScreen() {
         text1: 'Could not load notes',
         text2: err.response?.data?.message || err.message,
       });
+      setList(l => ({...l, isLoading: false}));
       return false;
-    } finally {
-      setIsLoading(false);
     }
   }, []);
 
@@ -104,10 +118,13 @@ export default function NotesScreen() {
   const inSelectMode = selectedIds.length > 0;
 
   const toggleSelect = (id: string) => {
-    setMenuNoteId(null);
-    setSelectedIds(prev =>
-      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id],
-    );
+    setView(v => ({
+      ...v,
+      menuNoteId: null,
+      selectedIds: v.selectedIds.includes(id)
+        ? v.selectedIds.filter(i => i !== id)
+        : [...v.selectedIds, id],
+    }));
   };
 
   const handleShare = async (note: INote) => {
@@ -174,7 +191,7 @@ export default function NotesScreen() {
                     : NoteService.softDelete(id),
                 ),
               );
-              setSelectedIds([]);
+              clearSelection();
               fetchNotes();
             } catch (err: any) {
               Toast.show({type: 'error', text1: 'Delete failed'});
@@ -290,9 +307,7 @@ export default function NotesScreen() {
             <TouchableOpacity
               key={tab}
               onPress={() => {
-                setActiveTab(tab);
-                setSelectedIds([]);
-                setMenuNoteId(null);
+                setView({activeTab: tab, menuNoteId: null, selectedIds: []});
               }}
               className={`flex-1 py-3 rounded-[10px] items-center ${
                 activeTab === tab ? 'bg-offWhite dark:bg-night-muted' : ''
@@ -321,7 +336,7 @@ export default function NotesScreen() {
               <Trash2 size={20} color={colors.danger} />
             </TouchableOpacity>
             <TouchableOpacity
-              onPress={() => setSelectedIds([])}
+              onPress={clearSelection}
               hitSlop={10}
               className="ml-6">
               <Text className="font-dm-sans text-gray-primary dark:text-night-text text-[16px]">

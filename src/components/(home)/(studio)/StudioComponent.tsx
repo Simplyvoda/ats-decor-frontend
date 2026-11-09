@@ -32,19 +32,20 @@ const StudioComponent = () => {
   const navigation = useNavigation();
   const styles = useStyles();
   const {colors} = useTheme();
-  const [designs, setDesigns] = useState<IDesign[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [{designs, loading}, setList] = useState<{
+    designs: IDesign[];
+    loading: boolean;
+  }>({designs: [], loading: true});
 
   const fetchDesigns = useCallback(async () => {
     try {
       const res = await DesignService.getDesigns();
-      setDesigns(res.data);
+      setList({designs: res.data, loading: false});
       return true;
     } catch (err: any) {
       console.warn('Failed to load designs:', err?.message ?? err);
+      setList(l => ({...l, loading: false}));
       return false;
-    } finally {
-      setLoading(false);
     }
   }, []);
 
@@ -59,7 +60,10 @@ const StudioComponent = () => {
         onPress: async () => {
           try {
             await DesignService.deleteDesign(design.id);
-            setDesigns(prev => prev.filter(d => d.id !== design.id));
+            setList(l => ({
+              ...l,
+              designs: l.designs.filter(d => d.id !== design.id),
+            }));
           } catch (err: any) {
             Alert.alert('Error', err?.message ?? 'Failed to delete');
           }
