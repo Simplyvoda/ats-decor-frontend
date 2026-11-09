@@ -17,3 +17,4 @@ RCT_EXTERN_METHOD(requestCameraAccess:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 
 @end
+
