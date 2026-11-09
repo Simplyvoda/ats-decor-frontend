@@ -13,7 +13,6 @@ import {
   View,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import {appleAuth} from '@invertase/react-native-apple-authentication';
 import PrimaryButton from '../../components/molecules/PrimaryButton';
 import {goBack, navigateTo} from '../../utils/navigation';
 import {useNavigation} from '@react-navigation/native';
@@ -26,6 +25,8 @@ import {
 } from '../../../interface/auth_user.interface';
 import AuthService from '../../services/AuthService';
 import {useUserContext} from '../../context/UserContext';
+import {useAppleSignIn} from '../../hooks/useAppleSignIn';
+import {track} from '../../services/analytics';
 import {useTheme} from '../../theme/useTheme';
 
 type FormData = {
@@ -39,7 +40,9 @@ const Login = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [isAppleSubmitting, setIsAppleSubmitting] = useState(false);
+  // Also creates the account on someone's first use, so it may ask for a
+  // date of birth just like Sign Up.
+  const apple = useAppleSignIn();
   const {
     control,
     reset,
@@ -62,6 +65,7 @@ const Login = () => {
         password: data.password,
       } as ISignInPayload);
       await signInUser(res);
+      track.login('email');
       Toast.show({
         type: 'success',
         text1: 'Success',
@@ -79,53 +83,6 @@ const Login = () => {
       });
     } finally {
       setIsSubmitting(false);
-    }
-  };
-
-  // Same identity-based flow as SignUp's onApplePress: signInWithIdToken
-  // signs in on any repeat tap and creates the account on first use, so
-  // this isn't a distinct "login" variant — it's the same action, just
-  // also offered here since a returning user reasonably looks for it here.
-  const onApplePress = async () => {
-    try {
-      setIsAppleSubmitting(true);
-      const appleResponse = await appleAuth.performRequest({
-        requestedOperation: appleAuth.Operation.LOGIN,
-        requestedScopes: [appleAuth.Scope.EMAIL, appleAuth.Scope.FULL_NAME],
-      });
-
-      if (!appleResponse.identityToken) {
-        throw new Error('Apple sign-in did not return an identity token');
-      }
-
-      const res = await AuthService.appleSignIn({
-        identityToken: appleResponse.identityToken,
-        // See SignUp.tsx's onApplePress for why this is required.
-        nonce: appleResponse.nonce,
-        firstName: appleResponse.fullName?.givenName ?? undefined,
-        lastName: appleResponse.fullName?.familyName ?? undefined,
-      });
-
-      await signInUser(res);
-      Toast.show({
-        type: 'success',
-        text1: 'Success',
-        text2: 'Signed in with Apple',
-        position: 'bottom',
-      });
-    } catch (err: any) {
-      if (err.code === appleAuth.Error.CANCELED) {
-        return;
-      }
-      console.log('Apple sign-in error:', err.response?.data || err.message);
-      Toast.show({
-        type: 'error',
-        text1: 'Error',
-        text2: err.response?.data?.message || err.message,
-        position: 'bottom',
-      });
-    } finally {
-      setIsAppleSubmitting(false);
     }
   };
 
@@ -245,15 +202,15 @@ const Login = () => {
             />
 
             <Pressable
-              onPress={onApplePress}
-              disabled={isAppleSubmitting}
+              onPress={apple.onPress}
+              disabled={apple.isSubmitting}
               className="w-full flex flex-row items-center justify-center bg-white border border-gray-800 rounded-lg py-3 space-x-2">
               <Image
                 source={images.apple_icon}
                 style={{width: 18, height: 18}}
               />
               <Text className="text-black font-semibold text-base">
-                {isAppleSubmitting ? 'Signing in…' : 'Continue with Apple'}
+                {apple.isSubmitting ? 'Signing in…' : 'Continue with Apple'}
               </Text>
             </Pressable>
 
@@ -268,6 +225,7 @@ const Login = () => {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+      {apple.dateOfBirthPrompt}
     </SafeAreaView>
   );
 };

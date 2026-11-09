@@ -18,6 +18,7 @@ const AuthService = {
     nonce?: string; // raw nonce matching the hashed claim inside identityToken
     firstName?: string;
     lastName?: string;
+    dateOfBirth?: string; // YYYY-MM-DD, needed the first time (sign-up)
   }): Promise<ISignInResponse> {
     const res = await api.post<ISignInResponse>('/auth/apple', payload);
     return res.data;

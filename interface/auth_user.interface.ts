@@ -4,6 +4,8 @@ export interface ISignInResponse {
   data: {
     user: IUser;
     session: ISession;
+    // Only from Apple sign-in: true when this created the account.
+    is_new_user?: boolean;
   };
 }
 
@@ -72,4 +74,5 @@ export interface ISignUpPayload {
   password: string;
   first_name: string;
   last_name: string;
+  date_of_birth: string; // YYYY-MM-DD
 }

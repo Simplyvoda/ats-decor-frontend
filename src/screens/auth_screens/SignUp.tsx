@@ -27,8 +27,10 @@ import {images} from '../../../assets/constants/images';
 import AuthService from '../../services/AuthService';
 import {ISignUpPayload} from '../../../interface/auth_user.interface';
 import Toast from 'react-native-toast-message';
-import {appleAuth} from '@invertase/react-native-apple-authentication';
-import {useUserContext} from '../../context/UserContext';
+import {useAppleSignIn} from '../../hooks/useAppleSignIn';
+import {track} from '../../services/analytics';
+import DateOfBirthInput from '../../components/molecules/DateOfBirthInput';
+import {validateDateOfBirth} from '../../utils/age';
 import {
   isStrongPassword,
   PASSWORD_REQUIREMENTS_MESSAGE,
@@ -39,6 +41,7 @@ type FormData = {
   first_name: string;
   last_name: string;
   email: string;
+  date_of_birth: string; // YYYY-MM-DD, '' until all three boxes are filled
   password: string;
   confirm_password: string;
 };
@@ -51,69 +54,26 @@ const SignUp = () => {
     formState: {errors},
     watch,
     reset,
+    trigger,
+    getValues,
   } = useForm<FormData>({
     defaultValues: {
       first_name: '',
       last_name: '',
       email: '',
+      date_of_birth: '',
       password: '',
       confirm_password: '',
     },
   });
 
   const navigation = useNavigation();
-  const {signInUser} = useUserContext();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isAppleSubmitting, setIsAppleSubmitting] = useState(false);
-
-  const onApplePress = async () => {
-    try {
-      setIsAppleSubmitting(true);
-      const appleResponse = await appleAuth.performRequest({
-        requestedOperation: appleAuth.Operation.LOGIN,
-        requestedScopes: [appleAuth.Scope.EMAIL, appleAuth.Scope.FULL_NAME],
-      });
-
-      if (!appleResponse.identityToken) {
-        throw new Error('Apple sign-in did not return an identity token');
-      }
-
-      const res = await AuthService.appleSignIn({
-        identityToken: appleResponse.identityToken,
-        // The library auto-generates a nonce, SHA256-hashes it into the
-        // Apple request, and returns the RAW value here. Supabase needs the
-        // raw nonce to verify the hashed claim inside identityToken —
-        // omitting it fails with "Passed nonce and nonce in id_token
-        // should either both exist or not."
-        nonce: appleResponse.nonce,
-        firstName: appleResponse.fullName?.givenName ?? undefined,
-        lastName: appleResponse.fullName?.familyName ?? undefined,
-      });
-
-      await signInUser(res);
-      Toast.show({
-        type: 'success',
-        text1: 'Success',
-        text2: 'Signed in with Apple',
-        position: 'bottom',
-      });
-    } catch (err: any) {
-      if (err.code === appleAuth.Error.CANCELED) {
-        return;
-      }
-      console.log('Apple sign-in error:', err.response?.data || err.message);
-      Toast.show({
-        type: 'error',
-        text1: 'Error',
-        text2: err.response?.data?.message || err.message,
-        position: 'bottom',
-      });
-    } finally {
-      setIsAppleSubmitting(false);
-    }
-  };
+  // Which password boxes show their text.
+  const [visible, setVisible] = useState({password: false, confirm: false});
+  const apple = useAppleSignIn({
+    getDateOfBirth: () => getValues('date_of_birth'),
+  });
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -123,7 +83,9 @@ const SignUp = () => {
         last_name: data.last_name,
         email: data.email,
         password: data.password,
+        date_of_birth: data.date_of_birth,
       } as ISignUpPayload);
+      track.signUp('email');
       Toast.show({
         type: 'success',
         text1: 'Success',
@@ -274,6 +236,33 @@ const SignUp = () => {
               <View>
                 <Controller
                   control={control}
+                  name="date_of_birth"
+                  rules={{validate: validateDateOfBirth}}
+                  render={({field: {onChange, onBlur}}) => (
+                    <DateOfBirthInput
+                      hasError={!!errors.date_of_birth}
+                      onBlur={onBlur}
+                      onChange={value => {
+                        onChange(value);
+                        // Check as soon as the date is complete, so an
+                        // under-age message shows right after it's entered.
+                        if (value) {
+                          trigger('date_of_birth');
+                        }
+                      }}
+                    />
+                  )}
+                />
+                {errors.date_of_birth && (
+                  <Text className="text-red-600 dark:text-red-400">
+                    {errors.date_of_birth.message}
+                  </Text>
+                )}
+              </View>
+
+              <View>
+                <Controller
+                  control={control}
                   name="password"
                   rules={{
                     required: 'Password is required',
@@ -289,15 +278,15 @@ const SignUp = () => {
                         autoCapitalize="none"
                         placeholderTextColor={colors.textMuted}
                         placeholder="Password"
-                        secureTextEntry={!showPassword}
+                        secureTextEntry={!visible.password}
                         value={value}
                         onBlur={onBlur}
                         onChangeText={onChange}
                       />
                       <TouchableOpacity
-                        onPress={() => setShowPassword(s => !s)}
+                        onPress={() => setVisible(v => ({...v, password: !v.password}))}
                         hitSlop={{top: 8, bottom: 8, left: 8, right: 8}}>
-                        {showPassword ? (
+                        {visible.password ? (
                           <EyeOff color={colors.textMuted} size={18} />
                         ) : (
                           <Eye color={colors.textMuted} size={18} />
@@ -331,15 +320,15 @@ const SignUp = () => {
                         autoCapitalize="none"
                         placeholderTextColor={colors.textMuted}
                         placeholder="Confirm Password"
-                        secureTextEntry={!showConfirmPassword}
+                        secureTextEntry={!visible.confirm}
                         value={value}
                         onBlur={onBlur}
                         onChangeText={onChange}
                       />
                       <TouchableOpacity
-                        onPress={() => setShowConfirmPassword(s => !s)}
+                        onPress={() => setVisible(v => ({...v, confirm: !v.confirm}))}
                         hitSlop={{top: 8, bottom: 8, left: 8, right: 8}}>
-                        {showConfirmPassword ? (
+                        {visible.confirm ? (
                           <EyeOff color={colors.textMuted} size={18} />
                         ) : (
                           <Eye color={colors.textMuted} size={18} />
@@ -399,15 +388,15 @@ const SignUp = () => {
             */}
 
               <Pressable
-                onPress={onApplePress}
-                disabled={isAppleSubmitting}
+                onPress={apple.onPress}
+                disabled={apple.isSubmitting}
                 className="w-full flex flex-row items-center justify-center bg-white border border-gray-800 rounded-lg py-3 space-x-2">
                 <Image
                   source={images.apple_icon}
                   style={{width: 18, height: 18}}
                 />
                 <Text className="text-black font-semibold text-base">
-                  {isAppleSubmitting ? 'Signing in…' : 'Continue with Apple'}
+                  {apple.isSubmitting ? 'Signing in…' : 'Continue with Apple'}
                 </Text>
               </Pressable>
             </View>
@@ -424,6 +413,7 @@ const SignUp = () => {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+      {apple.dateOfBirthPrompt}
     </SafeAreaView>
   );
 };
