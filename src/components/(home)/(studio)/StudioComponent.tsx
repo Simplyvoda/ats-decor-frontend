@@ -9,7 +9,6 @@ type StudioCard = {
   title: string;
   subtitle: string;
   icon: LucideIcon;
-  // The coloured strip on the card's left (from the Home mockup)
   color: string;
   screen: string;
 };
