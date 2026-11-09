@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {ISignInResponse} from '../../interface/auth_user.interface';
 import UserService from '../services/UserService';
 import {onUnauthorized} from '../utils/authEvents';
+import {setAnalyticsUser} from '../services/analytics';
 
 interface IUser {
   id: string;
@@ -10,15 +11,29 @@ interface IUser {
   first_name?: string;
   last_name?: string;
   profile_picture?: string | null;
+  // Guided tours. Missing (an older cached user, or the profile couldn't
+  // load) counts as "not known yet", so no tour shows until we know.
+  first_login_completed?: boolean;
+  first_scan_completed?: boolean;
+  // When they agreed to room scans being stored; null = not yet.
+  // Missing = not known yet (older cached user).
+  room_data_consent_at?: string | null;
 }
+
+export type TourFlag = 'first_login_completed' | 'first_scan_completed';
 
 interface IUserContext {
   user: IUser | null;
   isLoadingUser: boolean;
   signInUser: (data: ISignInResponse) => Promise<void>;
-  signInFromSession: (accessToken: string, refreshToken: string) => Promise<void>;
+  signInFromSession: (
+    accessToken: string,
+    refreshToken: string,
+  ) => Promise<void>;
   logoutUser: () => Promise<void>;
   updateUser: (partial: Partial<IUser>) => Promise<void>;
+  completeTour: (flag: TourFlag) => Promise<void>;
+  giveRoomDataConsent: () => Promise<void>;
 }
 
 const UserContext = createContext<IUserContext | undefined>(undefined);
@@ -26,6 +41,13 @@ const UserContext = createContext<IUserContext | undefined>(undefined);
 export const UserProvider = ({children}: {children: React.ReactNode}) => {
   const [user, setUser] = useState<IUser | null>(null);
   const [isLoadingUser, setIsLoadingUser] = useState(true);
+
+  // GA4 counts one person across devices/reinstalls by our user id
+  // (never email or name). Cleared on log out.
+  const userId = user?.id ?? null;
+  useEffect(() => {
+    setAnalyticsUser(userId);
+  }, [userId]);
 
   // Restore user on app launch
   useEffect(() => {
@@ -50,6 +72,9 @@ export const UserProvider = ({children}: {children: React.ReactNode}) => {
                 last_name: profile.data.last_name,
                 email: profile.data.email,
                 profile_picture: profile.data.profile_picture,
+                first_login_completed: profile.data.first_login_completed,
+                first_scan_completed: profile.data.first_scan_completed,
+                room_data_consent_at: profile.data.room_data_consent_at,
               };
               await AsyncStorage.setItem('user', JSON.stringify(refreshed));
               setUser(refreshed);
@@ -108,6 +133,9 @@ export const UserProvider = ({children}: {children: React.ReactNode}) => {
         last_name: profile.data.last_name,
         email: profile.data.email,
         profile_picture: profile.data.profile_picture,
+        first_login_completed: profile.data.first_login_completed,
+        first_scan_completed: profile.data.first_scan_completed,
+        room_data_consent_at: profile.data.room_data_consent_at,
       };
       await AsyncStorage.setItem('user', JSON.stringify(refreshed));
       setUser(refreshed);
@@ -121,7 +149,10 @@ export const UserProvider = ({children}: {children: React.ReactNode}) => {
   // (e.g. the signup-confirmation deep link) rather than a signin response —
   // there's no user payload on the link itself, so fetch the profile once
   // the token is in place.
-  const signInFromSession = async (accessToken: string, refreshToken: string) => {
+  const signInFromSession = async (
+    accessToken: string,
+    refreshToken: string,
+  ) => {
     await AsyncStorage.setItem('token', accessToken);
     await AsyncStorage.setItem(
       'session',
@@ -148,6 +179,9 @@ export const UserProvider = ({children}: {children: React.ReactNode}) => {
         first_name: profile.data.first_name,
         last_name: profile.data.last_name,
         profile_picture: profile.data.profile_picture,
+        first_login_completed: profile.data.first_login_completed,
+        first_scan_completed: profile.data.first_scan_completed,
+        room_data_consent_at: profile.data.room_data_consent_at,
       };
       await AsyncStorage.setItem('user', JSON.stringify(verifiedUser));
       setUser(verifiedUser);
@@ -174,6 +208,25 @@ export const UserProvider = ({children}: {children: React.ReactNode}) => {
     });
   };
 
+  // Called when someone reaches the end of a tour. Hides it straight away,
+  // then saves it to the server so it stays hidden on every device. If the
+  // save fails, it'll show again next launch — better than losing it.
+  const completeTour = async (flag: TourFlag) => {
+    await updateUser({[flag]: true});
+    try {
+      await UserService.updateProfile({[flag]: true});
+    } catch (err) {
+      console.log('Could not save tour progress:', err);
+    }
+  };
+
+  // Saves consent on the server first: unlike the tours, nothing should go
+  // ahead unless it's actually recorded. Throws if the save fails.
+  const giveRoomDataConsent = async () => {
+    const res = await UserService.updateProfile({room_data_consent: true});
+    await updateUser({room_data_consent_at: res.data.room_data_consent_at});
+  };
+
   return (
     <UserContext.Provider
       value={{
@@ -183,6 +236,8 @@ export const UserProvider = ({children}: {children: React.ReactNode}) => {
         signInFromSession,
         logoutUser,
         updateUser,
+        completeTour,
+        giveRoomDataConsent,
       }}>
       {children}
     </UserContext.Provider>

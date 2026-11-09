@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {StatusBar, Text, TouchableOpacity, View} from 'react-native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {useNavigation} from '@react-navigation/native';
@@ -10,6 +10,8 @@ import ExploreScreen from '../components/(explore)/ExploreScreen';
 import HomeScreen from '../screens/home_screens/InitialScreen';
 import NotesScreen from '../components/(notes)/NotesScreen';
 import UserAvatar from '../components/molecules/UserAvatar';
+import GuidedTour from '../components/shared/GuidedTour';
+import {APP_TOUR} from '../config/tours';
 import {useUserContext} from '../context/UserContext';
 import {useTheme} from '../theme/useTheme';
 
@@ -79,40 +81,53 @@ function TabHeader() {
 
 export default function HomeTabNavigator() {
   const {colors} = useTheme();
+  const {user, completeTour} = useUserContext();
+  // Skipping hides the tour until the app is next opened.
+  const [skipped, setSkipped] = useState(false);
+  const showTour = user?.first_login_completed === false && !skipped;
+
   return (
-    <Tab.Navigator
-      screenOptions={({route}) => ({
-        header: () => <TabHeader />,
-        tabBarActiveTintColor: colors.brand,
-        tabBarInactiveTintColor: colors.textMuted,
-        tabBarStyle: {
-          backgroundColor: colors.surface,
-          borderTopColor: colors.border,
-          borderTopWidth: 1,
-        },
-        tabBarLabelStyle: {
-          fontSize: 12,
-          marginTop: 2,
-        },
-        tabBarIcon: ({color, size}) => {
-          switch (route.name) {
-            case 'Home':
-              return <Home size={size} color={color} />;
-            case 'Design':
-              return <PenTool size={size} color={color} />;
-            case 'Notes':
-              return <FileText size={size} color={color} />;
-            case 'Explore':
-              return <Compass size={size} color={color} />;
-            default:
-              return null;
-          }
-        },
-      })}>
-      <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Design" component={DesignScreen} />
-      <Tab.Screen name="Notes" component={NotesScreen} />
-      <Tab.Screen name="Explore" component={ExploreScreen} />
-    </Tab.Navigator>
+    <>
+      <Tab.Navigator
+        screenOptions={({route}) => ({
+          header: () => <TabHeader />,
+          tabBarActiveTintColor: colors.brand,
+          tabBarInactiveTintColor: colors.textMuted,
+          tabBarStyle: {
+            backgroundColor: colors.surface,
+            borderTopColor: colors.border,
+            borderTopWidth: 1,
+          },
+          tabBarLabelStyle: {
+            fontSize: 12,
+            marginTop: 2,
+          },
+          tabBarIcon: ({color, size}) => {
+            switch (route.name) {
+              case 'Home':
+                return <Home size={size} color={color} />;
+              case 'Design':
+                return <PenTool size={size} color={color} />;
+              case 'Notes':
+                return <FileText size={size} color={color} />;
+              case 'Explore':
+                return <Compass size={size} color={color} />;
+              default:
+                return null;
+            }
+          },
+        })}>
+        <Tab.Screen name="Home" component={HomeScreen} />
+        <Tab.Screen name="Design" component={DesignScreen} />
+        <Tab.Screen name="Notes" component={NotesScreen} />
+        <Tab.Screen name="Explore" component={ExploreScreen} />
+      </Tab.Navigator>
+      <GuidedTour
+        visible={showTour}
+        steps={APP_TOUR}
+        onFinish={() => completeTour('first_login_completed')}
+        onSkip={() => setSkipped(true)}
+      />
+    </>
   );
 }

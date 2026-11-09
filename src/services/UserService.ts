@@ -10,6 +10,9 @@ export interface IUserProfile {
   profile_picture: string | null;
   design_style: string | null;
   marketing_emails: boolean;
+  first_login_completed: boolean;
+  first_scan_completed: boolean;
+  room_data_consent_at: string | null;
   date_joined: string;
 }
 
@@ -26,6 +29,9 @@ export interface IUpdateProfilePayload {
   profile_picture?: string;
   design_style?: string;
   marketing_emails?: boolean;
+  first_login_completed?: boolean;
+  first_scan_completed?: boolean;
+  room_data_consent?: boolean;
 }
 
 const UserService = {
