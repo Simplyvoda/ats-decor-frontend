@@ -1,33 +1,34 @@
 import React from 'react';
 import {Text, TouchableOpacity, View} from 'react-native';
 import {Heart} from 'lucide-react-native';
+import {useNavigation} from '@react-navigation/native';
 import {makeStyles, useTheme} from '../../../theme/useTheme';
-// import {useNavigation} from '@react-navigation/native';
+import {navigateTo} from '../../../utils/navigation';
 
+// Home tab card: the way into the Mood Board screen.
 const MoodBoardComponent = () => {
   const styles = useStyles();
   const {colors} = useTheme();
-  // const navigation = useNavigation();
-
-  // const navigateToMoodBoards = () => {
-  //   navigation.navigate('Moodboards' as never);
-  // };
+  const navigation = useNavigation();
 
   return (
     <View style={styles.card}>
-      <Text style={styles.title}>
-        <Heart color={colors.brand} size={20} /> Mood Board
-      </Text>
+      <View style={styles.titleRow}>
+        <Heart color={colors.brand} size={24} strokeWidth={1.5} />
+        <Text style={styles.title}>Mood Board</Text>
+      </View>
 
       <View style={styles.emptyState}>
-        <Heart size={40} color={colors.icon} />
+        <Heart size={52} color={colors.textPrimary} strokeWidth={1.4} />
         <Text style={styles.subtext}>
-          See your favourite designs {'\n'} and inspirations
+          See your favourite designs{'\n'}and Inspirations
         </Text>
       </View>
 
-      <TouchableOpacity style={styles.ctaButton} disabled>
-        <Text style={styles.ctaButtonText}>Coming Soon</Text>
+      <TouchableOpacity
+        style={styles.ctaButton}
+        onPress={() => navigateTo(navigation, 'Moodboards')}>
+        <Text style={styles.ctaButtonText}>View mood boards</Text>
       </TouchableOpacity>
     </View>
   );
@@ -37,47 +38,47 @@ const useStyles = makeStyles(c => ({
   card: {
     marginHorizontal: 20,
     marginBottom: 20,
-    paddingHorizontal: 20,
-    paddingVertical: 40,
+    paddingHorizontal: 18,
+    paddingTop: 40,
+    paddingBottom: 40,
     borderRadius: 16,
     borderColor: c.border,
     borderWidth: 1,
   },
+  titleRow: {flexDirection: 'row', alignItems: 'center', gap: 22},
   title: {
     fontFamily: 'Cormorant Garamond',
     fontSize: 24,
     fontWeight: '600',
     color: c.textPrimary,
-    marginBottom: 8,
   },
   emptyState: {
-    flexDirection: 'column',
-    justifyContent: 'center',
     alignItems: 'center',
-    gap: 16,
-    marginVertical: 15,
+    gap: 22,
+    marginTop: 54,
+    marginBottom: 34,
   },
   subtext: {
     fontSize: 16,
+    lineHeight: 21,
     fontFamily: 'DM Sans',
-    color: c.textSecondary,
-    marginBottom: 20,
+    color: c.text,
     textAlign: 'center',
   },
   ctaButton: {
     backgroundColor: c.brand,
-    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 16,
-    borderRadius: 12,
-    marginHorizontal: 10,
-    opacity: 0.7,
+    height: 50,
+    borderRadius: 10,
+    marginHorizontal: 20,
   },
   ctaButtonText: {
+    fontFamily: 'DM Sans',
     color: c.onBrand,
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: '600',
+    letterSpacing: 1,
   },
 }));
 

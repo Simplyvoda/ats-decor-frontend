@@ -20,6 +20,7 @@ import SharedHeader from '../shared/Header';
 import useRefetchOnFocus from '../../hooks/useRefetchOnFocus';
 import {useTheme} from '../../theme/useTheme';
 import {usePlan} from '../../context/PlanContext';
+import AddToBoardSheet from '../(home)/(moodboard)/AddToBoardSheet';
 
 const PAGE_SIZE = 12;
 
@@ -27,6 +28,8 @@ export default function ExploreScreen() {
   const {colors} = useTheme();
   const navigation = useNavigation();
   const {gate} = usePlan();
+  // The just-saved design whose boards are being picked
+  const [boardsFor, setBoardsFor] = useState<IDesign | null>(null);
 
   const [feed, setFeed] = useState<{
     designs: IDesign[];
@@ -142,6 +145,16 @@ export default function ExploreScreen() {
         await MoodboardService.unlike(design.id);
       } else {
         await MoodboardService.like(design.id);
+        // Offer to put it on a board straight away
+        Toast.show({
+          type: 'info',
+          text1: 'Saved to your mood board',
+          text2: 'Tap to add it to a board',
+          onPress: () => {
+            Toast.hide();
+            setBoardsFor(design);
+          },
+        });
       }
     } catch {
       // Roll back on failure
@@ -340,6 +353,10 @@ export default function ExploreScreen() {
             tintColor={colors.brand}
           />
         }
+      />
+      <AddToBoardSheet
+        design={boardsFor}
+        onClose={() => setBoardsFor(null)}
       />
     </View>
   );

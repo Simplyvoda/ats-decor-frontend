@@ -56,12 +56,27 @@ export interface IDesignResponse {
   data: IDesign;
 }
 
+// Whether a saved design can still be seen. Anything but 'available'
+// means design is null and the app shows an empty frame saying why:
+//   design_deleted  — its creator deleted it
+//   account_deleted — its creator deleted their account
+//   unpublished     — its creator took it off Explore
+export type SavedStatus =
+  | 'available'
+  | 'design_deleted'
+  | 'account_deleted'
+  | 'unpublished';
+
 export interface IMoodboardItem {
   id: string;
   user_id: string;
-  design_id: string;
-  design: IDesign;
+  // Null once the design is deleted
+  design_id: string | null;
+  design: IDesign | null;
+  status: SavedStatus;
   createdAt: string;
+  // Boards this saved design is on (only on the saved-designs list)
+  board_ids?: string[];
 }
 
 export interface IMoodboardResponse {
@@ -69,6 +84,21 @@ export interface IMoodboardResponse {
   message: string;
   data: IMoodboardItem[];
 }
+
+// A named collection of saved designs
+export interface IMoodboard {
+  id: string;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface IMoodboardSummary extends IMoodboard {
+  item_count: number;
+  // Up to 4 thumbnails of its newest designs
+  cover_urls: string[];
+}
+
 
 export interface IPublishDesignPayload {
   name: string;
