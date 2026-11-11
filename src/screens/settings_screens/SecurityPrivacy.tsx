@@ -134,7 +134,7 @@ const SecurityPrivacy = () => {
   const handleDeleteAccount = () => {
     Alert.alert(
       'Delete your account?',
-      'This permanently deletes your account, designs, and notes. This cannot be undone.',
+      'This permanently deletes your account and everything in it: rooms, scans, designs (including ones you shared to Explore), notes, mood boards and saved designs. This cannot be undone.\n\nIf you subscribe through the App Store, cancel in your Apple ID settings too, or Apple will keep billing you.',
       [
         {text: 'Cancel', style: 'cancel'},
         {
