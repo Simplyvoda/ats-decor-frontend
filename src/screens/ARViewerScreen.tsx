@@ -149,9 +149,10 @@ export default function ARViewerScreen() {
   // The saved room this design is in. New designs from a room share its
   // model, so saving sends the room's id rather than a model file.
   const roomId: string | undefined = route.params?.roomId;
-  // Explore/Moodboard open designs for browsing, not editing — nothing
-  // here can be changed, so no furniture editing UI and no "unsaved
-  // changes" prompt on the way out.
+  // Explore/Moodboard open other people's designs for inspiration: you can
+  // look around and keep your own notes on them, nothing else. No
+  // furniture editing, saving or exporting, and no "unsaved changes"
+  // prompt on the way out.
   const viewOnly: boolean = route.params?.viewOnly === true;
   // Known when opened from Explore/Moodboard, or set after publishing —
   // notes taken here attach to this design automatically
@@ -735,8 +736,7 @@ export default function ARViewerScreen() {
             {/* 3-dot dropdown menu */}
             {showToolsMenu && (
               <View style={styles.toolsMenu}>
-                {!viewOnly && (
-                  <TouchableOpacity
+                <TouchableOpacity
                     style={styles.toolsMenuItem}
                     onPress={() => {
                       setShowToolsMenu(false);
@@ -750,7 +750,6 @@ export default function ARViewerScreen() {
                     <NotebookPen color={colors.brand} size={18} />
                     <Text style={styles.toolsMenuText}>Notes</Text>
                   </TouchableOpacity>
-                )}
                 {!viewOnly && (
                   <TouchableOpacity
                     style={styles.toolsMenuItem}
@@ -764,14 +763,16 @@ export default function ARViewerScreen() {
                     </Text>
                   </TouchableOpacity>
                 )}
-                <TouchableOpacity
-                  style={styles.toolsMenuItem}
-                  onPress={handleExportPdf}>
-                  <FileDown color={colors.brand} size={18} />
-                  <Text style={styles.toolsMenuText}>
-                    {isExporting ? 'Exporting…' : 'Export PDF'}
-                  </Text>
-                </TouchableOpacity>
+                {!viewOnly && (
+                  <TouchableOpacity
+                    style={styles.toolsMenuItem}
+                    onPress={handleExportPdf}>
+                    <FileDown color={colors.brand} size={18} />
+                    <Text style={styles.toolsMenuText}>
+                      {isExporting ? 'Exporting…' : 'Export PDF'}
+                    </Text>
+                  </TouchableOpacity>
+                )}
               </View>
             )}
 

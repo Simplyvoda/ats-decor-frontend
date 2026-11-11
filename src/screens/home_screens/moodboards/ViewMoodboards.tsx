@@ -297,6 +297,8 @@ const ViewMoodboards = () => {
       designId: item.design.id,
       designName: item.design.name,
       furnitureLayout: item.design.furniture_layout,
+      // Saved designs are someone else's: look and take notes only
+      viewOnly: true,
     });
   };
 
