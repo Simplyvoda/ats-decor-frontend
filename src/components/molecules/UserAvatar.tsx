@@ -20,7 +20,8 @@ export default function UserAvatar({
   if (profilePicture) {
     return (
       <Image
-        source={{uri: profilePicture}}
+        // Each upload gets a new URL, so a cached copy is never stale
+        source={{uri: profilePicture, cache: 'force-cache'}}
         style={{width: size, height: size, borderRadius: size / 2}}
       />
     );

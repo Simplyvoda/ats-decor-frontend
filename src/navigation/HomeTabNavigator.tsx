@@ -4,8 +4,7 @@ import {
   Text,
   TouchableOpacity,
   useWindowDimensions,
-  View,
-} from 'react-native';
+  View, StyleSheet} from 'react-native';
 import {
   BottomTabBar,
   createBottomTabNavigator,
@@ -204,6 +203,11 @@ export default function HomeTabNavigator() {
 
   return (
     <>
+      {/* One header above all the tabs, drawn once. As a per-tab header,
+          each tab built its own copy and the avatar reloaded (flickered)
+          every time you switched tabs. */}
+      <View style={styles.tabs}>
+      <TabHeader />
       <Tab.Navigator
         tabBar={props => (
           <View
@@ -212,7 +216,7 @@ export default function HomeTabNavigator() {
           </View>
         )}
         screenOptions={({route}) => ({
-          header: () => <TabHeader />,
+          headerShown: false,
           tabBarActiveTintColor: colors.brand,
           tabBarInactiveTintColor: colors.textMuted,
           tabBarStyle: {
@@ -244,6 +248,7 @@ export default function HomeTabNavigator() {
         <Tab.Screen name="Notes" component={NotesScreen} />
         <Tab.Screen name="Explore" component={ExploreScreen} />
       </Tab.Navigator>
+      </View>
       <GuidedTour
         visible={showTour}
         steps={APP_TOUR}
@@ -277,3 +282,7 @@ export default function HomeTabNavigator() {
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  tabs: {flex: 1},
+});
