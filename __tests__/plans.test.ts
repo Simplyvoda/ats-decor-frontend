@@ -1,24 +1,80 @@
-import {featureLine, limitMessage, usageLine} from '../src/config/plans';
+import {cardLines, limitMessage, usageLine} from '../src/config/plans';
+
+const CASUAL = {
+  'room.active': {max: 3},
+  'design.create': {max: 4},
+  'note.active': {max: 2},
+  'community.save': {max: 10},
+  'moodboard.active': {max: 3},
+  'community.post': {max: 0},
+  'export.watermark_free': {max: 1},
+};
+const HOBBYIST = {
+  'room.active': {max: 7},
+  'design.create': {max: 10},
+  'note.active': {max: 7},
+  'community.save': {max: 50},
+  'moodboard.active': {max: 10},
+  'community.post': {max: 1},
+  'export.watermark_free': {max: null},
+};
 
 describe('plan card lines', () => {
-  it.each([
-    ['room.active', 3, 'atOnce', 'Up to 3 rooms'],
-    ['room.active', 1, 'atOnce', 'Up to 1 room'],
-    ['design.create', 4, 'lifetime', '4 designs'],
-    ['design.create', 10, 'month', '10 designs a month'],
-    ['design.create', null, 'month', 'Unlimited designs'],
-    ['community.save', 50, 'atOnce', 'Up to 50 saved community designs'],
-    ['community.post', 1, 'flag', 'Post your designs to the community'],
-    ['export.watermark_free', 1, 'lifetime', '1 export without a watermark'],
-    ['export.watermark_free', null, 'lifetime', 'Export without watermarks'],
-  ] as const)('%s %s %s → %s', (feature, max, period, text) => {
-    expect(featureLine(feature, max, period)).toBe(text);
+  it('fills the Casual card from its limits', () => {
+    expect(cardLines('casual', CASUAL).map(l => l.title)).toEqual([
+      'Add up to 3 rooms',
+      'Make up to 4 designs',
+      'Keep up to 2 project notes',
+      'Create up to 3 mood boards',
+      'Save up to 10 community designs',
+      'Browse the Community Gallery',
+      'Export one design without watermark',
+    ]);
   });
 
-  it('leaves out features a plan does not have', () => {
-    expect(featureLine('community.post', 0, 'flag')).toBeNull();
-    expect(featureLine('export.watermark_free', 0, 'lifetime')).toBeNull();
+  it('fills the Hobbyist card from its limits', () => {
+    expect(cardLines('hobbyist', HOBBYIST).map(l => l.title)).toEqual([
+      'Add up to 7 rooms in total',
+      'Make up to 10 designs each month',
+      'Keep up to 7 project notes',
+      'Create up to 10 mood boards',
+      'Explore designs in 360°',
+      'Save up to 50 community designs',
+      'Browse the Community Gallery',
+      'Generate a shopping list from each design',
+      'Priority support',
+      'Export without watermarks',
+    ]);
   });
+
+  it('follows the server when a limit changes', () => {
+    const lines = cardLines('casual', {...CASUAL, 'room.active': {max: 5}});
+    expect(lines[0].title).toBe('Add up to 5 rooms');
+  });
+
+  it('leaves out a feature limited to 0', () => {
+    const titles = cardLines('casual', {
+      ...CASUAL,
+      'export.watermark_free': {max: 0},
+    }).map(l => l.title);
+    expect(titles).not.toContain('Export one design without watermark');
+  });
+
+  it('marks unbuilt features as coming soon', () => {
+    const soon = cardLines('hobbyist', HOBBYIST)
+      .filter(l => l.soon)
+      .map(l => l.title);
+    expect(soon).toEqual([
+      'Explore designs in 360°',
+      'Generate a shopping list from each design',
+    ]);
+  });
+});
+
+it('has a message for running out of mood boards', () => {
+  expect(limitMessage('moodboard.active', {limit: 3}).body).toContain(
+    '3 mood boards',
+  );
 });
 
 describe('usage meters', () => {

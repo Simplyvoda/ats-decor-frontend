@@ -4,6 +4,7 @@ export type FeatureKey =
   | 'design.create'
   | 'note.active'
   | 'community.save'
+  | 'moodboard.active'
   | 'community.post'
   | 'export.watermark_free';
 

@@ -21,7 +21,7 @@ import {
 } from '../../../interface/plan.interface';
 import {
   PLAN_DISPLAY,
-  featureLine,
+  cardLines,
   planName,
   usageLine,
 } from '../../config/plans';
@@ -35,22 +35,13 @@ import {
 import {track} from '../../services/analytics';
 import type {PurchasesPackage} from 'react-native-purchases';
 
-// Plan cards list these, in this order.
-const CARD_FEATURES: FeatureKey[] = [
-  'room.active',
-  'design.create',
-  'note.active',
-  'community.save',
-  'community.post',
-  'export.watermark_free',
-];
-
 // Usage meters for these.
 const METERED: FeatureKey[] = [
   'room.active',
   'design.create',
   'note.active',
   'community.save',
+  'moodboard.active',
 ];
 
 const errorText = (err: any) =>
@@ -324,13 +315,7 @@ function PlanCard({
   const {colors} = useTheme();
   const display = PLAN_DISPLAY[row.plan];
   const paid = row.plan !== 'casual';
-  const lines = [
-    ...CARD_FEATURES.map(f => {
-      const rule = row.features[f];
-      return rule ? featureLine(f, rule.max, rule.period) : null;
-    }),
-    ...(display?.perks ?? []),
-  ].filter((l): l is string => !!l);
+  const lines = cardLines(row.plan, row.features);
 
   return (
     <View style={[styles.planCard, paid && styles.planCardPaid]}>
@@ -348,16 +333,19 @@ function PlanCard({
 
       <View style={styles.lines}>
         {lines.map(line => (
-          <View key={line} style={styles.line}>
-            <Check size={16} color={colors.brand} />
-            <Text style={styles.lineText}>{line}</Text>
-          </View>
-        ))}
-        {(display?.comingSoon ?? []).map(line => (
-          <View key={line} style={styles.line}>
-            <Clock size={16} color={colors.textMuted} />
-            <Text style={[styles.lineText, styles.soonText]}>{line}</Text>
-            <Text style={styles.soonTag}>Soon</Text>
+          <View key={line.title} style={styles.line}>
+            {line.soon ? (
+              <Clock size={16} color={colors.textMuted} style={styles.lineIcon} />
+            ) : (
+              <Check size={16} color={colors.brand} style={styles.lineIcon} />
+            )}
+            <View style={styles.lineCopy}>
+              <Text style={[styles.lineText, line.soon && styles.soonText]}>
+                {line.title}
+              </Text>
+              <Text style={styles.lineBody}>{line.body}</Text>
+            </View>
+            {line.soon && <Text style={styles.soonTag}>Soon</Text>}
           </View>
         ))}
       </View>
@@ -478,9 +466,22 @@ const useStyles = makeStyles(c => ({
     color: c.brand,
     marginTop: 6,
   },
-  lines: {gap: 10, marginTop: 14},
-  line: {flexDirection: 'row', alignItems: 'center', gap: 10},
-  lineText: {fontFamily: 'DM Sans', fontSize: 14, color: c.text, flex: 1},
+  lines: {gap: 14, marginTop: 14},
+  line: {flexDirection: 'row', alignItems: 'flex-start', gap: 10},
+  lineIcon: {marginTop: 2},
+  lineCopy: {flex: 1, gap: 2},
+  lineText: {
+    fontFamily: 'DM Sans',
+    fontSize: 14,
+    fontWeight: '600',
+    color: c.text,
+  },
+  lineBody: {
+    fontFamily: 'DM Sans',
+    fontSize: 13,
+    lineHeight: 18,
+    color: c.textSecondary,
+  },
   soonText: {color: c.textMuted},
   soonTag: {
     fontFamily: 'DM Sans',
