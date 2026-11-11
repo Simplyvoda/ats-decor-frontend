@@ -43,6 +43,11 @@ import useAfterModalClose from '../hooks/useAfterModalClose';
 
 const Tab = createBottomTabNavigator();
 
+// The tour's highlight around a tab: wide enough for the longest label
+// ("Explore"), and a little in from the top and bottom of the bar.
+const TAB_HIGHLIGHT_WIDTH = 64;
+const TAB_HIGHLIGHT_INSET = 2;
+
 function TabHeader() {
   const navigation = useNavigation<any>();
   const {user} = useUserContext();
@@ -135,16 +140,19 @@ export default function HomeTabNavigator() {
 
   // The tab bar runs along the bottom of the screen, full width, and its
   // buttons share that width equally. Its height includes the
-  // home-indicator strip below the buttons, which is left out.
+  // home-indicator strip below the buttons, which is left out. Only the
+  // icon and label in the middle of the button are highlighted, not the
+  // whole (wide) button.
   const tabIndex = tourTarget ? TABS.indexOf(tourTarget) : -1;
   const buttonWidth = window.width / TABS.length;
+  const highlightWidth = Math.min(TAB_HIGHLIGHT_WIDTH, buttonWidth);
   const highlight: Rect | null =
     tabBarHeight > 0 && tabIndex >= 0
       ? {
-          x: buttonWidth * tabIndex,
-          y: window.height - tabBarHeight,
-          width: buttonWidth,
-          height: tabBarHeight - insets.bottom,
+          x: buttonWidth * tabIndex + (buttonWidth - highlightWidth) / 2,
+          y: window.height - tabBarHeight + TAB_HIGHLIGHT_INSET,
+          width: highlightWidth,
+          height: tabBarHeight - insets.bottom - TAB_HIGHLIGHT_INSET * 2,
         }
       : null;
 

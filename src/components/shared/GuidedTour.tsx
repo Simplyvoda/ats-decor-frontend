@@ -5,6 +5,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import type {LucideIcon} from 'lucide-react-native';
@@ -24,6 +25,9 @@ export type Rect = {x: number; y: number; width: number; height: number};
 
 // Space between the highlighted thing and the ring drawn around it.
 const SPOTLIGHT_PADDING = 6;
+// The ring always stays at least this far inside the screen, so it's
+// never cut off at an edge.
+const SCREEN_MARGIN = 4;
 
 type Props = {
   visible: boolean;
@@ -156,10 +160,21 @@ function Spotlight({rect}: {rect: Rect}) {
     return () => loop.stop();
   }, [pulse]);
 
-  const x = rect.x - SPOTLIGHT_PADDING;
-  const y = rect.y - SPOTLIGHT_PADDING;
-  const width = rect.width + SPOTLIGHT_PADDING * 2;
-  const height = rect.height + SPOTLIGHT_PADDING * 2;
+  const screen = useWindowDimensions();
+  const left = Math.max(SCREEN_MARGIN, rect.x - SPOTLIGHT_PADDING);
+  const top = Math.max(SCREEN_MARGIN, rect.y - SPOTLIGHT_PADDING);
+  const right = Math.min(
+    screen.width - SCREEN_MARGIN,
+    rect.x + rect.width + SPOTLIGHT_PADDING,
+  );
+  const bottom = Math.min(
+    screen.height - SCREEN_MARGIN,
+    rect.y + rect.height + SPOTLIGHT_PADDING,
+  );
+  const x = left;
+  const y = top;
+  const width = right - left;
+  const height = bottom - top;
 
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="none">
