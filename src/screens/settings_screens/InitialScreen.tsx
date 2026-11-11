@@ -6,7 +6,11 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import React, {useState} from 'react';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from 'react-native-safe-area-context';
+import useLightStatusBar from '../../hooks/useLightStatusBar';
 import {goBack, navigateTo} from '../../utils/navigation';
 import {useNavigation} from '@react-navigation/native';
 import {
@@ -24,7 +28,12 @@ import {useUserContext} from '../../context/UserContext';
 import AuthService from '../../services/AuthService';
 import {useTheme} from '../../theme/useTheme';
 
+// Height of the gold header below the status bar
+const HEADER_HEIGHT = 128;
+
 const InitialScreen = () => {
+  const insets = useSafeAreaInsets();
+  useLightStatusBar();
   const navigation = useNavigation();
   const {user, logoutUser} = useUserContext();
   const [search, setSearch] = useState('');
@@ -110,8 +119,14 @@ const InitialScreen = () => {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-offWhite dark:bg-night gap-5">
-      <View className="bg-brand h-32 w-full flex flex-row justify-start  items-center pl-5">
+    <SafeAreaView
+      edges={['bottom', 'left', 'right']}
+      className="flex-1 bg-offWhite dark:bg-night gap-5">
+      {/* Gold header, from the very top of the screen (behind the status
+          bar), as in the design */}
+      <View
+        className="bg-brand w-full flex flex-row justify-start items-center pl-5"
+        style={{height: HEADER_HEIGHT + insets.top, paddingTop: insets.top}}>
         <ChevronLeft
           className="text-white dark:text-night"
           size={24}

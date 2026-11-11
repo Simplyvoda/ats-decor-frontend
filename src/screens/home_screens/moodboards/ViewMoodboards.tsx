@@ -7,7 +7,6 @@ import {
   ActivityIndicator,
   Alert,
   Image,
-  SafeAreaView,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -22,6 +21,8 @@ import {
   Plus,
 } from 'lucide-react-native';
 import {useNavigation} from '@react-navigation/native';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import useLightStatusBar from '../../../hooks/useLightStatusBar';
 import Toast from 'react-native-toast-message';
 import {goBack, navigateTo} from '../../../utils/navigation';
 import MoodboardService from '../../../services/MoodboardService';
@@ -74,6 +75,9 @@ const ViewMoodboards = () => {
   const {colors} = useTheme();
   const navigation = useNavigation();
   const {gate} = usePlan();
+  // The gold header runs up behind the status bar, as in the design
+  const insets = useSafeAreaInsets();
+  useLightStatusBar();
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   // ALL, or a board id
   const [selected, setSelected] = useState<string>(ALL);
@@ -490,9 +494,16 @@ const ViewMoodboards = () => {
   };
 
   return (
-    <SafeAreaView style={styles.root}>
-      {/* Gold header */}
-      <View style={styles.header}>
+    <View style={styles.root}>
+      {/* Gold header, from the very top of the screen */}
+      <View
+        style={[
+          styles.header,
+          {
+            height: HEADER_HEIGHT + insets.top,
+            paddingTop: HEADER_PADDING_TOP + insets.top,
+          },
+        ]}>
         <TouchableOpacity
           style={styles.backRow}
           onPress={() => goBack(navigation)}
@@ -571,7 +582,10 @@ const ViewMoodboards = () => {
 
       <ScrollView
         style={styles.list}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={[
+          styles.listContent,
+          {paddingBottom: 40 + insets.bottom},
+        ]}
         showsVerticalScrollIndicator={false}>
         {isLoading ? (
           <View style={styles.centered}>
@@ -655,13 +669,14 @@ const ViewMoodboards = () => {
           afterNaming.onDismiss();
         }}
       />
-    </SafeAreaView>
+    </View>
   );
 };
 
 // Measurements from the design (points)
 const GUTTER = 30;
-const HEADER_HEIGHT = 164;
+const HEADER_HEIGHT = 164; // below the status bar
+const HEADER_PADDING_TOP = 28;
 const CARD_HEIGHT = 158;
 const CARD_OVERLAP = 122; // how far the info card hangs below the header
 
@@ -672,9 +687,7 @@ const useStyles = makeStyles(c => ({
   },
   header: {
     backgroundColor: c.brand,
-    height: HEADER_HEIGHT,
     paddingHorizontal: GUTTER,
-    paddingTop: 28,
     zIndex: 1,
   },
   backRow: {
