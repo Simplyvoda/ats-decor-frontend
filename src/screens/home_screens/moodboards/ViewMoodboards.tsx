@@ -802,9 +802,6 @@ const useStyles = makeStyles(c => ({
     borderWidth: 1,
     borderColor: c.border,
     borderRadius: 16,
-    // Makes iOS draw a true rounded border. Without it, React Native
-    // paints the border as a stretched image, which leaves a faint square
-    // outline around the card with a see-through border colour.
     overflow: 'hidden',
     paddingVertical: 18,
     paddingHorizontal: 20,
