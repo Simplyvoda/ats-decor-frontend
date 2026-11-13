@@ -303,7 +303,8 @@ const ViewMoodboards = () => {
       furnitureLayout: item.design.furniture_layout,
       // Saved designs are someone else's: look and take notes only
       viewOnly: true,
-      reportable: true,
+      // Your own design (saved from Explore) can't be reported
+      reportable: !item.is_mine,
     });
   };
 
