@@ -2,6 +2,7 @@ import React, {useCallback, useState} from 'react';
 import {openLegal} from '../../utils/openLegal';
 import {
   ActivityIndicator,
+  Alert,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -11,6 +12,8 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {Check, ChevronLeft, Clock, Crown} from 'lucide-react-native';
 import Toast from 'react-native-toast-message';
+import UserService from '../../services/UserService';
+import FoundingService from '../../services/FoundingService';
 import {goBack} from '../../utils/navigation';
 import {makeStyles, useTheme} from '../../theme/useTheme';
 import {usePlan} from '../../context/PlanContext';
@@ -64,6 +67,8 @@ const ShoppingScreen = () => {
   // Apple's Hobbyist product (with its local price), once loaded
   const [pkg, setPkg] = useState<PurchasesPackage | null>(null);
   const [busy, setBusy] = useState<'buy' | 'restore' | null>(null);
+  // Founding member? null until known; the code link only shows on false
+  const [isFounding, setIsFounding] = useState<boolean | null>(null);
 
   // Before launch (limits not enforced) everyone has full access; show
   // the early-access note instead. Developers see the real screen.
@@ -76,8 +81,43 @@ const ShoppingScreen = () => {
         .then(setPlans)
         .catch(() => setPlans([]));
       getHobbyistPackage().then(setPkg);
+      UserService.getProfile()
+        .then(res => setIsFounding(!!res.data.founding_member))
+        .catch(() => {});
     }, [refresh]),
   );
+
+  // Founding members whose app email isn't the one they signed up with on
+  // the website (e.g. Sign in with Apple, hidden email) enter their code.
+  const enterFoundingCode = () =>
+    Alert.prompt(
+      'Founding member code',
+      'Enter the code from your founding member email.',
+      async code => {
+        if (!code?.trim()) {
+          return;
+        }
+        try {
+          await FoundingService.claim(code);
+          setIsFounding(true);
+          refresh();
+          Toast.show({
+            type: 'success',
+            text1: 'Welcome, founding member',
+            text2: 'Thank you for helping build PlaDomus.',
+          });
+        } catch (err: any) {
+          Toast.show({
+            type: 'error',
+            text1: 'Could not use that code',
+            text2: errorText(err),
+          });
+        }
+      },
+      'plain-text',
+      '',
+      'default',
+    );
 
   useFocusEffect(
     useCallback(() => {
@@ -224,6 +264,14 @@ const ShoppingScreen = () => {
               </View>
             )}
           </>
+        )}
+
+        {isFounding === false && (
+          <TouchableOpacity
+            style={styles.foundingLink}
+            onPress={enterFoundingCode}>
+            <Text style={styles.link}>Founding member? Enter your code</Text>
+          </TouchableOpacity>
         )}
       </ScrollView>
     </SafeAreaView>
@@ -507,6 +555,10 @@ const useStyles = makeStyles(c => ({
     lineHeight: 18,
     color: c.textMuted,
     marginTop: 20,
+  },
+  foundingLink: {
+    alignItems: 'center',
+    marginTop: 24,
   },
   links: {
     flexDirection: 'row',

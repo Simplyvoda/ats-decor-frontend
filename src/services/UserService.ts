@@ -1,4 +1,5 @@
 import api from '../config/api';
+import {setFoundingMember} from './analytics';
 
 export interface IUserProfile {
   id: string;
@@ -15,6 +16,8 @@ export interface IUserProfile {
   room_data_consent_at: string | null;
   // 'apple' = signed in with Apple (deleting the account also revokes it)
   sso_type?: 'google' | 'facebook' | 'apple' | null;
+  // Founding member (first 250 on the Kit list). Analytics only; not shown
+  founding_member?: boolean;
   date_joined: string;
 }
 
@@ -39,6 +42,10 @@ export interface IUpdateProfilePayload {
 const UserService = {
   async getProfile(): Promise<IUserProfileResponse> {
     const res = await api.get('/user');
+    // Keep the analytics cohort in step with the account
+    if (typeof res.data?.data?.founding_member === 'boolean') {
+      setFoundingMember(res.data.data.founding_member);
+    }
     return res.data;
   },
 
