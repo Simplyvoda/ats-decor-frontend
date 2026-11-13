@@ -18,6 +18,7 @@ import {
   View,
 } from 'react-native';
 import Toast from 'react-native-toast-message';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {goBack} from '../../utils/navigation';
 import {openLegal} from '../../utils/openLegal';
 import {appleAuth} from '@invertase/react-native-apple-authentication';
@@ -44,6 +45,7 @@ const EMPTY_PASSWORDS = {
 
 const SecurityPrivacy = () => {
   const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
   const {colors} = useTheme();
   const {logoutUser} = useUserContext();
 
@@ -191,8 +193,14 @@ const SecurityPrivacy = () => {
       style={{flex: 1}}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView
-        className="flex-1 bg-offWhite dark:bg-night px-5 pt-[70px]"
-        contentContainerStyle={{paddingBottom: 40}}
+        className="flex-1 bg-offWhite dark:bg-night px-5"
+        // Padding on the content (not the scroll view) so it scrolls fully,
+        // with room below the last card for the home indicator.
+        contentContainerStyle={{
+          paddingTop: 70,
+          paddingBottom: 40 + insets.bottom,
+        }}
+        keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}>
         {/* HEADER */}
         <View className="flex-row items-center mb-6 gap-3">
