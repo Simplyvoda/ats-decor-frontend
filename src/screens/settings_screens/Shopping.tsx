@@ -1,4 +1,5 @@
 import React, {useCallback, useState} from 'react';
+import {openLegal} from '../../utils/openLegal';
 import {
   ActivityIndicator,
   ScrollView,
@@ -197,11 +198,11 @@ const ShoppingScreen = () => {
             </Text>
             <View style={styles.links}>
               <TouchableOpacity
-                onPress={() => (navigation as any).navigate('TermsOfService')}>
+                onPress={() => openLegal('terms')}>
                 <Text style={styles.link}>Terms of Use</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={() => (navigation as any).navigate('PrivacyPolicy')}>
+                onPress={() => openLegal('privacy')}>
                 <Text style={styles.link}>Privacy Policy</Text>
               </TouchableOpacity>
             </View>

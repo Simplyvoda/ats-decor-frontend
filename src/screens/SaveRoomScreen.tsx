@@ -1,4 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react';
+import {openLegal} from '../utils/openLegal';
 import {
   ActivityIndicator,
   Alert,
@@ -89,7 +90,7 @@ export default function SaveRoomScreen() {
       <ConsentScreen
         icon={ScanLine}
         {...ROOM_DATA_CONSENT}
-        onFootnotePress={() => navigation.navigate('PrivacyPolicy')}
+        onFootnotePress={() => openLegal('privacy')}
         busy={consentBusy}
         onDecline={() => navigation.goBack()}
         onAccept={async () => {

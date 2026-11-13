@@ -1,5 +1,11 @@
 import {useNavigation} from '@react-navigation/native';
-import {Bell, ChevronLeft, Trash, User} from 'lucide-react-native';
+import {
+  Bell,
+  ChevronLeft,
+  ChevronRight,
+  Trash,
+  User,
+} from 'lucide-react-native';
 import React, {useEffect, useState} from 'react';
 import {
   Alert,
@@ -13,6 +19,8 @@ import {
 } from 'react-native';
 import Toast from 'react-native-toast-message';
 import {goBack} from '../../utils/navigation';
+import {openLegal} from '../../utils/openLegal';
+import {appleAuth} from '@invertase/react-native-apple-authentication';
 import PrimaryButton from '../../components/molecules/PrimaryButton';
 import AppSwitch from '../../components/molecules/AppSwitch';
 import AuthService from '../../services/AuthService';
@@ -134,15 +142,35 @@ const SecurityPrivacy = () => {
   const handleDeleteAccount = () => {
     Alert.alert(
       'Delete your account?',
-      'This permanently deletes your account and everything in it: rooms, scans, designs (including ones you shared to Explore), notes, mood boards and saved designs. This cannot be undone.\n\nIf you subscribe through the App Store, cancel in your Apple ID settings too, or Apple will keep billing you.',
+      'This permanently deletes your account and everything in it: rooms, scans, designs (including ones you shared to Explore), notes, mood boards and saved designs. This cannot be undone.\n\nIf you subscribe through the App Store, cancel in your Apple ID settings too, or Apple will keep billing you.\n\nIf you signed in with Apple, you’ll be asked to confirm with Apple.',
       [
         {text: 'Cancel', style: 'cancel'},
         {
           text: 'Delete Forever',
           style: 'destructive',
           onPress: async () => {
+            // Sign in with Apple accounts confirm with Apple once more, so
+            // the server can revoke the app's access to their Apple ID.
+            let appleCode: string | undefined;
             try {
-              await AuthService.deleteAccount();
+              const profile = await UserService.getProfile();
+              if (profile.data.sso_type === 'apple') {
+                const res = await appleAuth.performRequest({
+                  requestedOperation: appleAuth.Operation.LOGIN,
+                  requestedScopes: [],
+                });
+                appleCode = res.authorizationCode ?? undefined;
+              }
+            } catch (err: any) {
+              if (err?.code === appleAuth.Error.CANCELED) {
+                // They backed out of the Apple prompt: don't delete.
+                return;
+              }
+              // Anything else: delete anyway; the server logs the missed
+              // revoke.
+            }
+            try {
+              await AuthService.deleteAccount(appleCode);
               Toast.show({type: 'success', text1: 'Account deleted'});
               await logoutUser();
             } catch (err: any) {
@@ -271,8 +299,7 @@ const SecurityPrivacy = () => {
                 Share usage analytics
               </Text>
               <Text className="text-[12px] text-[#999] dark:text-night-text-muted font-dm-sans mt-0.5">
-                Anonymous stats on how features are used, to help us improve
-                the app.
+                Stats on how features are used, to help us improve the app.
               </Text>
             </View>
             <AppSwitch
@@ -280,6 +307,36 @@ const SecurityPrivacy = () => {
               onValueChange={handleToggleAnalytics}
             />
           </View>
+
+          <TouchableOpacity
+            className="flex-row justify-between items-center py-2.5 border-t-[1px] border-[#2C2C2C1A] dark:border-night-border"
+            onPress={() => (navigation as any).navigate('BlockedUsers')}>
+            <Text className="text-[14px] text-[#333] dark:text-night-text font-dm-sans">
+              Blocked users
+            </Text>
+            <ChevronRight size={18} color={colors.textMuted} />
+          </TouchableOpacity>
+
+          {/* The documents live on the website and open in an in-app
+              browser, so they're always the current version. */}
+          {(
+            [
+              ['privacy', 'Privacy Policy'],
+              ['terms', 'Terms of Use'],
+              ['credits', 'Credits & licences'],
+            ] as const
+          ).map(([doc, label]) => (
+            <TouchableOpacity
+              key={doc}
+              className="flex-row justify-between items-center py-2.5 border-t-[1px] border-[#2C2C2C1A] dark:border-night-border"
+              accessibilityRole="link"
+              onPress={() => openLegal(doc)}>
+              <Text className="text-[14px] text-[#333] dark:text-night-text font-dm-sans">
+                {label}
+              </Text>
+              <ChevronRight size={18} color={colors.textMuted} />
+            </TouchableOpacity>
+          ))}
         </View>
 
         <View className="bg-transparent border-[1.5px] border-[#D21616] rounded-2xl p-4 mb-5">

@@ -1,4 +1,4 @@
-import {Compass, Eye, EyeOff, Heart} from 'lucide-react-native';
+import {Compass, Ellipsis, Eye, EyeOff, Heart} from 'lucide-react-native';
 import React, {SetStateAction, useCallback, useEffect, useRef, useState} from 'react';
 import {
   ActivityIndicator,
@@ -21,6 +21,7 @@ import useRefetchOnFocus from '../../hooks/useRefetchOnFocus';
 import {useTheme} from '../../theme/useTheme';
 import {usePlan} from '../../context/PlanContext';
 import AddToBoardSheet from '../(home)/(moodboard)/AddToBoardSheet';
+import {openModerationMenu} from '../../utils/moderationMenu';
 
 const PAGE_SIZE = 12;
 
@@ -173,6 +174,17 @@ export default function ExploreScreen() {
     }
   };
 
+  // Report someone else's design or block its creator. Either way it
+  // leaves this feed now; the server keeps it out of future loads too.
+  const moderate = async (design: IDesign) => {
+    const outcome = await openModerationMenu('design', design.id);
+    if (outcome === 'reported') {
+      setDesigns(prev => prev.filter(d => d.id !== design.id));
+    } else if (outcome === 'blocked') {
+      setDesigns(prev => prev.filter(d => d.user_id !== design.user_id));
+    }
+  };
+
   // Unpublish one of my own designs — the design itself is kept, it just
   // stops being public. Only offered on cards the backend marked is_mine.
   const hideFromExplore = (design: IDesign) => {
@@ -217,6 +229,7 @@ export default function ExploreScreen() {
       designName: design.name,
       furnitureLayout: design.furniture_layout,
       viewOnly: true,
+      reportable: !design.is_mine,
     });
   };
 
@@ -268,12 +281,20 @@ export default function ExploreScreen() {
               {item.views_count}
             </Text>
           </View>
-          {item.is_mine && (
+          {item.is_mine ? (
             <TouchableOpacity
               onPress={() => hideFromExplore(item)}
               hitSlop={6}
               className="flex-row items-center bg-[#000000B3] rounded-full px-3 py-1.5">
               <EyeOff size={16} color="white" />
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              onPress={() => moderate(item)}
+              hitSlop={6}
+              accessibilityLabel="Report or block"
+              className="flex-row items-center bg-[#000000B3] rounded-full px-3 py-1.5">
+              <Ellipsis size={16} color="white" />
             </TouchableOpacity>
           )}
         </View>

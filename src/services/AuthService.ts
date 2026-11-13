@@ -40,8 +40,15 @@ const AuthService = {
     });
   },
 
-  async deleteAccount(): Promise<void> {
-    await api.delete('/auth/delete-account');
+  // `appleAuthorizationCode`: for Sign in with Apple accounts, a fresh code
+  // from confirming with Apple, so the server can revoke the app's access
+  // to their Apple ID (Apple requires this).
+  async deleteAccount(appleAuthorizationCode?: string): Promise<void> {
+    await api.delete('/auth/delete-account', {
+      data: appleAuthorizationCode
+        ? {apple_authorization_code: appleAuthorizationCode}
+        : {},
+    });
   },
 
   async forgotPassword(email: string): Promise<void> {

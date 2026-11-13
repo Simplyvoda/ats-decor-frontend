@@ -13,6 +13,8 @@ export interface IUserProfile {
   first_login_completed: boolean;
   first_scan_completed: boolean;
   room_data_consent_at: string | null;
+  // 'apple' = signed in with Apple (deleting the account also revokes it)
+  sso_type?: 'google' | 'facebook' | 'apple' | null;
   date_joined: string;
 }
 

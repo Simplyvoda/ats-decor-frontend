@@ -10,9 +10,8 @@ import SetPassword from '../screens/auth_screens/SetPassword';
 import ForgotPassword from '../screens/auth_screens/ForgotPassword';
 import GetReady from '../screens/auth_screens/GetReady';
 import Login from '../screens/auth_screens/Login';
-import PrivacyPolicyScreen from '../screens/legal_screens/PrivacyPolicyScreen';
-import TermsOfServiceScreen from '../screens/legal_screens/TermsOfServiceScreen';
 import SettingsScreen from '../screens/settings_screens/InitialScreen';
+import BlockedUsers from '../screens/settings_screens/BlockedUsers';
 import ProfilePreference from '../screens/settings_screens/ProfilePreference';
 import Shopping from '../screens/settings_screens/Shopping';
 import SecurityPrivacy from '../screens/settings_screens/SecurityPrivacy';
@@ -49,6 +48,7 @@ function SettingsNavigator() {
         component={SecurityPrivacy}
       />
       <SettingsStack.Screen name="HelpFeedback" component={HelpFeedback} />
+      <SettingsStack.Screen name="BlockedUsers" component={BlockedUsers} />
     </SettingsStack.Navigator>
   );
 }
@@ -61,11 +61,6 @@ function AuthNavigator() {
       <AuthStack.Screen name="GetReady" component={GetReady} />
       <AuthStack.Screen name="SetPassword" component={SetPassword} />
       <AuthStack.Screen name="ForgotPassword" component={ForgotPassword} />
-      <AuthStack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
-      <AuthStack.Screen
-        name="TermsOfService"
-        component={TermsOfServiceScreen}
-      />
     </AuthStack.Navigator>
   );
 }
@@ -103,8 +98,6 @@ function AppNavigator(): React.JSX.Element {
           <Stack.Screen name="BlogPost" component={BlogPostScreen} />
           <Stack.Screen name="CreateNote" component={CreateNoteScreen} />
           <Stack.Screen name="DesignNotes" component={DesignNotesScreen} />
-          <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
-          <Stack.Screen name="TermsOfService" component={TermsOfServiceScreen} />
         </>
       ) : (
         // ── Unauthenticated ────────────────────────────────────────────────

@@ -5,6 +5,7 @@ import {
   Globe,
   MoreVertical,
   NotebookPen,
+  Flag,
   RotateCcw,
   Save,
   ScanLine,
@@ -12,6 +13,8 @@ import {
   X,
 } from 'lucide-react-native';
 import React, {SetStateAction, useEffect, useRef, useState} from 'react';
+import {openLegal} from '../utils/openLegal';
+import {openModerationMenu} from '../utils/moderationMenu';
 import {
   ActivityIndicator,
   Alert,
@@ -154,6 +157,8 @@ export default function ARViewerScreen() {
   // furniture editing, saving or exporting, and no "unsaved changes"
   // prompt on the way out.
   const viewOnly: boolean = route.params?.viewOnly === true;
+  // Someone else's published design: offer Report / Block in the menu
+  const reportable: boolean = viewOnly && route.params?.reportable === true;
   // Known when opened from Explore/Moodboard, or set after publishing —
   // notes taken here attach to this design automatically
   const [currentDesignId, setCurrentDesignId] = useState<string | null>(
@@ -552,7 +557,6 @@ export default function ARViewerScreen() {
                 NoteService.createNote({
                   title: d.title,
                   description: d.description,
-                  is_private: d.is_private,
                   project_id: res.data.id,
                   tags: d.tags,
                 }),
@@ -750,6 +754,24 @@ export default function ARViewerScreen() {
                     <NotebookPen color={colors.brand} size={18} />
                     <Text style={styles.toolsMenuText}>Notes</Text>
                   </TouchableOpacity>
+                {reportable && currentDesignId && (
+                  <TouchableOpacity
+                    style={styles.toolsMenuItem}
+                    onPress={async () => {
+                      setShowToolsMenu(false);
+                      const outcome = await openModerationMenu(
+                        'design',
+                        currentDesignId,
+                      );
+                      // It's hidden for this user now
+                      if (outcome) {
+                        navigation.goBack();
+                      }
+                    }}>
+                    <Flag color={colors.brand} size={18} />
+                    <Text style={styles.toolsMenuText}>Report or block</Text>
+                  </TouchableOpacity>
+                )}
                 {!viewOnly && (
                   <TouchableOpacity
                     style={styles.toolsMenuItem}
@@ -862,10 +884,8 @@ export default function ARViewerScreen() {
         <ConsentScreen
           icon={ScanLine}
           {...ROOM_DATA_CONSENT}
-          onFootnotePress={() => {
-            setPub('showConsent')(false);
-            (navigation as any).navigate('PrivacyPolicy');
-          }}
+          // Opens over the consent sheet; Done returns to it
+          onFootnotePress={() => openLegal('privacy')}
           busy={savingConsent}
           onAccept={agreeAndContinue}
           onDecline={() => setPub('showConsent')(false)}

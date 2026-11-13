@@ -20,6 +20,7 @@ import {
   MessageCircle,
   Share2,
   X,
+  Ellipsis,
 } from 'lucide-react-native';
 import {useNavigation, useRoute, RouteProp} from '@react-navigation/native';
 import {PortableText} from '@portabletext/react-native';
@@ -31,6 +32,7 @@ import {makeStyles, useTheme} from '../../../theme/useTheme';
 import InitialsAvatar from '../../../components/molecules/InitialsAvatar';
 import UserAvatar from '../../../components/molecules/UserAvatar';
 import BlogService from '../../../services/BlogService';
+import {openModerationMenu} from '../../../utils/moderationMenu';
 import {useUserContext} from '../../../context/UserContext';
 import {sanityImageUrl} from '../../../utils/sanityImage';
 
@@ -165,6 +167,39 @@ const BlogPostScreen = () => {
       })
       .finally(() => setThread(t => ({...t, loading: false})));
   }, [post._id]);
+
+  // Back to the first page of comments (after blocking someone, all of
+  // their comments go, wherever they are in the thread).
+  const reloadComments = useCallback(() => {
+    BlogService.getComments(post._id, {page: 1})
+      .then(res =>
+        setThread(t => ({
+          ...t,
+          comments: res.data,
+          total: res.total,
+          page: res.page,
+        })),
+      )
+      .catch(() => {});
+  }, [post._id]);
+
+  // Report a comment or block its author (not offered on your own).
+  const moderateComment = async (commentId: string) => {
+    const outcome = await openModerationMenu('comment', commentId);
+    if (outcome === 'reported') {
+      setThread(t => ({
+        ...t,
+        comments: t.comments
+          .filter(c => c.id !== commentId)
+          .map(c => ({
+            ...c,
+            replies: c.replies?.filter(r => r.id !== commentId),
+          })),
+      }));
+    } else if (outcome === 'blocked') {
+      reloadComments();
+    }
+  };
 
   const handleLike = useCallback(async () => {
     if (isLiking) {
@@ -438,6 +473,15 @@ const BlogPostScreen = () => {
                         <Text style={styles.commentTime}>
                           {timeAgo(c.createdAt)}
                         </Text>
+                        {!c.is_mine && (
+                          <TouchableOpacity
+                            style={styles.commentMenu}
+                            hitSlop={10}
+                            accessibilityLabel="Report or block"
+                            onPress={() => moderateComment(c.id)}>
+                            <Ellipsis size={16} color={colors.textMuted} />
+                          </TouchableOpacity>
+                        )}
                       </View>
                       <Text style={styles.commentText}>{c.body}</Text>
                       <TouchableOpacity
@@ -470,6 +514,15 @@ const BlogPostScreen = () => {
                           <Text style={styles.commentTime}>
                             {timeAgo(reply.createdAt)}
                           </Text>
+                          {!reply.is_mine && (
+                            <TouchableOpacity
+                              style={styles.commentMenu}
+                              hitSlop={10}
+                              accessibilityLabel="Report or block"
+                              onPress={() => moderateComment(reply.id)}>
+                              <Ellipsis size={16} color={colors.textMuted} />
+                            </TouchableOpacity>
+                          )}
                         </View>
                         <Text style={styles.commentText}>{reply.body}</Text>
                       </View>
@@ -710,6 +763,9 @@ const useStyles = makeStyles(c => ({
     fontFamily: 'DM Sans',
     fontSize: 12,
     color: c.textMuted,
+  },
+  commentMenu: {
+    marginLeft: 'auto',
   },
   commentText: {
     fontFamily: 'DM Sans',

@@ -9,6 +9,7 @@ import {
   View,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
+import Toast from 'react-native-toast-message';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {Box, Plus} from 'lucide-react-native';
 import DesignService from '../../services/DesignService';
@@ -24,8 +25,9 @@ import {usePlan} from '../../context/PlanContext';
 import {startDesignFromRoom} from '../../utils/designs';
 
 // Every design the user has saved, most recently edited first, as a
-// two-column grid (Recent Designs mockup). Tap to open; long-press to
-// delete.
+// two-column grid (Recent Designs mockup). Tap to open; long-press for
+// options: share to / remove from Explore, or delete. Designs on Explore
+// carry an "On Explore" tag.
 //
 // With a `room` param it shows just that room's designs, with a "Design
 // this room" button to start another (opened from My Rooms).
@@ -93,13 +95,62 @@ export default function RecentDesignsScreen() {
     ]);
   };
 
+  // Publish to or remove from Explore. Removing is instant and reversible;
+  // sharing checks the plan first (the server checks again).
+  const setPublic = async (design: IDesign, isPublic: boolean) => {
+    if (isPublic && !gate('community.post')) {
+      return;
+    }
+    const patch = (value: boolean) =>
+      setList(l => ({
+        ...l,
+        designs: l.designs.map(d =>
+          d.id === design.id ? {...d, is_public: value} : d,
+        ),
+      }));
+    patch(isPublic);
+    try {
+      await DesignService.setVisibility(design.id, isPublic);
+      Toast.show({
+        type: 'success',
+        text1: isPublic ? 'Shared to Explore' : 'Removed from Explore',
+        text2: isPublic ? undefined : 'Only you can see it now.',
+      });
+    } catch (err: any) {
+      patch(!isPublic);
+      Toast.show({
+        type: 'error',
+        text1: isPublic
+          ? 'Could not share to Explore'
+          : 'Could not remove from Explore',
+        text2: err?.response?.data?.message || err?.message,
+      });
+    }
+  };
+
+  const openOptions = (design: IDesign) =>
+    Alert.alert(design.name, undefined, [
+      design.is_public
+        ? {
+            text: 'Remove from Explore',
+            onPress: () => setPublic(design, false),
+          }
+        : {text: 'Share to Explore', onPress: () => setPublic(design, true)},
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: () => confirmDelete(design),
+      },
+      {text: 'Cancel', style: 'cancel'},
+    ]);
+
   const renderItem = ({item: design}: {item: IDesign}) => (
     <TouchableOpacity
       style={styles.card}
       onPress={() => openDesign(navigation, design)}
-      onLongPress={() => confirmDelete(design)}
+      onLongPress={() => openOptions(design)}
       activeOpacity={0.8}
-      accessibilityHint="Long-press to delete">
+      accessibilityHint="Long-press for options">
       <View style={styles.imageWrap}>
         {design.thumbnail_url ? (
           <Image
@@ -118,6 +169,11 @@ export default function RecentDesignsScreen() {
           {design.name}
         </Text>
         <Text style={styles.edited}>{editedAgo(design.updatedAt)}</Text>
+        {design.is_public ? (
+          <View style={styles.tag}>
+            <Text style={styles.tagText}>On Explore</Text>
+          </View>
+        ) : null}
         {design.room_detached_at ? (
           <View style={styles.tag}>
             <Text style={styles.tagText}>Room deleted</Text>
