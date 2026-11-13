@@ -21,6 +21,7 @@ import {goBack} from '../../utils/navigation';
 import {useNavigation} from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {buildDateLabel, versionLabel} from '../../utils/appInfo';
 import PrimaryButton from '../../components/molecules/PrimaryButton';
 import SecondaryButton from '../../components/molecules/SecondaryButton';
 import FeedbackService from '../../services/FeedbackService';
@@ -274,12 +275,17 @@ Your plan's limits are in Settings → Shopping. When you're ready for more, upg
           <Text className="text-[#1A1A1A] dark:text-night-text-primary font-semibold font-cormorant text-xl mb-3">
             App Information
           </Text>
-          <Text className="text-[#444] dark:text-night-text-secondary text-sm mb-1 font-dm-sans">
-            Version 1.1.0
-          </Text>
-          <Text className="text-[#444] dark:text-night-text-secondary text-sm mb-3 font-dm-sans">
-            Last Updated: Sept 3, 2026
-          </Text>
+          {/* Read from the installed app, so it's always right */}
+          {!!versionLabel() && (
+            <Text className="text-[#444] dark:text-night-text-secondary text-sm mb-1 font-dm-sans">
+              {versionLabel()}
+            </Text>
+          )}
+          {!!buildDateLabel() && (
+            <Text className="text-[#444] dark:text-night-text-secondary text-sm mb-3 font-dm-sans">
+              Last Updated: {buildDateLabel()}
+            </Text>
+          )}
           <SecondaryButton
             title="Rate App"
             onPress={() =>
