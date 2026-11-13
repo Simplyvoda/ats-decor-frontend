@@ -18,6 +18,7 @@ import {
   logSignUp,
   setAnalyticsCollectionEnabled,
   setUserId,
+  setUserProperty,
 } from '@react-native-firebase/analytics';
 
 const ENABLED_KEY = 'analyticsEnabled';
@@ -61,6 +62,13 @@ export async function applyAnalyticsPreference() {
 // null on log out.
 export function setAnalyticsUser(userId: string | null) {
   safely(a => setUserId(a, userId));
+}
+
+// Lets GA4 segment the founding-member cohort (user property
+// "founding_member": "true" / "false"). Register it in GA4 as a custom
+// user-scoped dimension to use it in reports.
+export function setFoundingMember(isFounding: boolean) {
+  safely(a => setUserProperty(a, 'founding_member', String(isFounding)));
 }
 
 // ── Events ──
