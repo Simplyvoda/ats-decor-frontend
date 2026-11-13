@@ -1,4 +1,5 @@
 import React, {useCallback, useEffect, useState} from 'react';
+import {openLegal} from '../../utils/openLegal';
 import {ActivityIndicator, AppState, Linking, View} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {Camera, CameraOff, ScanLine} from 'lucide-react-native';
@@ -65,7 +66,7 @@ export default function ScanConsentGate({
       <ConsentScreen
         icon={ScanLine}
         {...ROOM_DATA_CONSENT}
-        onFootnotePress={() => navigation.navigate('PrivacyPolicy')}
+        onFootnotePress={() => openLegal('privacy')}
         busy={busy}
         onDecline={leave}
         onAccept={async () => {

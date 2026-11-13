@@ -12,6 +12,7 @@ import {
   X,
 } from 'lucide-react-native';
 import React, {SetStateAction, useEffect, useRef, useState} from 'react';
+import {openLegal} from '../utils/openLegal';
 import {
   ActivityIndicator,
   Alert,
@@ -861,10 +862,8 @@ export default function ARViewerScreen() {
         <ConsentScreen
           icon={ScanLine}
           {...ROOM_DATA_CONSENT}
-          onFootnotePress={() => {
-            setPub('showConsent')(false);
-            (navigation as any).navigate('PrivacyPolicy');
-          }}
+          // Opens over the consent sheet; Done returns to it
+          onFootnotePress={() => openLegal('privacy')}
           busy={savingConsent}
           onAccept={agreeAndContinue}
           onDecline={() => setPub('showConsent')(false)}

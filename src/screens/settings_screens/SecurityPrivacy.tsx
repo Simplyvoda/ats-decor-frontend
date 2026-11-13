@@ -1,5 +1,11 @@
 import {useNavigation} from '@react-navigation/native';
-import {Bell, ChevronLeft, Trash, User} from 'lucide-react-native';
+import {
+  Bell,
+  ChevronLeft,
+  ChevronRight,
+  Trash,
+  User,
+} from 'lucide-react-native';
 import React, {useEffect, useState} from 'react';
 import {
   Alert,
@@ -13,6 +19,7 @@ import {
 } from 'react-native';
 import Toast from 'react-native-toast-message';
 import {goBack} from '../../utils/navigation';
+import {openLegal} from '../../utils/openLegal';
 import PrimaryButton from '../../components/molecules/PrimaryButton';
 import AppSwitch from '../../components/molecules/AppSwitch';
 import AuthService from '../../services/AuthService';
@@ -271,8 +278,7 @@ const SecurityPrivacy = () => {
                 Share usage analytics
               </Text>
               <Text className="text-[12px] text-[#999] dark:text-night-text-muted font-dm-sans mt-0.5">
-                Anonymous stats on how features are used, to help us improve
-                the app.
+                Stats on how features are used, to help us improve the app.
               </Text>
             </View>
             <AppSwitch
@@ -280,6 +286,27 @@ const SecurityPrivacy = () => {
               onValueChange={handleToggleAnalytics}
             />
           </View>
+
+          {/* The documents live on the website and open in an in-app
+              browser, so they're always the current version. */}
+          {(
+            [
+              ['privacy', 'Privacy Policy'],
+              ['terms', 'Terms of Use'],
+              ['credits', 'Credits & licences'],
+            ] as const
+          ).map(([doc, label]) => (
+            <TouchableOpacity
+              key={doc}
+              className="flex-row justify-between items-center py-2.5 border-t-[1px] border-[#2C2C2C1A] dark:border-night-border"
+              accessibilityRole="link"
+              onPress={() => openLegal(doc)}>
+              <Text className="text-[14px] text-[#333] dark:text-night-text font-dm-sans">
+                {label}
+              </Text>
+              <ChevronRight size={18} color={colors.textMuted} />
+            </TouchableOpacity>
+          ))}
         </View>
 
         <View className="bg-transparent border-[1.5px] border-[#D21616] rounded-2xl p-4 mb-5">
