@@ -552,7 +552,6 @@ export default function ARViewerScreen() {
                 NoteService.createNote({
                   title: d.title,
                   description: d.description,
-                  is_private: d.is_private,
                   project_id: res.data.id,
                   tags: d.tags,
                 }),

@@ -1,6 +1,5 @@
 import {
   Calendar,
-  Lock,
   Paperclip,
   Pencil,
   Save,
@@ -14,7 +13,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Switch,
   Text,
   TextInput,
   TouchableOpacity,
@@ -42,7 +40,6 @@ const formatDate = (iso: string) => {
 type NoteFields = {
   title: string;
   description: string;
-  isPrivate: boolean;
   projectId: string | null;
   tags: string[];
 };
@@ -78,7 +75,6 @@ export default function CreateNoteScreen() {
   const [initialSnapshot] = useState<NoteFields>(() => ({
     title: existingNote?.title ?? existingDraft?.title ?? '',
     description: existingNote?.description ?? existingDraft?.description ?? '',
-    isPrivate: existingNote?.is_private ?? existingDraft?.is_private ?? false,
     projectId:
       existingNote?.project_id ??
       existingDraft?.project_id ??
@@ -87,7 +83,7 @@ export default function CreateNoteScreen() {
     tags: existingNote?.tags?.map(t => t.name) ?? existingDraft?.tags ?? [],
   }));
   const [fields, setFields] = useState<NoteFields>(initialSnapshot);
-  const {title, description, isPrivate, projectId, tags} = fields;
+  const {title, description, projectId, tags} = fields;
   const setField =
     <K extends keyof NoteFields>(key: K) =>
     (value: NoteFields[K]) =>
@@ -117,7 +113,6 @@ export default function CreateNoteScreen() {
   const hasChanges =
     title !== initialSnapshot.title ||
     description !== initialSnapshot.description ||
-    isPrivate !== initialSnapshot.isPrivate ||
     projectId !== initialSnapshot.projectId ||
     tags.length !== initialSnapshot.tags.length ||
     tags.some((t, i) => t !== initialSnapshot.tags[i]);
@@ -144,7 +139,6 @@ export default function CreateNoteScreen() {
       const payload = {
         title: title.trim(),
         description: description.trim(),
-        is_private: isPrivate,
         project_id: projectId ?? undefined,
         tags,
       };
@@ -240,7 +234,6 @@ export default function CreateNoteScreen() {
     canSave,
     title,
     description,
-    isPrivate,
     projectId,
     tags,
   ]);
@@ -314,14 +307,6 @@ export default function CreateNoteScreen() {
                     existingNote?.createdAt ?? existingDraft?.createdAt ?? '',
                   )}
                 </Text>
-                {isPrivate && (
-                  <View className="flex-row items-center ml-3">
-                    <Lock size={12} color={colors.text} />
-                    <Text className="font-dm-sans text-[#7A7A7A] dark:text-night-text-muted text-[12px] ml-1">
-                      Private
-                    </Text>
-                  </View>
-                )}
               </View>
 
               {description ? (
@@ -436,27 +421,11 @@ export default function CreateNoteScreen() {
               />
             </View>
 
-            {/* Private + project */}
-            <View className="bg-white dark:bg-night-surface border border-[#E5E0D5] dark:border-night-border rounded-[14px] px-4 py-4 mb-4">
-              <View className="flex-row items-center justify-between mb-4">
-                <View className="flex-row items-center">
-                  <Lock size={16} color={colors.text} />
-                  <Text className="font-cormorant text-[17px] text-gray-primary dark:text-night-text ml-2">
-                    Private Note
-                  </Text>
-                </View>
-                <Switch
-                  value={isPrivate}
-                  onValueChange={setField('isPrivate')}
-                  trackColor={{true: colors.brand, false: colors.border}}
-                  ios_backgroundColor={colors.border}
-                  thumbColor="white"
-                />
-              </View>
-
-              {/* Creating from a specific design's Notes page already implies
-                  the project — nothing to pick, so skip the dropdown. */}
-              {!fromARViewer && !presetProjectId && (
+            {/* Project. Notes are always private to their author, so there's
+                no privacy switch. Creating from a specific design's Notes page
+                already implies the project, so the card is skipped then. */}
+            {!fromARViewer && !presetProjectId && (
+              <View className="bg-white dark:bg-night-surface border border-[#E5E0D5] dark:border-night-border rounded-[14px] px-4 py-4 mb-4">
                 <>
                   <View className="flex-row items-center mb-2">
                     <Paperclip size={16} color={colors.brand} />
@@ -493,8 +462,8 @@ export default function CreateNoteScreen() {
                     }}
                   />
                 </>
-              )}
-            </View>
+              </View>
+            )}
 
             {/* Quota banner */}
             {notesUsed !== null && noteLimit !== null && (
