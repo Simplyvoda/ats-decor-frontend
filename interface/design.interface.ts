@@ -74,6 +74,9 @@ export interface IMoodboardItem {
   design_id: string | null;
   design: IDesign | null;
   status: SavedStatus;
+  // The user's own design (no Report / Block on these). Missing on older
+  // servers: treated as not yours.
+  is_mine?: boolean;
   createdAt: string;
   // Boards this saved design is on (only on the saved-designs list)
   board_ids?: string[];

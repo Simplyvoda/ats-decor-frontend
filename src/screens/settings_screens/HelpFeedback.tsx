@@ -20,6 +20,8 @@ import {
 import {goBack} from '../../utils/navigation';
 import {useNavigation} from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {buildDateLabel, versionLabel} from '../../utils/appInfo';
 import PrimaryButton from '../../components/molecules/PrimaryButton';
 import SecondaryButton from '../../components/molecules/SecondaryButton';
 import FeedbackService from '../../services/FeedbackService';
@@ -29,6 +31,7 @@ const SUPPORT_EMAIL = 'support@pladomus.com';
 
 const HelpFeedback = () => {
   const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
   const {colors} = useTheme();
   // FAQ list: the search box and which answer is expanded.
   const [{faqSearch, openIndex}, setFaq] = useState<{
@@ -109,7 +112,14 @@ Your plan's limits are in Settings → Shopping. When you're ready for more, upg
       style={{flex: 1}}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView
-        className="flex-1 bg-offWhite dark:bg-night px-5 pt-[70px] pb-[30px]"
+        className="flex-1 bg-offWhite dark:bg-night px-5"
+        // Padding on the content (not the scroll view) so it scrolls fully,
+        // with room below Rate App for the home indicator.
+        contentContainerStyle={{
+          paddingTop: 70,
+          paddingBottom: 40 + insets.bottom,
+        }}
+        keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}>
         {/* HEADER */}
         <View className="flex-row items-center mb-6">
@@ -265,12 +275,17 @@ Your plan's limits are in Settings → Shopping. When you're ready for more, upg
           <Text className="text-[#1A1A1A] dark:text-night-text-primary font-semibold font-cormorant text-xl mb-3">
             App Information
           </Text>
-          <Text className="text-[#444] dark:text-night-text-secondary text-sm mb-1 font-dm-sans">
-            Version 1.1.0
-          </Text>
-          <Text className="text-[#444] dark:text-night-text-secondary text-sm mb-3 font-dm-sans">
-            Last Updated: Sept 3, 2026
-          </Text>
+          {/* Read from the installed app, so it's always right */}
+          {!!versionLabel() && (
+            <Text className="text-[#444] dark:text-night-text-secondary text-sm mb-1 font-dm-sans">
+              {versionLabel()}
+            </Text>
+          )}
+          {!!buildDateLabel() && (
+            <Text className="text-[#444] dark:text-night-text-secondary text-sm mb-3 font-dm-sans">
+              Last Updated: {buildDateLabel()}
+            </Text>
+          )}
           <SecondaryButton
             title="Rate App"
             onPress={() =>

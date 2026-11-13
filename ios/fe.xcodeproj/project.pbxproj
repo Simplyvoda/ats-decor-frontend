@@ -11,6 +11,7 @@
 		2C32D4D6A5F0AF45484CAB9C /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB6FD604AC24597B94599A79 /* SceneDelegate.swift */; };
 		A0FEA7232F00000000000023 /* SafariViewModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0FEA7212F00000000000021 /* SafariViewModule.swift */; };
 		A0FEA7242F00000000000024 /* SafariViewModule.m in Sources */ = {isa = PBXBuildFile; fileRef = A0FEA7222F00000000000022 /* SafariViewModule.m */; };
+		A0FEA7262F00000000000026 /* AppInfoModule.m in Sources */ = {isa = PBXBuildFile; fileRef = A0FEA7252F00000000000025 /* AppInfoModule.m */; };
 		51DC9810477F8FC2683D429F /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
 		566E3793A2904823BDFA927B /* DMSans-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 6A0FD5EE046C43BF97E2BC5C /* DMSans-Medium.ttf */; };
 		58027BFBC61B45D0A14FE933 /* CormorantGaramond-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 28429C529CE14408BFDF2176 /* CormorantGaramond-Medium.ttf */; };
@@ -70,6 +71,7 @@
 		AB6FD604AC24597B94599A79 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SceneDelegate.swift; path = fe/SceneDelegate.swift; sourceTree = "<group>"; };
 		A0FEA7212F00000000000021 /* SafariViewModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SafariViewModule.swift; path = fe/SafariViewModule.swift; sourceTree = "<group>"; };
 		A0FEA7222F00000000000022 /* SafariViewModule.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = SafariViewModule.m; path = fe/SafariViewModule.m; sourceTree = "<group>"; };
+		A0FEA7252F00000000000025 /* AppInfoModule.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = AppInfoModule.m; path = fe/AppInfoModule.m; sourceTree = "<group>"; };
 		E5308F11A4BE7422B340F51B /* libPods-fe.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-fe.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E8317B5416F649B5BC4CD939 /* BootSplash.storyboard */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = BootSplash.storyboard; path = fe/BootSplash.storyboard; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
@@ -98,6 +100,7 @@
 				AB6FD604AC24597B94599A79 /* SceneDelegate.swift */,
 				A0FEA7212F00000000000021 /* SafariViewModule.swift */,
 				A0FEA7222F00000000000022 /* SafariViewModule.m */,
+				A0FEA7252F00000000000025 /* AppInfoModule.m */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */,
@@ -221,6 +224,7 @@
 				2C6ACA23712F6B71BF676325 /* [CP] Embed Pods Frameworks */,
 				565CEAF0DD2844576702E163 /* [CP] Copy Pods Resources */,
 				53D7AF468B24DD8F6D9301FE /* [CP-User] [RNFB] Core Configuration */,
+				A0FEA7272F00000000000027 /* Stamp build date */,
 			);
 			buildRules = (
 			);
@@ -382,6 +386,26 @@
 			shellPath = /bin/sh;
 			shellScript = "/bin/sh ../node_modules/@sentry/react-native/scripts/sentry-xcode-debug-files.sh";
 		};
+		A0FEA7272F00000000000027 /* Stamp build date */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Stamp build date";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Writes the build date into the built Info.plist as PDBuildDate, so the\n# app can show it (Help & Feedback, via AppInfoModule). Runs every build.\nPLIST=\"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"\nDATE=$(date -u +%Y-%m-%d)\n/usr/libexec/PlistBuddy -c \"Set :PDBuildDate $DATE\" \"$PLIST\" 2>/dev/null || /usr/libexec/PlistBuddy -c \"Add :PDBuildDate string $DATE\" \"$PLIST\"\n";
+			showEnvVarsInLog = 0;
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -393,6 +417,7 @@
 				2C32D4D6A5F0AF45484CAB9C /* SceneDelegate.swift in Sources */,
 				A0FEA7232F00000000000023 /* SafariViewModule.swift in Sources */,
 				A0FEA7242F00000000000024 /* SafariViewModule.m in Sources */,
+				A0FEA7262F00000000000026 /* AppInfoModule.m in Sources */,
 				A0679A322F33B975002EF03A /* RealityKitModule.m in Sources */,
 				A016CC102FDA328B00C215B3 /* RealityKitViewManager.m in Sources */,
 				A016CC112FDA328B00C215B3 /* RealityKitViewManager.swift in Sources */,

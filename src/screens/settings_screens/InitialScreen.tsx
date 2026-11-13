@@ -75,9 +75,15 @@ const InitialScreen = () => {
       icon: 'Shield',
       title: 'Security & Privacy',
       subtitle: 'Protect your account and data',
+      // Also what the settings search matches on
       tags: [
         'Password & Security',
         'Privacy Settings',
+        'Blocked Users',
+        'Privacy Policy',
+        'Terms of Use',
+        'Credits & Licences',
+        'Delete Account',
         // 'Data Export', // not implemented on Security & Privacy
       ],
       screen: 'SecurityPrivacy',
