@@ -11,6 +11,7 @@ import ForgotPassword from '../screens/auth_screens/ForgotPassword';
 import GetReady from '../screens/auth_screens/GetReady';
 import Login from '../screens/auth_screens/Login';
 import SettingsScreen from '../screens/settings_screens/InitialScreen';
+import BlockedUsers from '../screens/settings_screens/BlockedUsers';
 import ProfilePreference from '../screens/settings_screens/ProfilePreference';
 import Shopping from '../screens/settings_screens/Shopping';
 import SecurityPrivacy from '../screens/settings_screens/SecurityPrivacy';
@@ -47,6 +48,7 @@ function SettingsNavigator() {
         component={SecurityPrivacy}
       />
       <SettingsStack.Screen name="HelpFeedback" component={HelpFeedback} />
+      <SettingsStack.Screen name="BlockedUsers" component={BlockedUsers} />
     </SettingsStack.Navigator>
   );
 }

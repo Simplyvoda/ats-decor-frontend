@@ -287,6 +287,15 @@ const SecurityPrivacy = () => {
             />
           </View>
 
+          <TouchableOpacity
+            className="flex-row justify-between items-center py-2.5 border-t-[1px] border-[#2C2C2C1A] dark:border-night-border"
+            onPress={() => (navigation as any).navigate('BlockedUsers')}>
+            <Text className="text-[14px] text-[#333] dark:text-night-text font-dm-sans">
+              Blocked users
+            </Text>
+            <ChevronRight size={18} color={colors.textMuted} />
+          </TouchableOpacity>
+
           {/* The documents live on the website and open in an in-app
               browser, so they're always the current version. */}
           {(

@@ -54,6 +54,8 @@ export interface BlogComment {
   body: string;
   createdAt: string;
   author: BlogCommentAuthor;
+  // The signed-in user's own comment (no Report / Block on these)
+  is_mine?: boolean;
   replies?: BlogComment[];
 }
 
