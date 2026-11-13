@@ -20,6 +20,7 @@ import {
 import Toast from 'react-native-toast-message';
 import {goBack} from '../../utils/navigation';
 import {openLegal} from '../../utils/openLegal';
+import {appleAuth} from '@invertase/react-native-apple-authentication';
 import PrimaryButton from '../../components/molecules/PrimaryButton';
 import AppSwitch from '../../components/molecules/AppSwitch';
 import AuthService from '../../services/AuthService';
@@ -141,15 +142,35 @@ const SecurityPrivacy = () => {
   const handleDeleteAccount = () => {
     Alert.alert(
       'Delete your account?',
-      'This permanently deletes your account and everything in it: rooms, scans, designs (including ones you shared to Explore), notes, mood boards and saved designs. This cannot be undone.\n\nIf you subscribe through the App Store, cancel in your Apple ID settings too, or Apple will keep billing you.',
+      'This permanently deletes your account and everything in it: rooms, scans, designs (including ones you shared to Explore), notes, mood boards and saved designs. This cannot be undone.\n\nIf you subscribe through the App Store, cancel in your Apple ID settings too, or Apple will keep billing you.\n\nIf you signed in with Apple, you’ll be asked to confirm with Apple.',
       [
         {text: 'Cancel', style: 'cancel'},
         {
           text: 'Delete Forever',
           style: 'destructive',
           onPress: async () => {
+            // Sign in with Apple accounts confirm with Apple once more, so
+            // the server can revoke the app's access to their Apple ID.
+            let appleCode: string | undefined;
             try {
-              await AuthService.deleteAccount();
+              const profile = await UserService.getProfile();
+              if (profile.data.sso_type === 'apple') {
+                const res = await appleAuth.performRequest({
+                  requestedOperation: appleAuth.Operation.LOGIN,
+                  requestedScopes: [],
+                });
+                appleCode = res.authorizationCode ?? undefined;
+              }
+            } catch (err: any) {
+              if (err?.code === appleAuth.Error.CANCELED) {
+                // They backed out of the Apple prompt: don't delete.
+                return;
+              }
+              // Anything else: delete anyway; the server logs the missed
+              // revoke.
+            }
+            try {
+              await AuthService.deleteAccount(appleCode);
               Toast.show({type: 'success', text1: 'Account deleted'});
               await logoutUser();
             } catch (err: any) {
