@@ -13,6 +13,7 @@ import AuthService from '../services/AuthService';
 import {track} from '../services/analytics';
 import {useUserContext} from '../context/UserContext';
 import DateOfBirthInput from '../components/molecules/DateOfBirthInput';
+import TermsNotice from '../components/molecules/TermsNotice';
 import {
   DATE_OF_BIRTH_REQUIRED_CODE,
   UNDERAGE_CODE,
@@ -204,6 +205,15 @@ export function useAppleSignIn(options?: {
           />
           {dobError && (
             <Text className="text-red-600 dark:text-red-400">{dobError}</Text>
+          )}
+
+          {/* Every new Apple account comes through here, including from
+              Log In, which has no terms line of its own. */}
+          {!blocked && (
+            <TermsNotice
+              action="continuing"
+              className="mt-4 text-sm text-light-gray dark:text-night-text-muted"
+            />
           )}
 
           <View className="flex-row mt-5 space-x-3">
