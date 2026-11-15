@@ -48,11 +48,18 @@ export default function ScannerScreen() {
     },
     [],
   );
+  // TEMPORARY: the last few scanner steps, shown on screen so a scan that
+  // won't start can be read off the phone. Remove once scanning is fixed.
+  const [debugSteps, setDebugSteps] = useState<string[]>([]);
+  const showStep = (line: string) =>
+    setDebugSteps(lines => [...lines.slice(-7), line]);
+
   const onScanStatus = ({
     nativeEvent: {step, detail},
   }: {
     nativeEvent: ScanStatus;
   }) => {
+    showStep(`${step} ${detail}`.trim());
     Sentry.addBreadcrumb({
       category: 'scan',
       message: `${step} ${detail}`.trim(),
@@ -113,6 +120,7 @@ export default function ScannerScreen() {
       message: 'shutter tapped',
       level: 'info',
     });
+    showStep('shutter tapped');
     startScanningCommand(ref);
     if (startWatchdog.current) {
       clearTimeout(startWatchdog.current);
@@ -120,6 +128,7 @@ export default function ScannerScreen() {
     startWatchdog.current = setTimeout(() => {
       if (!sessionStarted.current) {
         Sentry.captureMessage('Scan did not start within 5 s', 'warning');
+        showStep('did not start within 5 s (sent to Sentry)');
       }
     }, 5000);
     scanStartedAt.current = Date.now();
@@ -186,6 +195,14 @@ export default function ScannerScreen() {
             </TouchableOpacity>
             <Text style={styles.title}>Scan Room</Text>
             <View style={styles.backBtnSpacer} />
+          </View>
+          {/* TEMPORARY scan diagnostics (see debugSteps) */}
+          <View style={styles.debugBox} pointerEvents="none">
+            <Text style={styles.debugText}>
+              {debugSteps.length
+                ? debugSteps.join('\n')
+                : 'scan debug: no steps yet'}
+            </Text>
           </View>
         </SafeAreaView>
 
@@ -320,6 +337,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingBottom: 12,
   },
+  debugBox: {
+    marginHorizontal: 16,
+    marginTop: 8,
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+  },
+  debugText: {color: '#7CFC00', fontSize: 11, fontFamily: 'Menlo'},
   caption: {
     color: 'white',
     fontSize: 14,
