@@ -169,3 +169,4 @@ const useStyles = makeStyles(c => ({
   decline: {paddingVertical: 12, alignItems: 'center'},
   declineText: {fontFamily: 'DM Sans', fontSize: 15, color: c.textMuted},
 }));
+
