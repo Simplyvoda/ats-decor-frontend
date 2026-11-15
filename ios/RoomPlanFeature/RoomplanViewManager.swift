@@ -82,7 +82,10 @@ class RoomplanViewManager: RCTViewManager {
 
     private func withView(_ reactTag: NSNumber, _ action: @escaping (RoomplanView) -> Void) {
         bridge.uiManager.addUIBlock { _, viewRegistry in
-            guard let view = viewRegistry?[reactTag] as? RoomplanView else { return }
+            guard let view = viewRegistry?[reactTag] as? RoomplanView else {
+                NSLog("⚠️ RoomPlan command: no RoomplanView for tag \(reactTag)")
+                return
+            }
             action(view)
         }
     }
@@ -120,6 +123,25 @@ class RoomplanView: UIView, RoomCaptureSessionDelegate {
     // the dictionary argument arrives in JS as e.nativeEvent.
     @objc var onExportComplete: RCTBubblingEventBlock?
 
+    // Diagnostics, native → JS: each step of starting a scan (view created,
+    // start requested, aborted and why, session started/ended). JS forwards
+    // these to Sentry (src/screens/ScanScreen.tsx), so a scan that doesn't
+    // start on a TestFlight phone can be traced without a cable.
+    @objc var onScanStatus: RCTDirectEventBlock?
+
+    private func report(_ step: String, _ detail: String = "") {
+        NSLog("🔎 RoomPlan \(step) \(detail)")
+        let send: () -> Void = { [weak self] in
+            self?.onScanStatus?(["step": step, "detail": detail])
+        }
+        if Thread.isMainThread { send() } else { DispatchQueue.main.async(execute: send) }
+    }
+
+    private var layoutDescription: String {
+        let rcv = roomCaptureView.map { "\(Int($0.bounds.width))x\(Int($0.bounds.height))" } ?? "none"
+        return "view \(Int(bounds.width))x\(Int(bounds.height)), captureView \(rcv), window \(window != nil), supported \(RoomCaptureSession.isSupported)"
+    }
+
     // Prop from JS (src/config/scan.ts). false = save only the room's
     // structure (walls, floor, doors, windows, openings), no furniture.
     @objc var includeFurniture: Bool = true
@@ -144,9 +166,11 @@ class RoomplanView: UIView, RoomCaptureSessionDelegate {
         super.didMoveToWindow()
 
         guard window != nil else {
+            report("detached")
             cleanup()
             return
         }
+        report("attached", layoutDescription)
 
         // Set the flag before the async hop so a rapid second didMoveToWindow
         // can't queue a duplicate creation. (createCaptureView sets it again —
@@ -172,19 +196,22 @@ class RoomplanView: UIView, RoomCaptureSessionDelegate {
         self.roomCaptureView = captureView
         didCreateView = true
 
-        NSLog("✅ RoomCaptureView created and attached")
+        report("captureViewCreated", layoutDescription)
     }
 
     // Synchronous — caller must already be on main thread. Extracted so
     // resetScanning() can restart a session without duplicating this guard
     // chain.
     private func beginSession() {
-        guard !isCleaningUp else { return }
+        guard !isCleaningUp else {
+            report("aborted", "cleaning up")
+            return
+        }
 
         guard
             UIApplication.shared.applicationState == .active
         else {
-            NSLog("⚠️ beginSession aborted: app not active")
+            report("aborted", "app not active (state \(UIApplication.shared.applicationState.rawValue))")
             return
         }
 
@@ -195,12 +222,12 @@ class RoomplanView: UIView, RoomCaptureSessionDelegate {
             rcv.bounds.width > 0,
             rcv.bounds.height > 0
         else {
-            NSLog("⚠️ beginSession aborted: invalid layout")
+            report("aborted", "invalid layout: \(layoutDescription)")
             return
         }
 
         guard !didStartSession else {
-            NSLog("⚠️ scan already running")
+            report("aborted", "already running")
             return
         }
 
@@ -208,7 +235,7 @@ class RoomplanView: UIView, RoomCaptureSessionDelegate {
 
         let configuration = RoomCaptureSession.Configuration()
 
-        NSLog("🪟 RoomPlan scan starting")
+        report("sessionRun", layoutDescription)
         didStartSession = true
 
         // ⚠️ Run FIRST, then assign delegates (prevents race)
@@ -217,6 +244,7 @@ class RoomplanView: UIView, RoomCaptureSessionDelegate {
     }
 
     func startScanning() {
+        report("startRequested")
         DispatchQueue.main.async { [weak self] in
             self?.beginSession()
         }
@@ -352,8 +380,12 @@ class RoomplanView: UIView, RoomCaptureSessionDelegate {
     // Fires after stopScanning() (the delegate is nil'd on the abort/reset
     // paths, so those never reach here). Turns the session's raw capture data
     // into a .usdz the AR viewer can load, then reports the file URL to JS.
+    func captureSession(_ session: RoomCaptureSession, didStartWith configuration: RoomCaptureSession.Configuration) {
+        report("sessionStarted")
+    }
+
     func captureSession(_ session: RoomCaptureSession, didEndWith data: CapturedRoomData, error: Error?) {
-        NSLog("📦 RoomPlan session ended")
+        report("sessionEnded", error.map { String(describing: $0) } ?? "")
 
         // RoomBuilder is async; run the processing in a Task pinned to the main
         // actor since it ends by touching the event block (bridge callbacks

@@ -37,6 +37,7 @@ RCT_EXTERN_METHOD(resetScanning:(nonnull NSNumber *)reactTag)
 RCT_EXTERN_METHOD(abortScanning:(nonnull NSNumber *)reactTag)
 
 RCT_EXPORT_VIEW_PROPERTY(onExportComplete, RCTBubblingEventBlock)
+RCT_EXPORT_VIEW_PROPERTY(onScanStatus, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(includeFurniture, BOOL)
 
 @end

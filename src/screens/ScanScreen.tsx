@@ -1,4 +1,5 @@
-import React, {useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
+import * as Sentry from '@sentry/react-native';
 import {
   ActivityIndicator,
   NativeModules,
@@ -16,6 +17,7 @@ import RoomPlanView, {
   resetScanningCommand,
   startScanningCommand,
   stopScanningCommand,
+  type ScanStatus,
 } from '../components/RoomScanner/RoomPlanView.native';
 import {INCLUDE_FURNITURE_IN_SCANS} from '../config/scan';
 import {SCAN_TOUR} from '../config/tours';
@@ -32,6 +34,37 @@ export default function ScannerScreen() {
   const ref = useRef(null);
   // When the current scan started, for scan_completed's duration.
   const scanStartedAt = useRef(0);
+
+  // Diagnostics: every step the native scanner reports goes to Sentry as a
+  // breadcrumb. If a start is requested but the session hasn't started 5 s
+  // later, send the whole trail to Sentry as one message.
+  const sessionStarted = useRef(false);
+  const startWatchdog = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(
+    () => () => {
+      if (startWatchdog.current) {
+        clearTimeout(startWatchdog.current);
+      }
+    },
+    [],
+  );
+  const onScanStatus = ({
+    nativeEvent: {step, detail},
+  }: {
+    nativeEvent: ScanStatus;
+  }) => {
+    Sentry.addBreadcrumb({
+      category: 'scan',
+      message: `${step} ${detail}`.trim(),
+      level: 'info',
+    });
+    if (step === 'sessionStarted') {
+      sessionStarted.current = true;
+    }
+    if (step === 'aborted' || (step === 'sessionEnded' && detail)) {
+      Sentry.captureMessage(`Scan ${step}: ${detail}`, 'warning');
+    }
+  };
   const navigation = useNavigation();
   // processing = the scan is stopped and the 3D file is being written.
   const [{scanning, processing}, setScan] = useState({
@@ -74,7 +107,21 @@ export default function ScannerScreen() {
   };
 
   const startScan = () => {
+    sessionStarted.current = false;
+    Sentry.addBreadcrumb({
+      category: 'scan',
+      message: 'shutter tapped',
+      level: 'info',
+    });
     startScanningCommand(ref);
+    if (startWatchdog.current) {
+      clearTimeout(startWatchdog.current);
+    }
+    startWatchdog.current = setTimeout(() => {
+      if (!sessionStarted.current) {
+        Sentry.captureMessage('Scan did not start within 5 s', 'warning');
+      }
+    }, 5000);
     scanStartedAt.current = Date.now();
     track.scanStarted();
     setScan(s => ({...s, scanning: true}));
@@ -120,6 +167,7 @@ export default function ScannerScreen() {
           style={StyleSheet.absoluteFill}
           includeFurniture={INCLUDE_FURNITURE_IN_SCANS}
           onExportComplete={onExportComplete}
+          onScanStatus={onScanStatus}
         />
 
         {/* Corner brackets — pure decoration */}
