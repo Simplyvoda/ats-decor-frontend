@@ -22,14 +22,26 @@ export const ROOM_DATA_CONSENT = {
   acceptLabel: 'I agree',
 };
 
-export const CAMERA_CONSENT = {
-  title: 'Allow camera access',
-  intro: 'Pladomus uses your camera to measure your room while you scan.',
+// The one screen before the first scan: what a scan captures and stores,
+// and the camera. Agreeing saves roomDataConsentAt and then iOS asks for
+// the camera (its message is NSCameraUsageDescription in ios/fe/Info.plist;
+// keep the two consistent). ROOM_DATA_CONSENT above is still used for
+// rooms typed in by hand, where no camera is involved.
+export const SCAN_CONSENT = {
+  title: 'Before you scan',
+  intro:
+    'PlaDomus uses your camera and your iPhone’s depth sensor to measure your room and build a 3D model of its walls, doors, windows and layout.',
   points: [
-    'The camera is only used while you’re on the scan screen.',
-    'Next, your iPhone will ask for permission. Tap “Allow” to scan.',
+    'Camera images stay on your device.',
+    'We save the 3D model and its dimensions to your account so you can plan and return to your design.',
+    'Designs stay private unless you publish them to Explore.',
+    'You can delete your account and all your data from Settings at any time.',
   ],
-  acceptLabel: 'Continue',
+  footnote: 'Privacy Policy',
+  acceptLabel: 'Allow camera',
+  // When the camera is already allowed (e.g. an account that scanned
+  // before this screen existed), the button only records the agreement.
+  acceptLabelCameraAllowed: 'Continue',
 };
 
 export const CAMERA_BLOCKED = {

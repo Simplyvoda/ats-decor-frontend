@@ -233,6 +233,13 @@ Your plan's limits are in Settings → Shopping. When you're ready for more, upg
             </TouchableOpacity>
             */}
           </View>
+          {/* The address itself, for people without a mail app set up.
+              Long-press to copy. */}
+          <Text
+            selectable
+            className="text-center mt-3 text-[#2C2C2C] dark:text-night-text">
+            {SUPPORT_EMAIL}
+          </Text>
         </View>
 
         {/* SUPPORT HOURS */}

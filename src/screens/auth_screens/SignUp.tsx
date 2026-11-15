@@ -7,7 +7,7 @@ import {
   User,
 } from 'lucide-react-native';
 import React, {useState} from 'react';
-import {openLegal} from '../../utils/openLegal';
+import TermsNotice from '../../components/molecules/TermsNotice';
 import {Controller, useForm} from 'react-hook-form';
 import {
   Image,
@@ -345,20 +345,7 @@ const SignUp = () => {
                 )}
               </View>
             </View>
-            <Text className="w-full text-black dark:text-night-text">
-              By signing up, you agree to our{' '}
-              <Text
-                className="text-brand"
-                onPress={() => openLegal('terms')}>
-                Terms of Use
-              </Text>{' '}
-              and{' '}
-              <Text
-                className="text-brand"
-                onPress={() => openLegal('privacy')}>
-                Privacy Policy.
-              </Text>
-            </Text>
+            <TermsNotice />
           </View>
           <View className="w-full flex-1 flex-col space-y-4 items-center">
             <PrimaryButton

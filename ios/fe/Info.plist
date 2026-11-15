@@ -71,7 +71,7 @@
 		<string>Cinzel-Bold.ttf</string>
 	</array>
 	<key>NSCameraUsageDescription</key>
-	<string>Camera access is required to scan the room.</string>
+	<string>PlaDomus uses your camera to scan your room and build a 3D model of its walls, doors, windows and layout. Your camera images stay on your device.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Required to save or share room scans.</string>
 	<key>CFBundleURLTypes</key>
