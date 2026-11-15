@@ -1,5 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
-import * as Sentry from '@sentry/react-native';
+import React, {useRef, useState} from 'react';
 import {
   ActivityIndicator,
   NativeModules,
@@ -34,45 +33,17 @@ export default function ScannerScreen() {
   const ref = useRef(null);
   // When the current scan started, for scan_completed's duration.
   const scanStartedAt = useRef(0);
-
-  // Diagnostics: every step the native scanner reports goes to Sentry as a
-  // breadcrumb. If a start is requested but the session hasn't started 5 s
-  // later, send the whole trail to Sentry as one message.
-  const sessionStarted = useRef(false);
-  const startWatchdog = useRef<ReturnType<typeof setTimeout> | null>(null);
-  useEffect(
-    () => () => {
-      if (startWatchdog.current) {
-        clearTimeout(startWatchdog.current);
-      }
-    },
-    [],
-  );
-  // TEMPORARY: the last few scanner steps, shown on screen so a scan that
-  // won't start can be read off the phone. Remove once scanning is fixed.
-  const [debugSteps, setDebugSteps] = useState<string[]>([]);
-  const showStep = (line: string) =>
-    setDebugSteps(lines => [...lines.slice(-7), line]);
-
-  const onScanStatus = ({
-    nativeEvent: {step, detail},
-  }: {
-    nativeEvent: ScanStatus;
-  }) => {
-    showStep(`${step} ${detail}`.trim());
-    Sentry.addBreadcrumb({
-      category: 'scan',
-      message: `${step} ${detail}`.trim(),
-      level: 'info',
-    });
-    if (step === 'sessionStarted') {
-      sessionStarted.current = true;
-    }
-    if (step === 'aborted' || (step === 'sessionEnded' && detail)) {
-      Sentry.captureMessage(`Scan ${step}: ${detail}`, 'warning');
+  const navigation = useNavigation();
+  // The scan started but the camera sends no picture (e.g. the camera is in
+  // use by a call, or the iPhone's camera service is stuck until a restart).
+  const [cameraProblem, setCameraProblem] = useState(false);
+  const onScanStatus = ({nativeEvent: {step}}: {nativeEvent: ScanStatus}) => {
+    if (step === 'noCameraFrames') {
+      setCameraProblem(true);
+    } else if (step === 'cameraFrames') {
+      setCameraProblem(false);
     }
   };
-  const navigation = useNavigation();
   // processing = the scan is stopped and the 3D file is being written.
   const [{scanning, processing}, setScan] = useState({
     scanning: false,
@@ -114,29 +85,14 @@ export default function ScannerScreen() {
   };
 
   const startScan = () => {
-    sessionStarted.current = false;
-    Sentry.addBreadcrumb({
-      category: 'scan',
-      message: 'shutter tapped',
-      level: 'info',
-    });
-    showStep('shutter tapped');
     startScanningCommand(ref);
-    if (startWatchdog.current) {
-      clearTimeout(startWatchdog.current);
-    }
-    startWatchdog.current = setTimeout(() => {
-      if (!sessionStarted.current) {
-        Sentry.captureMessage('Scan did not start within 5 s', 'warning');
-        showStep('did not start within 5 s (sent to Sentry)');
-      }
-    }, 5000);
     scanStartedAt.current = Date.now();
     track.scanStarted();
     setScan(s => ({...s, scanning: true}));
   };
 
   const resetScan = () => {
+    setCameraProblem(false);
     resetScanningCommand(ref);
     scanStartedAt.current = Date.now();
   };
@@ -168,9 +124,8 @@ export default function ScannerScreen() {
     // The scanner (and so the camera) only appears once both consents are in.
     <ScanConsentGate>
       <View style={styles.root}>
-        {/* No Sentry <Mask> around the camera: it stopped the scan from
-            starting. Session replay is off instead (App.tsx), so the live
-            camera is never recorded. */}
+        {/* No Sentry <Mask> around the camera; session replay is off
+            instead (App.tsx), so the live camera is never recorded. */}
         <RoomPlanView
           ref={ref}
           style={StyleSheet.absoluteFill}
@@ -195,14 +150,6 @@ export default function ScannerScreen() {
             </TouchableOpacity>
             <Text style={styles.title}>Scan Room</Text>
             <View style={styles.backBtnSpacer} />
-          </View>
-          {/* TEMPORARY scan diagnostics (see debugSteps) */}
-          <View style={styles.debugBox} pointerEvents="none">
-            <Text style={styles.debugText}>
-              {debugSteps.length
-                ? debugSteps.join('\n')
-                : 'scan debug: no steps yet'}
-            </Text>
           </View>
         </SafeAreaView>
 
@@ -251,6 +198,29 @@ export default function ScannerScreen() {
             </TouchableOpacity>
           )}
         </SafeAreaView>
+
+        {cameraProblem && !processing && (
+          <View style={styles.cameraProblem}>
+            <View style={styles.cameraProblemCard}>
+              <Text style={styles.cameraProblemTitle}>
+                The camera didn’t start
+              </Text>
+              <Text style={styles.cameraProblemText}>
+                End any calls and close other apps that might be using the
+                camera, then try again. If it still doesn’t start, restart your
+                iPhone.
+              </Text>
+              <TouchableOpacity
+                style={styles.cameraProblemButton}
+                onPress={resetScan}>
+                <Text style={styles.cameraProblemButtonText}>Try again</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={onBackPress}>
+                <Text style={styles.cameraProblemBack}>Go back</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
 
         {processing && (
           <View style={styles.processingOverlay} pointerEvents="auto">
@@ -337,14 +307,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingBottom: 12,
   },
-  debugBox: {
-    marginHorizontal: 16,
-    marginTop: 8,
-    padding: 8,
-    borderRadius: 8,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-  },
-  debugText: {color: '#7CFC00', fontSize: 11, fontFamily: 'Menlo'},
   caption: {
     color: 'white',
     fontSize: 14,
@@ -396,6 +358,42 @@ const styles = StyleSheet.create({
 
   devLink: {color: 'rgba(255,255,255,0.5)', fontSize: 11, marginTop: 4},
 
+  cameraProblem: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+    backgroundColor: 'rgba(0,0,0,0.55)',
+  },
+  cameraProblemCard: {
+    backgroundColor: 'white',
+    borderRadius: 16,
+    padding: 20,
+    alignItems: 'center',
+  },
+  cameraProblemTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#1A1A1A',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  cameraProblemText: {
+    fontSize: 15,
+    lineHeight: 21,
+    color: '#444',
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  cameraProblemButton: {
+    alignSelf: 'stretch',
+    backgroundColor: ACCENT,
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  cameraProblemButtonText: {color: 'white', fontSize: 16, fontWeight: '600'},
+  cameraProblemBack: {color: '#666', fontSize: 15, paddingVertical: 8},
   processingOverlay: {
     position: 'absolute',
     top: 0,

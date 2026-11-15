@@ -27,6 +27,7 @@
 
 import Foundation
 import UIKit
+import ARKit
 import RoomPlan
 import React
 
@@ -123,10 +124,11 @@ class RoomplanView: UIView, RoomCaptureSessionDelegate {
     // the dictionary argument arrives in JS as e.nativeEvent.
     @objc var onExportComplete: RCTBubblingEventBlock?
 
-    // Diagnostics, native → JS: each step of starting a scan (view created,
-    // start requested, aborted and why, session started/ended). JS forwards
-    // these to Sentry (src/screens/ScanScreen.tsx), so a scan that doesn't
-    // start on a TestFlight phone can be traced without a cable.
+    // Status events, native → JS: each step of starting a scan (attached,
+    // capture view created, start requested, aborted and why, session
+    // run/started/ended) and, 4 s after starting, "cameraFrames" or
+    // "noCameraFrames". The scan screen uses "noCameraFrames" to explain a
+    // black screen (src/screens/ScanScreen.tsx); every step is also NSLogged.
     @objc var onScanStatus: RCTDirectEventBlock?
 
     private func report(_ step: String, _ detail: String = "") {
@@ -241,6 +243,20 @@ class RoomplanView: UIView, RoomCaptureSessionDelegate {
         // ⚠️ Run FIRST, then assign delegates (prevents race)
         rcv.captureSession.run(configuration: configuration)
         rcv.captureSession.delegate = self
+
+        // RoomPlan can report the session as started while the camera never
+        // delivers a picture (seen on a phone whose camera/AR service was
+        // stuck until a restart). Check a few seconds later that frames are
+        // arriving, and tell JS either way so it can explain a black screen.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 4) { [weak self, weak rcv] in
+            guard let self = self, let rcv = rcv, self.didStartSession,
+                  self.roomCaptureView === rcv else { return }
+            if rcv.captureSession.arSession.currentFrame == nil {
+                self.report("noCameraFrames")
+            } else {
+                self.report("cameraFrames")
+            }
+        }
     }
 
     func startScanning() {

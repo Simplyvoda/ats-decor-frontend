@@ -1,6 +1,5 @@
 import React from 'react';
 import {UIManager, findNodeHandle, requireNativeComponent} from 'react-native';
-import * as Sentry from '@sentry/react-native';
 
 // The JS half of the RoomPlan bridge.
 //
@@ -25,7 +24,8 @@ interface RoomPlanViewProps {
   onExportComplete?: (e: {
     nativeEvent: {json?: string; fileUrl?: string; error?: string};
   }) => void;
-  // Diagnostics: each step of starting a scan (see RoomplanViewManager.swift).
+  // Each step of starting a scan, plus "cameraFrames" / "noCameraFrames"
+  // 4 s after the session starts (see RoomplanViewManager.swift).
   onScanStatus?: (e: {nativeEvent: ScanStatus}) => void;
 }
 
@@ -40,7 +40,6 @@ const RoomPlanView = requireNativeComponent<RoomPlanViewProps>('RoomplanView');
 const dispatch = (ref: React.RefObject<any>, command: string) => {
   const nodeHandle = findNodeHandle(ref.current);
   if (nodeHandle == null) {
-    Sentry.captureMessage(`Scan command "${command}" had no scanner view`);
     return;
   }
   UIManager.dispatchViewManagerCommand(
