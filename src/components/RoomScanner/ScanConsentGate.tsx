@@ -2,15 +2,14 @@ import React, {useCallback, useEffect, useState} from 'react';
 import {openLegal} from '../../utils/openLegal';
 import {ActivityIndicator, AppState, Linking, View} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
-import {Camera, CameraOff, ScanLine} from 'lucide-react-native';
+import {CameraOff, ScanLine} from 'lucide-react-native';
 import Toast from 'react-native-toast-message';
 import ConsentScreen from '../shared/ConsentScreen';
 import {useUserContext} from '../../context/UserContext';
 import {
   CAMERA_BLOCKED,
-  CAMERA_CONSENT,
   CAMERA_RESTRICTED,
-  ROOM_DATA_CONSENT,
+  SCAN_CONSENT,
 } from '../../config/consent';
 import {
   CameraStatus,
@@ -21,10 +20,11 @@ import {goBack} from '../../utils/navigation';
 import {makeStyles, useTheme} from '../../theme/useTheme';
 
 // Shown in place of the scanner until it's OK to scan:
-//   1. Room data — they agree to what a scan captures and stores (once,
-//      saved on their account as roomDataConsentAt).
-//   2. Camera — explains why, then iOS asks. If camera access is off, says
-//      how to turn it on, with a manual-measurements fallback.
+//   1. "Before you scan" — one screen explaining what a scan captures and
+//      stores. "Allow camera" saves their agreement (once, on their account
+//      as roomDataConsentAt) and then iOS asks for the camera.
+//   2. If camera access is off, says how to turn it on, with a
+//      manual-measurements fallback.
 // Only then are `children` (the scanner, which starts the camera) shown.
 export default function ScanConsentGate({
   children,
@@ -61,32 +61,6 @@ export default function ScanConsentGate({
 
   const leave = () => goBack(navigation);
 
-  if (!hasRoomDataConsent) {
-    return (
-      <ConsentScreen
-        icon={ScanLine}
-        {...ROOM_DATA_CONSENT}
-        onFootnotePress={() => openLegal('privacy')}
-        busy={busy}
-        onDecline={leave}
-        onAccept={async () => {
-          setGate(g => ({...g, busy: true}));
-          try {
-            await giveRoomDataConsent();
-          } catch (err: any) {
-            Toast.show({
-              type: 'error',
-              text1: 'Could not save your choice',
-              text2: err.response?.data?.message || err.message,
-            });
-          } finally {
-            setGate(g => ({...g, busy: false}));
-          }
-        }}
-      />
-    );
-  }
-
   if (camera === null) {
     return (
       <View style={styles.loading}>
@@ -95,18 +69,41 @@ export default function ScanConsentGate({
     );
   }
 
-  if (camera === 'notDetermined') {
+  // Not agreed yet, or iOS hasn't asked about the camera yet: one screen
+  // covers both.
+  if (!hasRoomDataConsent || camera === 'notDetermined') {
+    const {acceptLabelCameraAllowed, ...copy} = SCAN_CONSENT;
     return (
       <ConsentScreen
-        icon={Camera}
-        {...CAMERA_CONSENT}
+        icon={ScanLine}
+        {...copy}
+        acceptLabel={
+          camera === 'notDetermined'
+            ? SCAN_CONSENT.acceptLabel
+            : acceptLabelCameraAllowed
+        }
+        onFootnotePress={() => openLegal('privacy')}
         busy={busy}
         onDecline={leave}
         onAccept={async () => {
           setGate(g => ({...g, busy: true}));
-          const status = await requestCameraAccess().catch(
-            () => 'denied' as const,
-          );
+          try {
+            if (!hasRoomDataConsent) {
+              await giveRoomDataConsent();
+            }
+          } catch (err: any) {
+            Toast.show({
+              type: 'error',
+              text1: 'Could not save your choice',
+              text2: err.response?.data?.message || err.message,
+            });
+            setGate(g => ({...g, busy: false}));
+            return;
+          }
+          const status =
+            camera === 'notDetermined'
+              ? await requestCameraAccess().catch(() => 'denied' as const)
+              : camera;
           setGate({camera: status, busy: false});
         }}
       />
