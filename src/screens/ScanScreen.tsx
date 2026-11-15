@@ -11,7 +11,6 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import {useNavigation} from '@react-navigation/native';
 import {Check, ChevronLeft, RotateCcw} from 'lucide-react-native';
 import Toast from 'react-native-toast-message';
-import {Mask} from '@sentry/react-native';
 import RoomPlanView, {
   abortScanningCommand,
   resetScanningCommand,
@@ -113,16 +112,15 @@ export default function ScannerScreen() {
     // The scanner (and so the camera) only appears once both consents are in.
     <ScanConsentGate>
       <View style={styles.root}>
-        {/* The live camera feed is never recorded in Sentry session
-            replays (the privacy policy promises this). */}
-        <Mask style={StyleSheet.absoluteFill}>
-          <RoomPlanView
-            ref={ref}
-            style={StyleSheet.absoluteFill}
-            includeFurniture={INCLUDE_FURNITURE_IN_SCANS}
-            onExportComplete={onExportComplete}
-          />
-        </Mask>
+        {/* No Sentry <Mask> around the camera: it stopped the scan from
+            starting. Session replay is off instead (App.tsx), so the live
+            camera is never recorded. */}
+        <RoomPlanView
+          ref={ref}
+          style={StyleSheet.absoluteFill}
+          includeFurniture={INCLUDE_FURNITURE_IN_SCANS}
+          onExportComplete={onExportComplete}
+        />
 
         {/* Corner brackets — pure decoration */}
         <View pointerEvents="none" style={StyleSheet.absoluteFill}>

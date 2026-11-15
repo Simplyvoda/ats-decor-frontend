@@ -59,13 +59,14 @@ Sentry.init({
   // Enable Logs
   enableLogs: true,
 
-  // Configure Session Replay
-  replaysSessionSampleRate: 0.1,
-  replaysOnErrorSampleRate: 1,
-  integrations: [
-    Sentry.mobileReplayIntegration(),
-    Sentry.feedbackIntegration(),
-  ],
+  // Session Replay (screen recordings) is OFF: it could record the live
+  // camera on the scan screen, which the privacy policy says never
+  // happens, and the <Mask> that hid it stopped scans from starting.
+  // Crash and error reports are unaffected. Turn back on only with
+  // masking tested on a device.
+  replaysSessionSampleRate: 0,
+  replaysOnErrorSampleRate: 0,
+  integrations: [Sentry.feedbackIntegration()],
 
   // uncomment the line below to enable Spotlight (https://spotlightjs.com)
   // spotlight: __DEV__,
